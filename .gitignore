@@ -1,0 +1,27 @@
+# 运行数据（首次启动自动生成种子数据）
+data/
+_preview/
+
+# 依赖与构建产物
+node_modules/
+desktop/node_modules/
+desktop/app/
+desktop/dist/
+desktop/*.log
+desktop/.cache/
+android/dist/
+android/build/
+android/.gradle/
+android/keystore/
+
+# 生成物
+_smoke-result.json
+_smoke-log.txt
+*.tmp
+
+# 系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+desktop/scripts/app/

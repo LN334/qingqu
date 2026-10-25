@@ -1,0 +1,1040 @@
+/* ==========================================================================
+   页面专属样式：工单 / 巡检 / 设备台账 / 系统管理 / 手机端视图
+   仅在本文件内定义，根类名按页面隔离（.p-workorders / .p-inspections /
+   .p-devices / .p-admin / .p-mobile）；通用组件仍走 app.css。
+   ========================================================================== */
+
+/* 通用小工具（仅在运营类页面内使用，避免影响其他页面） */
+.p-workorders .stack-sm,
+.p-inspections .stack-sm,
+.p-devices .stack-sm,
+.p-admin .stack-sm,
+.p-mobile .stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p-workorders .check-field,
+.p-inspections .check-field,
+.p-devices .check-field,
+.p-admin .check-field,
+.p-mobile .check-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.p-workorders .check-field input[type="checkbox"],
+.p-inspections .check-field input[type="checkbox"],
+.p-devices .check-field input[type="checkbox"],
+.p-admin .check-field input[type="checkbox"],
+.p-mobile .check-field input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.p-workorders .pre-wrap,
+.p-inspections .pre-wrap,
+.p-devices .pre-wrap,
+.p-admin .pre-wrap {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+
+.p-workorders .text-bad,
+.p-inspections .text-bad,
+.p-devices .text-bad,
+.p-devices .amount-bad,
+.p-mobile .amount-bad {
+  color: var(--bad);
+  font-weight: 600;
+}
+
+/* 分页条：位于 card-foot 或列表底部 */
+.p-workorders .pager,
+.p-inspections .pager,
+.p-devices .pager,
+.p-admin .pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+}
+
+.p-workorders .pager .tiny,
+.p-inspections .pager .tiny,
+.p-devices .pager .tiny,
+.p-admin .pager .tiny {
+  white-space: nowrap;
+}
+
+/* 截止时间单元格（双行：时间 + 剩余/超时说明） */
+.p-workorders .due-cell,
+.p-inspections .due-cell,
+.p-devices .due-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.p-workorders .due-cell .mono,
+.p-inspections .due-cell .mono,
+.p-devices .due-cell .mono {
+  font-size: 12px;
+}
+
+/* ==========================================================================
+   1. 工单管理
+   ========================================================================== */
+.p-workorders .wo-filter {
+  position: sticky;
+  top: -1px;
+  z-index: 3;
+  background: var(--surface);
+}
+
+.p-workorders .wo-filter .toolbar {
+  margin-bottom: 0;
+}
+
+.p-workorders .wo-filter .search-field .input {
+  width: 250px;
+}
+
+.p-workorders .wo-head-badges {
+  align-items: center;
+  gap: 8px;
+}
+
+.p-workorders .wo-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.p-workorders .wo-detail .kv {
+  margin: 0;
+}
+
+.p-workorders .wo-detail .card {
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.p-workorders .wo-detail .card-head {
+  padding: 10px 12px 6px;
+}
+
+.p-workorders .wo-detail .card-body {
+  padding: 4px 12px 12px;
+}
+
+.p-workorders .wo-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 0 2px;
+  border-top: 1px dashed var(--line);
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+}
+
+.p-workorders .wo-actions:empty {
+  display: none;
+}
+
+.p-workorders .wo-section {
+  margin: 0;
+}
+
+/* ==========================================================================
+   2. 巡检管理
+   ========================================================================== */
+.p-inspections .plan-grid {
+  align-items: stretch;
+}
+
+.p-inspections .plan-grid .card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.p-inspections .plan-grid .card .card-body {
+  flex: 1;
+}
+
+.p-inspections .plan-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.p-inspections .plan-item {
+  display: flex;
+  gap: 10px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.p-inspections .plan-item:last-child {
+  border-bottom: 0;
+  padding-bottom: 2px;
+}
+
+.p-inspections .plan-idx {
+  flex: none;
+  width: 24px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+}
+
+.p-inspections .plan-item-text {
+  min-width: 0;
+  flex: 1;
+}
+
+.p-inspections .plan-item-label {
+  font-size: 12.8px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+.p-inspections .plan-item-standard {
+  margin-top: 2px;
+  font-size: 11.8px;
+  line-height: 1.5;
+  color: var(--muted-2);
+}
+
+.p-inspections .insp-items {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.p-inspections .insp-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  padding: 10px 12px;
+  transition: border-color .15s, background .15s;
+}
+
+.p-inspections .insp-item.missing {
+  border-color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.p-inspections .insp-item-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.p-inspections .insp-item-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.p-inspections .insp-item-title .cell-main {
+  font-size: 13px;
+}
+
+.p-inspections .insp-item-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.p-inspections .insp-item-body .segmented {
+  width: 100%;
+}
+
+.p-inspections .insp-item-body .segmented button {
+  flex: 1;
+  min-height: 34px;
+}
+
+.p-inspections .insp-item-body .textarea {
+  min-height: 54px;
+  font-size: 12.5px;
+}
+
+.p-inspections .insp-item .badge {
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   3. 设备台账
+   ========================================================================== */
+.p-devices .dev-kpis {
+  margin: 0;
+}
+
+.p-devices .dev-kpis .kpi-value {
+  font-size: 21px;
+}
+
+.p-devices .dev-filters {
+  margin-bottom: 0;
+}
+
+.p-devices .dev-filters .search-field .input {
+  width: 240px;
+}
+
+/* 台账表格：固定列宽 + 单行省略，行高约 56px */
+.p-devices .dev-table table {
+  table-layout: fixed;
+  width: 100%;
+  min-width: 1150px;
+}
+
+.p-devices .dev-table th,
+.p-devices .dev-table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.p-devices .dev-table td.col-name,
+.p-devices .dev-table td.col-health {
+  white-space: normal;
+}
+
+.p-devices .dev-name-cell {
+  min-width: 0;
+}
+
+.p-devices .dev-name {
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.p-devices .dev-key {
+  margin-top: 2px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.p-devices .dev-code {
+  white-space: nowrap;
+}
+
+.p-devices .dev-model,
+.p-devices .dev-unit {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+
+.p-devices .th-hint {
+  border-bottom: 1px dotted var(--muted-2);
+  cursor: help;
+}
+
+.p-devices .table-hint {
+  margin-top: 8px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted-2);
+}
+
+.p-devices .status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.p-devices .dot-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.p-devices .dot-line .dot {
+  width: 7px;
+  height: 7px;
+  flex: none;
+}
+
+.p-devices .health-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.p-devices .health-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 82px;
+  max-width: 120px;
+}
+
+.p-devices .health-cell .progress {
+  height: 5px;
+}
+
+.p-devices .health-cell .badge {
+  align-self: flex-start;
+  font-size: 10.5px;
+  padding: 0 5px;
+  line-height: 1.6;
+}
+
+.p-devices .dev-detail {
+  gap: 12px;
+}
+
+.p-devices .dev-head-badges {
+  align-items: center;
+  gap: 8px;
+}
+
+.p-devices .dev-detail .card {
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+
+.p-devices .dev-detail .card-head {
+  padding: 10px 12px 6px;
+}
+
+.p-devices .dev-detail .card-body {
+  padding: 2px 12px 12px;
+}
+
+.p-devices .dev-detail .kv {
+  margin: 0;
+}
+
+.p-devices .dev-detail .progress {
+  width: 92px;
+  height: 6px;
+}
+
+/* ==========================================================================
+   4. 系统管理
+   ========================================================================== */
+.p-admin .check-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 6px 12px;
+}
+
+.p-admin .role-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 10px;
+}
+
+.p-admin .role-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: var(--surface-2);
+}
+
+.p-admin .role-item-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.p-admin .role-item p {
+  margin: 4px 0 8px;
+  line-height: 1.6;
+}
+
+.p-admin .role-perms {
+  gap: 6px;
+}
+
+.p-admin .role-perms .chip {
+  font-size: 11px;
+  padding: 1px 7px;
+}
+
+.p-admin .perm-cell {
+  text-align: center;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--good);
+}
+
+.p-admin .perm-no {
+  color: var(--muted-2);
+  font-weight: 400;
+}
+
+.p-admin .audit-toolbar {
+  align-items: center;
+  gap: 6px;
+}
+
+.p-admin .audit-toolbar .input,
+.p-admin .audit-toolbar .select {
+  height: 32px;
+  font-size: 12.5px;
+}
+
+.p-admin .audit-toolbar input[type="datetime-local"] {
+  width: 172px;
+  min-width: 0;
+}
+
+.p-admin .audit-toolbar .spacer {
+  flex: 1;
+}
+
+.p-admin .detail-cell {
+  display: block;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p-admin .danger-box {
+  border: 1px solid var(--bad);
+  background: var(--bad-soft);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.p-admin .danger-box p {
+  margin: 4px 0 0;
+  color: var(--ink-2);
+}
+
+.p-admin .danger-box .check-field {
+  margin-top: 10px;
+  font-weight: 600;
+  color: var(--bad);
+}
+
+/* ==========================================================================
+   5. 手机端视图
+   ========================================================================== */
+.p-mobile {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+.p-mobile .mobile-frame {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 430px;
+  height: min(calc(100dvh - var(--topbar-h, 56px) - 60px), 940px);
+  max-height: calc(100dvh - var(--topbar-h, 56px) - 60px);
+  padding: 12px 12px 0;
+  overflow: hidden;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+/* 手机容器内部滚动区：底部导航始终在容器内，不覆盖卡片 */
+.p-mobile .m-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0 2px 8px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.p-mobile .mobile-preview-tip {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 7px 10px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.p-mobile .mobile-preview-tip .btn {
+  margin-left: auto;
+}
+
+.p-mobile .mobile-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 2px 0;
+}
+
+.p-mobile .mobile-head > div:first-child {
+  min-width: 0;
+  flex: 1;
+}
+
+.p-mobile .mobile-title {
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: .01em;
+  line-height: 1.3;
+}
+
+.p-mobile .mobile-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.p-mobile .m-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.p-mobile .m-kpi {
+  padding: 9px 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.p-mobile .m-kpi-value {
+  font-size: 21px;
+  font-weight: 650;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.p-mobile .m-kpi-label {
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.p-mobile .m-kpi.tone-warn .m-kpi-value {
+  color: var(--warn);
+}
+
+.p-mobile .m-kpi.tone-info .m-kpi-value {
+  color: var(--info);
+}
+
+.p-mobile .m-kpi.tone-bad .m-kpi-value {
+  color: var(--bad);
+}
+
+.p-mobile .m-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-margin-top: 8px;
+}
+
+.p-mobile .m-card.card {
+  box-shadow: none;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.p-mobile .m-card .card-head {
+  padding: 10px 12px 4px;
+  align-items: center;
+}
+
+.p-mobile .m-card .card-title {
+  font-size: 14px;
+}
+
+.p-mobile .m-card .card-sub {
+  margin-top: 2px;
+  font-size: 11.5px;
+}
+
+.p-mobile .m-card .card-body {
+  padding: 8px 12px 12px;
+}
+
+.p-mobile .m-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.p-mobile .m-item {
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--line-soft);
+  border-radius: 10px;
+  background: var(--surface-2);
+  transition: background .15s, border-color .15s;
+}
+
+.p-mobile .m-item-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  min-width: 0;
+  margin-bottom: 6px;
+}
+
+.p-mobile .m-item-id {
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.p-mobile .m-item-head .badge {
+  font-size: 10.5px;
+  padding: 0 6px;
+  line-height: 1.7;
+}
+
+.p-mobile .m-item-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: var(--ink);
+  word-break: break-word;
+}
+
+.p-mobile .m-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.p-mobile .m-item-meta span {
+  overflow-wrap: anywhere;
+}
+
+.p-mobile .m-item-body {
+  margin-top: 4px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+
+.p-mobile .m-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.p-mobile .m-btn.btn {
+  flex: 1 1 0;
+  min-width: 88px;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.p-mobile .m-msg {
+  cursor: pointer;
+}
+
+.p-mobile .m-msg:active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.p-mobile .mobile-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 2px 0 4px;
+}
+
+.p-mobile .mobile-foot .btn {
+  min-height: 44px;
+}
+
+.p-mobile .mobile-foot-note {
+  text-align: center;
+  line-height: 1.55;
+}
+
+.p-mobile .m-tabbar {
+  position: relative;
+  flex: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px;
+  margin: 0 -12px;
+  padding: 5px 6px calc(5px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 -6px 16px rgba(16, 42, 67, .06);
+}
+
+.p-mobile .m-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  min-height: 48px;
+  padding: 4px 2px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 10.5px;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+
+.p-mobile .m-tab .icon {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.p-mobile .m-tab:hover,
+.p-mobile .m-tab:focus-visible {
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  outline: none;
+}
+
+/* 手机端在窄屏下全宽铺开；桌面宽度保留手机容器 + 预览提示 */
+@media (min-width: 721px) {
+  .p-mobile .mobile-preview-tip {
+    display: flex;
+  }
+}
+
+@media (max-width: 720px) {
+  /* 手机页独占视口：去掉页面留白，避免 430px 下横向溢出 */
+  #view:has(.p-mobile),
+  #page-root:has(> .p-mobile) {
+    padding: 0;
+  }
+
+  .p-mobile {
+    margin: 0;
+    align-items: stretch;
+  }
+
+  .p-mobile .mobile-frame {
+    width: 100%;
+    max-width: 430px;
+    height: calc(100dvh - var(--topbar-h, 56px));
+    max-height: calc(100dvh - var(--topbar-h, 56px));
+    padding: 10px 10px 0;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .p-mobile .m-tabbar {
+    margin: 0 -10px;
+    border-radius: 0;
+  }
+}
+
+/* 窄屏手机：统计卡 2×2，卡片允许换行不裁切 */
+@media (max-width: 560px) {
+  .p-mobile .m-kpis {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .p-mobile .mobile-title {
+    font-size: 17px;
+  }
+
+  .p-mobile .m-item-meta {
+    font-size: 11px;
+  }
+
+  .p-mobile .m-btn.btn {
+    min-width: 0;
+  }
+}
+
+/* 430px 手机：收紧全局顶栏，只留紧凑站点下拉 */
+@media (max-width: 480px) {
+  body:has(.p-mobile),
+  #view:has(.p-mobile) {
+    overflow-x: hidden;
+  }
+
+  body:has(.p-mobile) #topbar .crumb,
+  body:has(.p-mobile) .topbar .crumb {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+  }
+
+  body:has(.p-mobile) #topbar {
+    gap: 6px;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  body:has(.p-mobile) #topbar .topbar-tools {
+    gap: 4px;
+    min-width: 0;
+  }
+
+  body:has(.p-mobile) #topbar .last-updated,
+  body:has(.p-mobile) #topbar .crumb-section,
+  body:has(.p-mobile) #topbar .crumb-sep,
+  body:has(.p-mobile) #topbar .site-picker .dot,
+  body:has(.p-mobile) #topbar .user-chip-text {
+    display: none;
+  }
+
+  body:has(.p-mobile) #topbar #page-title {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  body:has(.p-mobile) #topbar .site-picker {
+    flex: 0 0 auto;
+    min-width: 0;
+    max-width: 128px;
+  }
+
+  body:has(.p-mobile) #topbar .site-picker .select {
+    width: 100%;
+    max-width: 128px;
+    min-width: 0;
+    font-size: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+
+  body:has(.p-mobile) #topbar .avatar {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+}
+
+/* 中窄屏（平板/小笔记本）下的运营页收折 */
+@media (max-width: 960px) {
+  .p-workorders .wo-filter .search-field .input,
+  .p-devices .dev-filters .search-field .input {
+    width: 100%;
+  }
+
+  .p-workorders .wo-filter .search-field,
+  .p-devices .dev-filters .search-field {
+    flex: 1 1 220px;
+  }
+
+  .p-admin .audit-toolbar input[type="datetime-local"] {
+    width: 100%;
+    flex: 1 1 170px;
+  }
+
+  .p-admin .detail-cell {
+    max-width: 240px;
+  }
+
+  .p-admin .role-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .p-inspections .insp-item-head {
+    flex-wrap: wrap;
+  }
+
+  .p-inspections .insp-item-head .badge {
+    margin-left: 0;
+  }
+
+  .p-workorders .wo-actions .btn,
+  .p-inspections .insp-item-body .segmented button {
+    flex: 1 1 auto;
+  }
+
+  .p-admin .detail-cell {
+    max-width: 160px;
+  }
+
+  .p-devices .health-cell {
+    min-width: 68px;
+  }
+}

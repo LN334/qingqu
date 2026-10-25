@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>智赋乡水 · 智慧水处理平台</title>
+<meta name="description" content="100 L/h 污水处理实验装置的智能监测、远程运维与工艺数据平台">
+<link rel="stylesheet" href="/css/app.css">
+<link rel="stylesheet" href="/css/pages-dash.css">
+<link rel="stylesheet" href="/css/pages-control.css">
+<link rel="stylesheet" href="/css/pages-data.css">
+<link rel="stylesheet" href="/css/pages-ops.css">
+<link rel="stylesheet" href="/css/pages-kiosk.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-dashboard" viewBox="0 0 24 24"><path d="M4 13h7V4H4v9Zm0 7h7v-4H4v4Zm9 0h7v-9h-7v9Zm0-16v4h7V4h-7Z"/></symbol>
+    <symbol id="i-process" viewBox="0 0 24 24"><path d="M4 20h16v-2H4v2ZM6 16h3V8H6v8Zm4.5 0h3V5h-3v11Zm4.5 0h3v-6h-3v6Z"/></symbol>
+    <symbol id="i-monitor" viewBox="0 0 24 24"><path d="m3 17 5-5 3.5 3.5L17 10l4 4v3H3v-0Zm2-9a2 2 0 1 1 4 0 2 2 0 0 1-4 0Z"/></symbol>
+    <symbol id="i-alarm" viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7v4l-2 4h18l-2-4V9a7 7 0 0 0-7-7Zm0 20a3 3 0 0 0 2.8-2H9.2A3 3 0 0 0 12 22Z"/></symbol>
+    <symbol id="i-control" viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm3 4v10M12 7v10m4-10v10" stroke="currentColor" stroke-width="2" fill="none"/><circle cx="8" cy="9" r="2"/><circle cx="16" cy="14" r="2"/></symbol>
+    <symbol id="i-params" viewBox="0 0 24 24"><path d="M4 6h10v2H4V6Zm0 5h16v2H4v-2Zm0 5h7v2H4v-2Z"/><circle cx="17" cy="7" r="2.5"/><circle cx="14" cy="17" r="2.5"/></symbol>
+    <symbol id="i-quality" viewBox="0 0 24 24"><path d="M12 2s6 7 6 11a6 6 0 0 1-12 0C6 9 12 2 12 2Zm0 16a4 4 0 0 0 4-4h-2a2 2 0 0 1-2 2v2Z"/></symbol>
+    <symbol id="i-diagnosis" viewBox="0 0 24 24"><path d="M11 2h2v3h3v2h-3v3h-2V7H8V5h3V2ZM5 12h14v2H5v-2Zm0 5h9v2H5v-2Z"/><circle cx="17.5" cy="18" r="3.5"/></symbol>
+    <symbol id="i-analysis" viewBox="0 0 24 24"><path d="M4 19h16v2H4v-2Zm2-3 4-6 3 3 5-7 2 1.5-6 8.5-3-3-3 4.5L6 16Z"/></symbol>
+    <symbol id="i-report" viewBox="0 0 24 24"><path d="M6 2h8l4 4v16H6V2Zm7 1.5V7h3.5L13 3.5ZM8 11h8v2H8v-2Zm0 4h8v2H8v-2Z"/></symbol>
+    <symbol id="i-workorder" viewBox="0 0 24 24"><path d="M5 3h14a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Zm3 4v2h8V7H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z"/></symbol>
+    <symbol id="i-inspection" viewBox="0 0 24 24"><path d="M9 2h6v3h3v17H6V5h3V2Zm-1 8v2h8v-2H8Zm0 4v2h8v-2H8Zm0 4v2h5v-2H8Z"/></symbol>
+    <symbol id="i-device" viewBox="0 0 24 24"><path d="M4 4h16v7H4V4Zm0 9h7v7H4v-7Zm9 0h7v7h-7v-7Z"/></symbol>
+    <symbol id="i-admin" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3Zm0 8a3 3 0 1 1 0 6 3 3 0 0 1 0-6Z"/></symbol>
+    <symbol id="i-mobile" viewBox="0 0 24 24"><path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm0 3v12h10V5H7Z"/></symbol>
+    <symbol id="i-kiosk" viewBox="0 0 24 24"><path d="M3 4h18a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-7v2h3v2H7v-2h3v-2H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Zm2 2v8h14V6H5Z"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M12 2a6 6 0 0 0-6 6v4l-2 3v1h16v-1l-2-3V8a6 6 0 0 0-6-6Zm0 20a3 3 0 0 0 3-3H9a3 3 0 0 0 3 3Z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M12 5V2L8 6l4 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7Z"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M10 3v2H5v14h5v2H3V3h7Zm5.6 3.4L21.2 12l-5.6 5.6-1.4-1.4 3.2-3.2H9v-2h8.4l-3.2-3.2 1.4-1.4Z"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6-1.4-1.4L12.2 12 7.6 7.4 9 6Z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6.4 5 12.6 12.6-1.4 1.4L5 6.4 6.4 5Zm12.6 1.4L6.4 19 5 17.6 17.6 5 19 6.4Z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="M10 3a7 7 0 1 0 4.2 12.6l4.6 4.6 1.4-1.4-4.6-4.6A7 7 0 0 0 10 3Zm0 2a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"/></symbol>
+    <symbol id="i-warning" viewBox="0 0 24 24"><path d="M12 2 1 21h22L12 2Zm1 14h-2v2h2v-2Zm0-7h-2v5h2V9Z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m9.5 16.2-4-4L4 13.7l5.5 5.5L21 7.7l-1.5-1.5-10 10Z"/></symbol>
+  </defs>
+</svg>
+
+<div id="boot" class="boot">
+  <div class="boot-logo">
+    <span class="mark"><svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4c6 7 11 12.6 11 18a11 11 0 0 1-22 0C9 16.6 14 11 20 4Z" fill="currentColor" opacity=".16"/><path d="M20 4c6 7 11 12.6 11 18a11 11 0 0 1-22 0C9 16.6 14 11 20 4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 22c2-3 4-4 6-4s4 1 6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+    <div>
+      <b>智赋乡水</b>
+      <span>智慧水处理平台</span>
+    </div>
+  </div>
+  <p class="boot-tip">正在载入平台…</p>
+</div>
+
+<!-- 登录 -->
+<section id="login" class="login" hidden>
+  <div class="login-brand">
+    <div class="login-brand-inner">
+      <div class="login-kicker">ZHIFU RURAL WATER · DEMO</div>
+      <h1>把一座乡村污水站<br>装进浏览器</h1>
+      <p class="login-lead">面向 100 L/h 污水处理实验装置：在线监测、远程运维、工艺参数、告警诊断与工单闭环。数据全部来自本机模拟网关，可反复演练。</p>
+      <ul class="login-points">
+        <li><i>01</i><div><b>三端一套数据</b><span>电脑驾驶舱 / 手机消息工单 / 现场触摸屏</span></div></li>
+        <li><i>02</i><div><b>命令可追溯</b><span>联锁校验 → 二次确认 → 回执 → 审计</span></div></li>
+        <li><i>03</i><div><b>不编造数据</b><span>缺失指标如实标注「待接入 / 人工化验」</span></div></li>
+      </ul>
+      <div class="login-meta">
+        <span>方案 V2.2 定稿版</span><span>·</span><span>站点：安吉·鲁家村 / 黟县·碧山</span>
+      </div>
+    </div>
+    <div class="login-water" aria-hidden="true"></div>
+  </div>
+
+  <div class="login-panel">
+    <form id="login-form" class="login-card" autocomplete="on">
+      <h2>登录平台</h2>
+      <p class="login-sub">使用演示账号进入，所有数据均为模拟数据。</p>
+      <label class="field">
+        <span class="label">账号</span>
+        <input class="input" name="username" id="login-username" autocomplete="username" placeholder="如 admin" required>
+      </label>
+      <label class="field">
+        <span class="label">密码</span>
+        <input class="input" type="password" name="password" id="login-password" autocomplete="current-password" placeholder="演示口令 water123" required>
+      </label>
+      <p class="error-text" id="login-error" role="alert" hidden></p>
+      <button class="btn primary block" type="submit" id="login-submit">进入平台</button>
+
+      <div class="login-demo">
+        <div class="row"><b>演示账号</b><span class="spacer"></span><span class="hint">口令统一 water123</span></div>
+        <div id="demo-accounts" class="demo-accounts"></div>
+      </div>
+      <p class="login-foot">本平台是方案 V2.2 的可运行演示实现，不连接现场 PLC；所有控制命令只作用于本机模拟网关。</p>
+    </form>
+  </div>
+</section>
+
+<!-- 主框架 -->
+<div id="shell" class="shell" hidden>
+  <aside id="sidebar" class="sidebar">
+    <div class="brand">
+      <span class="brand-mark">
+        <svg viewBox="0 0 40 40" aria-hidden="true"><path d="M20 4c6 7 11 12.6 11 18a11 11 0 0 1-22 0C9 16.6 14 11 20 4Z" fill="currentColor" opacity=".15"/><path d="M20 4c6 7 11 12.6 11 18a11 11 0 0 1-22 0C9 16.6 14 11 20 4Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M14 22c2-3 4-4 6-4s4 1 6 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </span>
+      <div class="brand-text"><b>智赋乡水</b><span>智慧水处理平台</span></div>
+    </div>
+    <nav id="nav" class="nav" aria-label="主导航"></nav>
+    <div class="sidebar-foot">
+      <div class="gateway-state" id="gateway-state"><span class="dot good"></span><span>模拟网关在线</span></div>
+      <div class="ver">方案 V2.2 · 演示版</div>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header id="topbar" class="topbar">
+      <button class="icon-btn menu-btn" id="menu-btn" type="button" aria-label="打开导航">
+        <svg class="icon"><use href="#i-process"/></svg>
+      </button>
+      <div class="crumb">
+        <span class="crumb-section" id="crumb-section">总览</span>
+        <svg class="icon crumb-sep"><use href="#i-chevron"/></svg>
+        <h1 id="page-title">综合驾驶舱</h1>
+      </div>
+      <div class="topbar-tools">
+        <label class="site-picker">
+          <span class="sr-only">当前站点</span>
+          <span class="dot good" id="site-dot"></span>
+          <select id="site-select" class="select bare"></select>
+        </label>
+        <span class="last-updated" id="last-updated" title="实时数据最后更新时间"><span class="pulse"></span><span id="last-updated-text">—</span></span>
+        <button class="icon-btn" id="refresh-btn" type="button" title="立即刷新">
+          <svg class="icon"><use href="#i-refresh"/></svg>
+        </button>
+        <button class="icon-btn bell" id="bell-btn" type="button" title="通知">
+          <svg class="icon"><use href="#i-bell"/></svg>
+          <span class="bell-count" id="bell-count" hidden>0</span>
+        </button>
+        <div class="user-menu">
+          <button class="user-chip" id="user-chip" type="button" aria-haspopup="menu">
+            <span class="avatar" id="user-avatar">—</span>
+            <span class="user-chip-text"><b id="user-name">—</b><span id="user-role">—</span></span>
+          </button>
+          <div class="menu" id="user-menu" role="menu" hidden>
+            <div class="menu-head" id="user-menu-head"></div>
+            <button class="menu-item" id="menu-password" role="menuitem">修改密码</button>
+            <button class="menu-item" id="menu-mobile" role="menuitem">手机端视图</button>
+            <button class="menu-item danger" id="menu-logout" role="menuitem">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="view" class="view" tabindex="-1"></main>
+  </div>
+</div>
+
+<div id="nav-scrim" aria-hidden="true"></div>
+<div id="toast-root" class="toast-root" aria-live="polite"></div>
+<div id="modal-root" class="modal-root" hidden></div>
+<div id="drawer-root" class="drawer-root" hidden></div>
+
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>

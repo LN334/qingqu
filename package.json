@@ -1,0 +1,16 @@
+{
+  "name": "zhifu-water-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "智赋乡水 · 智慧水处理平台（演示版，零依赖 Node 服务 + 原生前端 + 模拟网关）",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js --dev",
+    "reset": "node server/index.js --reset"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED"
+}

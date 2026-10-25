@@ -1,0 +1,461 @@
+/* 水质与诊断类页面：水质化验 / 智能诊断 / 数据分析 / 报表 */
+/* 说明：只写本组四个页面（.p-quality / .p-diagnosis / .p-analysis / .p-reports）的专属样式，
+   通用卡片、表格、图表、弹层样式沿用 app.css；页面内所有选择器均以页面根类名限定。 */
+
+/* ============ 水质与化验 ============ */
+.p-quality .q-filters {
+  align-items: flex-end;
+  gap: 10px;
+  row-gap: 9px;
+}
+
+.p-quality .q-filters .field {
+  min-width: 132px;
+}
+
+.p-quality .q-filters .label {
+  font-size: 11px;
+}
+
+.p-quality .q-trend {
+  min-height: 244px;
+}
+
+.p-quality .q-table-area {
+  min-width: 0;
+}
+
+.p-quality .q-removal {
+  min-height: 204px;
+}
+
+.p-quality .q-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 5px;
+  max-width: 360px;
+}
+
+.p-quality .q-metric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: #f2f7f9;
+  color: var(--ink-2, #3c5566);
+  font-size: 11.5px;
+  line-height: 1.7;
+  white-space: nowrap;
+}
+
+.p-quality .q-metric b {
+  font-family: var(--sans);
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.p-quality .q-metric.over {
+  background: var(--bad-soft);
+  color: var(--bad);
+  box-shadow: inset 0 0 0 1px #f0cdc7;
+}
+
+.p-quality .q-metric.over b {
+  color: var(--bad);
+}
+
+.p-quality .q-method {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.p-quality .q-qc {
+  line-height: 1.45;
+}
+
+.p-quality .q-section-title {
+  margin: 2px 0 0;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.p-quality .q-detail .kv-row .v {
+  word-break: break-word;
+}
+
+.p-quality .q-review-box {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #fbfdfe;
+}
+
+.p-quality .q-review-box .hint {
+  line-height: 1.5;
+}
+
+/* ============ 智能诊断 ============ */
+.p-diagnosis .dg-timebar {
+  gap: 8px;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.p-diagnosis .dg-timebar .badge {
+  flex: none;
+}
+
+.p-diagnosis .dg-list {
+  gap: 14px;
+}
+
+.p-diagnosis .dg-card {
+  min-width: 0;
+}
+
+.p-diagnosis .dg-body {
+  gap: 12px;
+  padding-top: 2px;
+}
+
+.p-diagnosis .dg-section h4 {
+  margin: 0 0 5px;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: 0.2px;
+  color: var(--ink);
+}
+
+.p-diagnosis .dg-phenomenon {
+  margin: 0;
+  font-size: 12.8px;
+  line-height: 1.7;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-diagnosis .dg-causes {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-diagnosis .dg-points {
+  gap: 6px;
+}
+
+.p-diagnosis .dg-point {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #f7fafb;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-diagnosis .dg-point b {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.p-diagnosis .dg-point-time {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.p-diagnosis .dg-point.stale {
+  border-color: #ecc9c3;
+  background: var(--bad-soft);
+  color: var(--bad);
+}
+
+.p-diagnosis .dg-point.stale b {
+  color: var(--bad);
+}
+
+.p-diagnosis .dg-basis {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 4px 10px;
+  margin: 9px 0 0;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.p-diagnosis .dg-basis dt {
+  color: var(--muted);
+  font-size: 11.5px;
+}
+
+.p-diagnosis .dg-basis dd {
+  margin: 0;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-diagnosis .dg-datatime {
+  margin: 7px 0 0;
+}
+
+.p-diagnosis .dg-suggestion {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 10px 12px;
+  border: 1px solid #cfe9e4;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  color: #0d534b;
+}
+
+.p-diagnosis .dg-suggestion .icon {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+}
+
+.p-diagnosis .dg-suggestion b {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 11.5px;
+  letter-spacing: 0.3px;
+}
+
+.p-diagnosis .dg-suggestion p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.65;
+}
+
+.p-diagnosis .dg-curves {
+  gap: 12px;
+}
+
+.p-diagnosis .dg-curve-block {
+  padding-bottom: 10px;
+  border-bottom: 1px dashed var(--line-soft);
+}
+
+.p-diagnosis .dg-curve-block:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.p-diagnosis .dg-mini-chart {
+  min-height: 150px;
+  margin-top: 4px;
+}
+
+.p-diagnosis .dg-drawer .kv-row .v {
+  word-break: break-word;
+}
+
+/* ============ 数据分析 ============ */
+.p-analysis .a-chart {
+  min-height: 190px;
+}
+
+.p-analysis .a-donut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.p-analysis .a-readings {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 420px;
+  font-size: 11.8px;
+  line-height: 1.55;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-analysis .a-unit-wrap {
+  overflow-x: auto;
+}
+
+.p-analysis .a-unit-wrap table.data {
+  min-width: 780px;
+}
+
+.p-analysis .a-unit-wrap .progress {
+  width: 64px;
+  min-width: 44px;
+}
+
+.p-analysis .a-unit-wrap td.num {
+  white-space: nowrap;
+}
+
+.p-analysis .a-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-2, #3c5566);
+}
+
+.p-analysis .a-notes li::marker {
+  color: var(--muted);
+}
+
+.p-analysis .kpi-value small {
+  white-space: nowrap;
+  font-size: 11px;
+}
+
+/* ============ 报表中心 ============ */
+.p-reports .r-table-wrap {
+  overflow-x: auto;
+}
+
+.p-reports .r-list {
+  min-width: 0;
+}
+
+.p-reports .r-table-wrap table.data {
+  min-width: 900px;
+}
+
+.p-reports .r-title {
+  max-width: 320px;
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.p-reports .r-ops {
+  gap: 4px;
+  flex-wrap: nowrap;
+}
+
+.p-reports .r-ops .btn {
+  padding: 0 8px;
+  height: 26px;
+  font-size: 11.5px;
+}
+
+.p-reports .r-empty-actions {
+  justify-content: center;
+  margin-top: 2px;
+}
+
+.p-reports .r-section {
+  padding-top: 11px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.p-reports .r-section:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.p-reports .r-section h4 {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ink);
+}
+
+.p-reports .r-section .table-wrap {
+  border: 1px solid var(--line-soft);
+  border-radius: var(--radius-sm);
+}
+
+.p-reports .r-sections {
+  gap: 14px;
+}
+
+.p-reports .r-detail-actions {
+  padding-bottom: 2px;
+}
+
+.p-reports .r-detail .kv-row .v {
+  word-break: break-word;
+}
+
+/* ============ 窄屏（≤600px，含 420px 宽度） ============ */
+@media (max-width: 640px) {
+  .p-quality .q-filters .field {
+    flex: 1 1 calc(50% - 5px);
+    min-width: 120px;
+  }
+
+  .p-quality .q-metrics {
+    max-width: none;
+  }
+
+  .p-quality .q-metric {
+    font-size: 11px;
+    padding: 1px 5px;
+  }
+
+  .p-diagnosis .dg-basis {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+
+  .p-diagnosis .dg-point {
+    padding: 3px 7px;
+    font-size: 11px;
+  }
+
+  .p-diagnosis .dg-suggestion {
+    padding: 9px 10px;
+  }
+
+  .p-analysis .a-unit-wrap table.data {
+    min-width: 660px;
+  }
+
+  .p-analysis .a-notes {
+    padding-left: 16px;
+  }
+
+  .p-reports .r-title {
+    max-width: 168px;
+  }
+
+  .p-reports .r-table-wrap table.data {
+    min-width: 820px;
+  }
+}
+
+@media (max-width: 460px) {
+  .p-quality .q-filters .field {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  .p-quality .q-filters .btn {
+    width: 100%;
+  }
+
+  .p-analysis .a-unit-wrap .progress {
+    display: none;
+  }
+}
