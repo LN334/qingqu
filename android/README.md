@@ -23,7 +23,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 脚本逐步执行：aapt2 compile → aapt2 link（生成 R.java）→ javac（`-source 8 -target 8 -bootclasspath android.jar`）→ d8 → jar 写入 classes.dex → zipalign → apksigner，最后自动做
 `aapt dump badging`、`apksigner verify`、源码/dex 的「无网页视图控件」检查。退出码 0 即成功。
 
-依赖本机已装好的 JDK17 与 Android SDK（路径写在脚本顶部，`D:\AndroidBuild\...`）。
+依赖 JDK 17 与 Android SDK（build-tools 34 / platform 34）。脚本优先读取环境变量 `JAVA_HOME` 与 `ANDROID_SDK_ROOT`；未设置时回退到本机路径 `D:\AndroidBuild\jdk\jdk-17*` 与 `D:\AndroidBuild\sdk`，换机器时改脚本顶部或设环境变量即可。
 注意：aapt2 对含中文的绝对路径不友好，脚本因此 `Set-Location` 到工程目录并用相对路径。
 
 ## 使用
