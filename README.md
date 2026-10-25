@@ -12,11 +12,11 @@
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`ZhifuWater-Setup-1.0.0.exe`](https://github.com/LN334/shuiwu/releases/latest)（Release 附件） | Electron 桌面程序，安装后自带服务与界面，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/latest)（Release 附件） | 原生 Android（Java + 框架 API，**非 WebView**），连接同一局域网内的平台服务 |
+| Windows 桌面版 | [`ZhifuWater-Setup-1.0.0.exe`](https://github.com/LN334/shuiwu/releases/download/v1.0.0/ZhifuWater-Setup-1.0.0.exe)（111 MB） | Electron 桌面程序，安装后自带服务与界面，无需另装 Node.js |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v1.0.0/zhifu-water-mobile.apk)（92 KB） | 原生 Android（Java + 框架 API，**非 WebView**），连接同一局域网内的平台服务 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 仓库内不提交二进制产物（见 `.gitignore`），安装包统一放在 GitHub Release；也可按下面「构建」章节自行打包。
+> 全部版本与校验值见 [Releases · v1.0.0](https://github.com/LN334/shuiwu/releases/tag/v1.0.0)；仓库内不提交二进制产物（见 `.gitignore`），也可按下面「构建」章节自行打包。
 
 ---
 
