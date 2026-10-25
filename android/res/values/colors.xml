@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 品牌 -->
+    <color name="brand">#0B7A70</color>
+    <color name="brand_dark">#075E56</color>
+    <color name="brand_light">#E6F2F0</color>
+    <color name="brand_soft">#0F8C80</color>
+
+    <!-- 中性 -->
+    <color name="bg">#F2F6F8</color>
+    <color name="white">#FFFFFF</color>
+    <color name="ink">#12313A</color>
+    <color name="ink_2">#3F5860</color>
+    <color name="muted">#5D7484</color>
+    <color name="muted_2">#8496A0</color>
+    <color name="line">#E3EBEF</color>
+    <color name="line_strong">#D8E4E8</color>
+    <color name="field_bg">#F7FAFB</color>
+
+    <!-- 语义 -->
+    <color name="ok">#15803D</color>
+    <color name="ok_bg">#E6F5EC</color>
+    <color name="danger">#B32D22</color>
+    <color name="danger_bg">#FBEAE8</color>
+    <color name="warn">#A86200</color>
+    <color name="warn_bg">#FCF1E0</color>
+    <color name="info">#1F6FB2</color>
+    <color name="info_bg">#E8F1FA</color>
+    <color name="neutral">#5D7484</color>
+    <color name="neutral_bg">#EDF2F5</color>
+    <color name="brand_bg">#E6F2F0</color>
+
+    <color name="black">#000000</color>
+    <color name="transparent">#00000000</color>
+</resources>

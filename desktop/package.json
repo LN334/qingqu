@@ -1,0 +1,64 @@
+{
+  "name": "zhifu-water-desktop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "智赋乡水 · 智慧水处理平台 桌面端",
+  "main": "main.js",
+  "author": "LN334",
+  "license": "MIT",
+  "scripts": {
+    "prepare:app": "node scripts/prepare_app.js",
+    "dev": "electron .",
+    "dist": "node scripts/prepare_app.js && electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "44.7.2",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "com.ln334.zhifuwater",
+    "productName": "智赋乡水",
+    "copyright": "Copyright © 2026 LN334",
+    "asar": false,
+    "npmRebuild": false,
+    "nodeGypRebuild": false,
+    "buildDependenciesFromSource": false,
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "app/**/*",
+      "!node_modules/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "ZhifuWater-Setup-${version}.exe"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "智赋乡水·智慧水处理平台",
+      "runAfterFinish": true,
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "language": "2052",
+      "deleteAppDataOnUninstall": false
+    }
+  }
+}

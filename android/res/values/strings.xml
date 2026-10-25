@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">智赋乡水</string>
+    <string name="app_subtitle">智慧水处理平台 · 移动端</string>
+    <string name="login_title">欢迎回来</string>
+    <string name="login_sub">登录后查看站点运行、告警与工单</string>
+    <string name="label_server">服务器地址</string>
+    <string name="hint_server">http://电脑IP:8765</string>
+    <string name="label_username">账号</string>
+    <string name="label_password">密码</string>
+    <string name="btn_login">登 录</string>
+    <string name="login_footer">平台演示账号 admin / water123</string>
+
+    <string name="tab_overview">总览</string>
+    <string name="tab_alarms">告警</string>
+    <string name="tab_workorders">工单</string>
+    <string name="tab_inspections">巡检</string>
+    <string name="tab_profile">我的</string>
+
+    <string name="btn_refresh">刷新</string>
+    <string name="btn_retry">重新加载</string>
+    <string name="section_alarms">最近告警</string>
+    <string name="section_process">工艺单元</string>
+    <string name="updated_at">更新于 %1$s</string>
+    <string name="loading">加载中…</string>
+    <string name="logout">退出登录</string>
+    <string name="change_server">修改服务器地址</string>
+    <string name="switch_site">切换站点</string>
+</resources>
