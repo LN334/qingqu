@@ -2,15 +2,16 @@
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 
-!define APP_NAME "智赋乡水"
-!define APP_FULL "智赋乡水 · 智慧水处理平台"
-!define APP_VERSION "2.0.2"
+!define APP_NAME "清渠"
+!define APP_FULL "清渠 · 村镇水处理站智能运维平台"
+!define APP_VERSION "2.0.3"
 !define APP_PUBLISHER "LN334"
-!define APP_EXE "ZhifuWater.exe"
-!define REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\ZhifuWaterNative"
+!define APP_EXE "Qingqu.exe"
+!define REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\QingquNative"
+!define LEGACY_REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\ZhifuWaterNative"
 
 Name "${APP_FULL}"
-OutFile "ZhifuWater-Setup-${APP_VERSION}.exe"
+OutFile "Qingqu-Setup-${APP_VERSION}.exe"
 InstallDir "$PROGRAMFILES64\${APP_NAME}"
 InstallDirRegKey HKLM "${REG_KEY}" "InstallDir"
 RequestExecutionLevel admin
@@ -32,6 +33,18 @@ Section "主程序" SecMain
   SectionIn RO
   SetOutPath "$INSTDIR"
   File /r "..\publish\*.*"
+
+  ; 旧版本（智赋乡水 / ZhifuWater.exe）迁移清理，避免桌面出现两个图标、程序与卸载项并存
+  Delete "$DESKTOP\智赋乡水.lnk"
+  Delete "$DESKTOP\智赋乡水 · 智慧水处理平台.lnk"
+  Delete "$DESKTOP\智赋乡水·智慧水处理平台.lnk"
+  Delete "$SMPROGRAMS\智赋乡水\智赋乡水.lnk"
+  Delete "$SMPROGRAMS\智赋乡水\卸载 智赋乡水.lnk"
+  RMDir "$SMPROGRAMS\智赋乡水"
+  DeleteRegKey HKLM "${LEGACY_REG_KEY}"
+  IfFileExists "$PROGRAMFILES64\智赋乡水\ZhifuWater.exe" 0 +2
+    RMDir /r "$PROGRAMFILES64\智赋乡水"
+
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
   CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
@@ -60,4 +73,5 @@ Section "Uninstall"
   RMDir "$SMPROGRAMS\${APP_NAME}"
   RMDir /r "$INSTDIR"
   DeleteRegKey HKLM "${REG_KEY}"
+  DeleteRegKey HKLM "${LEGACY_REG_KEY}"
 SectionEnd
