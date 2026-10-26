@@ -39,6 +39,24 @@ final class Demo {
         return loaded;
     }
 
+    /** 注入快照（供构建/测试工具在非 Android 环境直接验证路由与操作逻辑）。 */
+    static boolean load(JSONObject sitesData, JSONObject overviewData, JSONObject alarmsData,
+                        JSONObject workordersOpenData, JSONObject workordersDoneData,
+                        JSONObject inspectionsData, JSONObject inspectionDetailData, JSONObject meData) {
+        synchronized (LOCK) {
+            sites = sitesData;
+            overview = overviewData;
+            alarms = alarmsData;
+            workordersOpen = workordersOpenData;
+            workordersDone = workordersDoneData;
+            inspections = inspectionsData;
+            inspectionDetail = inspectionDetailData;
+            me = meData;
+            loaded = true;
+            return true;
+        }
+    }
+
     /** 演示账号信息（取自 me.json 的 user 字段）。 */
     static JSONObject user(Context c) {
         ensure(c);
@@ -67,7 +85,12 @@ final class Demo {
                     return copy(query.contains("status=done") ? workordersDone : workordersOpen);
                 }
                 if (seg.length == 3 && "inspections".equals(seg[2])) return copy(inspections);
-                if (seg.length == 4 && "inspections".equals(seg[2])) return copy(inspectionDetail);
+                if (seg.length == 4 && "inspections".equals(seg[2])) {
+                    JSONObject detailData = inspectionDetail == null ? null : inspectionDetail.optJSONObject("data");
+                    if (detailData != null && seg[3].equals(detailData.optString("id"))) return copy(inspectionDetail);
+                    JSONObject found = find(inspections.optJSONArray("data"), seg[3]);
+                    return found == null ? error("找不到该巡检任务") : ok(found);
+                }
                 if (seg.length == 4 && "auth".equals(seg[2]) && "me".equals(seg[3])) return copy(me);
             } else {
                 if (seg.length == 5 && "alarms".equals(seg[2]) && "ack".equals(seg[4])) {
