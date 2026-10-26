@@ -252,9 +252,9 @@ async function createWindow() {
     minWidth: 1080,
     minHeight: 700,
     show: false,
-    backgroundColor: '#f2f6f8',
+    backgroundColor: '#071e24',
     title: '智赋乡水 · 智慧水处理平台',
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     ...(fs.existsSync(iconPath) ? { icon: iconPath } : {}),
     webPreferences: {
       contextIsolation: true,
