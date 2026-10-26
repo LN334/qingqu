@@ -20,8 +20,11 @@ UI 全部由 Java 代码构建，`res/` 只放颜色、文字、样式、XML sha
 powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 ```
 
-脚本逐步执行：aapt2 compile → aapt2 link（生成 R.java）→ javac（`-source 8 -target 8 -bootclasspath android.jar`）→ d8 → jar 写入 classes.dex → zipalign → apksigner，最后自动做
-`aapt dump badging`、`apksigner verify`、源码/dex 的「无网页视图控件」检查。退出码 0 即成功。
+脚本逐步执行：aapt2 compile → aapt2 link（生成 R.java）→ javac（`-source 8 -target 8 -bootclasspath android.jar`）→ d8 → jar 写入 classes.dex → 修正 APK 内条目路径 → zipalign → apksigner，最后自动做
+`apksigner verify`、安装兼容性校验、`aapt dump badging`、源码/dex 的「无网页视图控件」检查。退出码 0 即成功。
+
+**安装兼容性校验（必看）**：`targetSdk ≥ 30` 的 APK 在 Android 11 及以上要求 `resources.arsc` 未压缩（stored）且数据 4 字节对齐，否则系统直接拒绝安装 —— 手机上的表现是「安装失败：无效安装包 / 与操作系统不兼容」。因此脚本最后一步会解析 zip 结构确认这两点，不满足就报错中止。
+历史坑：旧版脚本为了把 assets 路径里的反斜杠改成正斜杠，用 `ZipArchive` 重建了整个 zip，结果把 `resources.arsc` 也重新压缩了，打出来的包在所有 Android 11+ 手机上都装不上。现在改为**按字节改写文件名**（名字长度不变、偏移不变、不重新压缩任何条目），校验通过才能出包。
 
 依赖 JDK 17 与 Android SDK（build-tools 34 / platform 34）。脚本优先读取环境变量 `JAVA_HOME` 与 `ANDROID_SDK_ROOT`；未设置时回退到本机路径 `D:\AndroidBuild\jdk\jdk-17*` 与 `D:\AndroidBuild\sdk`，换机器时改脚本顶部或设环境变量即可。
 注意：aapt2 对含中文的绝对路径不友好，脚本因此 `Set-Location` 到工程目录并用相对路径。
