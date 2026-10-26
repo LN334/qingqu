@@ -172,6 +172,8 @@ async function enterShell(me) {
   renderSiteSelect();
   renderUser();
   wireShell();
+  state.lastTelemetryAt = null;
+  startClock();
   connectLive();
   await refreshBadges();
   loadNotifications();
@@ -378,11 +380,35 @@ function updateGateway() {
 }
 
 function updateLastUpdated() {
-  const t = state.lastTelemetryAt || Date.now();
-  const d = new Date(t);
-  const text = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+  state.lastTelemetryAt = state.lastTelemetryAt || Date.now();
   const node = $('#last-updated-text');
-  if (node) node.textContent = `实时 ${text}`;
+  if (node) {
+    const d = new Date(state.lastTelemetryAt);
+    const text = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+    node.title = `最近一次数据：${text}`;
+  }
+}
+
+/* 顶栏时钟：每秒走一次；旁边圆点表示实时通道状态 */
+let clockTimer = null;
+function startClock() {
+  if (clockTimer) clearInterval(clockTimer);
+  const tick = () => {
+    const node = $('#last-updated-text');
+    if (!node) return;
+    const d = new Date();
+    const text = [d.getHours(), d.getMinutes(), d.getSeconds()]
+      .map((n) => String(n).padStart(2, '0'))
+      .join(':');
+    const online = state.wsState === 'online';
+    node.textContent = `${online ? '实时' : '离线'} ${text}`;
+    if (state.lastTelemetryAt) {
+      const ago = Math.max(0, Math.round((Date.now() - state.lastTelemetryAt) / 1000));
+      node.title = `最近一次数据 ${ago} 秒前`;
+    }
+  };
+  tick();
+  clockTimer = setInterval(tick, 1000);
 }
 
 /* ---------------- 徽标与通知 ---------------- */
@@ -509,7 +535,6 @@ function wireShell() {
   });
 
   $('#menu-password').addEventListener('click', () => { menu.hidden = true; openPasswordModal(); });
-  $('#menu-mobile').addEventListener('click', () => { menu.hidden = true; location.hash = '#/mobile'; });
   $('#menu-logout').addEventListener('click', async () => {
     menu.hidden = true;
     const yes = await ui.confirm({ title: '退出登录', message: '退出后需要重新输入账号密码。', confirmText: '退出' });
@@ -517,6 +542,7 @@ function wireShell() {
     try { await api.logout(); } catch {}
     cleanupPage();
     if (live) { live.close(); live = null; }
+    if (clockTimer) { clearInterval(clockTimer); clockTimer = null; }
     state.user = null;
     location.hash = '';
     showLogin('已退出登录');

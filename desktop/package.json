@@ -1,6 +1,6 @@
 {
   "name": "zhifu-water-desktop",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "private": true,
   "description": "智赋乡水 · 智慧水处理平台 桌面端",
   "main": "main.js",
