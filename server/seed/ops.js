@@ -383,10 +383,10 @@ function seedOps(now, assets) {
 
   /* ---------------- 系统设置 ---------------- */
   const settings = {
-    platformName: '智赋乡水 · 智慧水处理平台',
-    shortName: '智赋乡水',
-    orgName: '智赋乡水（示范项目组）',
-    version: '1.0.0',
+    platformName: '清渠 · 村镇水处理站智能运维平台',
+    shortName: '清渠',
+    orgName: '清渠（示范项目组）',
+    version: '2.0.6',
     docVersion: 'V2.2',
     demoMode: true,
     dataRetentionDays: 7,
@@ -396,7 +396,7 @@ function seedOps(now, assets) {
     offlineCacheMinutes: 30,
     quietHours: { enabled: false, start: '22:00', end: '07:00' },
     backup: { lastAt: iso(now - 26 * H), auto: false, keepDays: 7 },
-    notice: '演示数据由内置模拟网关生成；标注「待接入」「人工化验」「选配」的数据不冒充在线实时值。',
+    notice: '数据由内置模拟网关生成；标注「待接入」「人工化验」的项不是在线实时值。',
     dataSources: {
       gateway: '内置模拟网关（MQTT/Modbus 抽象）',
       lab: '人工化验录入',
