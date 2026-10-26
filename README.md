@@ -21,6 +21,7 @@ v2 起提供两个**原生 App**，装完即用：
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
 | Windows 桌面版 | [`Qingqu-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Setup-2.0.6.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
+| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Kiosk-Setup-2.0.6.exe)（约 49 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
 | 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.6/zhifu-water-mobile.apk)（约 155 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
@@ -93,7 +94,7 @@ Web 端与桌面端同为 2.0.6：品牌、浅色水务蓝界面、数据模型�
 | 系统管理 | 用户/角色/设置/通知通道/审计日志/备份与恢复 |
 | 权限与数据范围 | 6 角色 × 功能权限，站点范围双重校验；业务层拒绝越权（界面只做展示层禁用） |
 | 安卓 App | 原生 5 Tab（总览 / 告警 / 工单 / 巡检 / 我的），本机 SQLite + 5 秒实时引擎，可离线；也可连服务器 |
-| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；用 `Qingqu.exe --kiosk` 启动：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
+| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；由单独的 `Qingqu-Kiosk-Setup-2.0.6.exe` 安装，开机自启：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
 | 多端同源 | 桌面端与安卓端共用同一套业务规则与数据模型（桌面 C# Core、安卓 LocalCore 各自移植），Web 端可作为服务端 |
 
 ---
@@ -136,8 +137,10 @@ zhifu-water-platform/
 ├── native/                   桌面端（C# / .NET 8）
 │   ├── ZhifuWater.Core/      业务层：存储、登录、遥测、模拟引擎、告警、命令、工单、报表
 │   ├── ZhifuWater.Core.Tests/ 业务层自测（174 断言）
-│   ├── ZhifuWater.Desktop/   WPF 界面：14 个页面 + 触摸屏独立窗口（--kiosk）
-│   ├── installer/setup.nsi   NSIS 安装包脚本
+│   ├── ZhifuWater.Desktop/   WPF 界面：14 个页面
+│   ├── ZhifuWater.Kiosk/     现场触摸屏独立入口（全屏、自动登录、开机自启）
+│   ├── installer/setup.nsi   桌面安装包脚本
+│   ├── installer/kiosk.nsi   现场触摸屏安装包脚本
 │   └── seed/db.json          首次启动的种子数据
 ├── android/                  安卓端（Java，手工打包，无 Gradle）
 │   ├── src/                  Activity / 页面 / LocalDb / LocalEngine / LocalApi
