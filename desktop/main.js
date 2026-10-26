@@ -27,10 +27,32 @@ const shotPath = argOf('screenshot');
 const isKiosk = process.argv.includes('--kiosk');
 const isSmoke = process.argv.includes('--smoke');
 
+// 兼容性优先：默认关闭硬件加速。
+// 现场不少老旧/双显卡笔记本在 Electron 的 GPU 合成下会出现「窗口全黑、只剩任务栏」，
+// 关掉后走软件渲染，界面是 2D 仪表盘，性能完全够用。
+// 需要 GPU 的用户可以加 --enable-gpu 或设环境变量 ZF_GPU=1。
+const wantGpu = process.argv.includes('--enable-gpu') || process.env.ZF_GPU === '1';
+const gpuDisabled = !wantGpu;
+if (gpuDisabled) app.disableHardwareAcceleration();
+
 let child = null;
 let mainWindow = null;
 let serverPort = 0;
 let quitting = false;
+
+function writeStartupLog(line) {
+  try {
+    const dir = logDir();
+    fs.mkdirSync(dir, { recursive: true });
+    fs.appendFileSync(
+      path.join(dir, 'startup.log'),
+      `[${new Date().toISOString()}] ${line}\n`,
+      'utf8'
+    );
+  } catch {
+    /* 日志失败不影响启动 */
+  }
+}
 
 
 function appRoot() {
@@ -151,6 +173,16 @@ function buildMenu() {
             shell.openPath(logDir());
           },
         },
+        {
+          label: '以兼容模式重启（窗口黑屏时用）',
+          click: () => {
+            const args = process.argv.slice(1).filter((a) => a !== '--safe-mode' && a !== '--enable-gpu');
+            args.push('--safe-mode');
+            app.relaunch({ args });
+            stopServer();
+            app.exit(0);
+          },
+        },
         { type: 'separator' },
         { role: 'quit', label: '退出' },
       ],
@@ -231,10 +263,38 @@ async function createWindow() {
     },
   });
 
+  // 先挂 ready-to-show 再导航，避免错过事件导致窗口一直不显示
+  mainWindow.once('ready-to-show', () => {
+    mainWindow.show();
+    writeStartupLog('窗口已显示');
+  });
+
+  mainWindow.webContents.on('did-fail-load', (_e, code, desc, url) => {
+    writeStartupLog(`页面加载失败 code=${code} ${desc} ${url}`);
+    dialog.showErrorBox(
+      '界面加载失败',
+      `无法打开平台界面（code=${code}）。\n请查看日志：${path.join(logDir(), 'startup.log')}`
+    );
+  });
+
+  // 渲染进程崩溃（表现为白屏/黑屏）时自动以兼容模式重启一次
+  mainWindow.webContents.on('render-process-gone', (_e, details) => {
+    writeStartupLog(`渲染进程退出 reason=${details.reason} exitCode=${details.exitCode}`);
+    if (process.argv.includes('--safe-mode')) return;
+    try {
+      const args = process.argv.slice(1).filter((a) => a !== '--enable-gpu');
+      args.push('--safe-mode');
+      app.relaunch({ args });
+      stopServer();
+      app.exit(0);
+    } catch {
+      /* 重启失败则保持原状 */
+    }
+  });
+
   const route = isKiosk ? 'kiosk' : 'dashboard';
   await mainWindow.loadURL(`http://127.0.0.1:${port}/#/${route}`);
   if (isKiosk) mainWindow.setFullScreen(true);
-  mainWindow.once('ready-to-show', () => mainWindow.show());
 
   if (shotPath) {
     mainWindow.show();
@@ -273,6 +333,15 @@ if (!gotLock) {
 
   app.whenReady().then(async () => {
     app.setAppUserModelId('com.ln334.zhifuwater');
+    writeStartupLog(
+      `启动 version=${app.getVersion()} gpu=${gpuDisabled ? 'disabled(兼容模式)' : 'enabled'} ` +
+        `argv=${JSON.stringify(process.argv.slice(1))} electron=${process.versions.electron}`
+    );
+    try {
+      writeStartupLog(`GPU 状态 ${JSON.stringify(app.getGPUFeatureStatus())}`);
+    } catch {
+      /* 某些机器拿不到 GPU 状态 */
+    }
     buildMenu();
     await createWindow();
     app.on('activate', () => {
