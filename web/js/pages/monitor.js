@@ -220,7 +220,7 @@ export async function render(root, ctx) {
   const curveHost = ui.el('div', { class: 'mon-curve-wrap' });
   page.appendChild(curveHost);
   const foot = ui.el('div', { class: 'mon-foot' },
-    ui.el('span', { class: 'muted small' }, '数据来源：内置模拟网关 · 在线判定：90 秒内有数据 · 图纸未布设仪表的单元标注「待接入」'),
+    ui.el('span', { class: 'muted small' }, '数据来源：模拟网关 · 90 秒无新数据判为超时'),
     ui.el('span', { class: 'mono small', 'data-role': 'updated' }, '等待刷新…'),
   );
   page.appendChild(foot);
@@ -495,7 +495,7 @@ export async function render(root, ctx) {
 
     const card = ui.card({
       title: '24 小时曲线',
-      sub: '历史数据来自内置模拟网关（30 分钟聚合）；同图叠加仅用于趋势对比，单位见点位标签',
+      sub: '30 分钟聚合',
       actions: headActions,
       body: ui.el('div', {},
         selectedBox,

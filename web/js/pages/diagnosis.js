@@ -142,14 +142,12 @@ function paint(ctx, host, data) {
   ];
   const healthCard = ui.card({
     title: '数据健康摘要',
-    sub: '诊断所依赖的在线点位状态（在线仪表通道）',
     body: ui.el('div', { class: 'stack' },
       health.total
         ? null
         : ui.notice('当前无在线点位数据：平台尚未接入在线仪表，或当前站点未配置在线点位，诊断与关联曲线暂不可用。', 'warn'),
       ui.kvRows(healthRows),
     ),
-    foot: ui.el('span', { class: 'tiny muted' }, '在线通道仅覆盖 pH、DO、液位、流量、压力、功率与累计量；COD / 氨氮 / 总氮 / 总磷 / SS 为人工化验，不参与实时诊断。'),
   });
 
   /* ---------------- 诊断卡片 ---------------- */

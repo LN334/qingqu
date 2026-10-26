@@ -148,7 +148,7 @@ function paint(ctx, host, data, opts) {
       value: value === null ? '—' : ui.fmt.num(value, DIGITS[key]),
       unit: 'mg/L',
       tone,
-      hint: `一级A限值 ${limits[key]} mg/L；数据来自人工取样化验，非在线实时值`,
+      hint: `一级A限值 ${limits[key]} mg/L`,
       delta,
     });
   });
@@ -171,13 +171,6 @@ function paint(ctx, host, data, opts) {
   }));
 
   const kpiGrid = ui.el('div', { class: 'grid cols-4' }, kpiCards);
-
-  const sourceNotice = ui.notice(
-    '数据来源说明：COD、氨氮、总氮、总磷、悬浮物（SS）为人工取样化验数据（人工/化验通道）；'
-    + '在线仪表通道仅有 pH、DO、液位、流量、压力、功率与累计量。页面不将化验值渲染为「在线实时值」。'
-    + '限值参考 GB 18918-2002《城镇污水处理厂污染物排放标准》一级 A 标准。',
-    'warn',
-  );
 
   /* ---------------- 趋势卡：指标切换 + 限值参考线 ---------------- */
   const trendHost = ui.el('div', { class: 'chart q-trend' });
@@ -239,13 +232,12 @@ function paint(ctx, host, data, opts) {
 
   drawTabs();
 
-  const trendSub = `近 30 天 · 进水 ${pointName(ctx, 'inlet')} / 出水 ${pointName(ctx, 'outlet')} · 虚线为一级A限值参考`;
+  const trendSub = `近 30 天 · ${pointName(ctx, 'inlet')} / ${pointName(ctx, 'outlet')} · 虚线为一级A限值`;
   const trendCard = ui.card({
     title: '水质趋势（人工化验）',
     sub: trendSub,
     actions: tabHost,
     body: trendHost,
-    foot: ui.el('span', { class: 'tiny muted' }, `参考标准：GB 18918-2002 一级 A（COD ${limits.COD}、氨氮 ${limits.NH3N}、总氮 ${limits.TN}、总磷 ${limits.TP}、SS ${limits.SS} mg/L）`),
   });
 
   /* ---------------- 去除率 + 达标率 ---------------- */
@@ -344,7 +336,7 @@ function paint(ctx, host, data, opts) {
     countLabel.appendChild(ui.el('span', { class: 'badge warn' }, '存在待复核记录'));
   }
 
-  ui.mount(host, kpiGrid, sourceNotice, trendCard, removalCard, tableCard);
+  ui.mount(host, kpiGrid, trendCard, removalCard, tableCard);
   drawTrend();
 }
 
@@ -551,7 +543,6 @@ function openDetail(ctx, row, opts, focusReview) {
       flush: true,
     }),
     ui.el('p', { class: 'tiny muted' }, `检测方法：${row.method || '—'}`),
-    ui.el('p', { class: 'tiny muted' }, '说明：本记录为人工取样化验数据（人工/化验通道），不是在线仪表实时值；在线仪表仅覆盖 pH、DO、液位、流量等。'),
   );
 
   let reviewBox = null;

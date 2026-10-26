@@ -411,7 +411,7 @@ export async function render(root, ctx) {
 
     parts.push(ui.card({
       title: '提交',
-      sub: '提交后不可修改；若存在异常项，系统会同步生成待接单工单',
+      sub: '提交后不可修改；异常项自动建单',
       body: ui.el('div', { class: 'form-grid one' },
         ui.field('巡检小结', summary),
         ui.el('div', { class: 'row' }, ui.el('span', { class: 'spacer' }), submitBtn),

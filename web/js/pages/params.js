@@ -459,7 +459,7 @@ export async function render(root, ctx) {
       }),
       ui.card({
         title: '版本历史',
-        sub: '每次生效变更生成新版本；回滚会生成一个指向旧值的新版本',
+        sub: '每次生效变更生成新版本',
         flush: true,
         body: versions.length
           ? ui.table({

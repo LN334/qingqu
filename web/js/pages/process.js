@@ -30,7 +30,7 @@ const UNIT_STATUS_TEXT = {
 };
 
 /* 11 单元在画布上的位置：蛇形三行 */
-const CANVAS = { w: 1400, h: 560, boxW: 290, boxH: 118, xs: [40, 370, 700, 1030], ys: [40, 210, 380] };
+const CANVAS = { w: 1400, h: 560, boxW: 290, boxH: 128, xs: [40, 370, 700, 1030], ys: [40, 210, 380] };
 const POS = {
   raw: [0, 0], grit: [1, 0], primary: [2, 0], dist1: [3, 0],
   baf: [3, 1], pac: [2, 1], pam: [1, 1], dist2: [0, 1],
@@ -70,7 +70,8 @@ function readingText(reading, digits = 1) {
     if (/\.RUN$/.test(code)) return raw ? '运行' : '停止';
     return raw ? '运行' : '停止';
   }
-  const text = reading.type === 'counter' ? ui.fmt.int(raw) : ui.fmt.num(raw, digits);
+  const digitsUsed = reading.type === 'counter' ? 0 : (Math.abs(raw) < 1 ? 2 : digits);
+  const text = reading.type === 'counter' ? ui.fmt.int(raw) : ui.fmt.num(raw, digitsUsed);
   return reading.unit ? `${text} ${reading.unit}` : text;
 }
 
@@ -183,7 +184,7 @@ export async function render(root, ctx) {
   page.appendChild(interlockCard());
 
   const foot = ui.el('div', { class: 'proc-foot' },
-    ui.el('span', { class: 'muted small' }, '数据来源：内置模拟网关（MQTT/Modbus 抽象）· 人工化验不参与本页实时值 · 缺失仪表单元按方案标注'),
+    ui.el('span', { class: 'muted small' }, '数据来源：模拟网关'),
     ui.el('span', { class: 'mono small', 'data-role': 'updated' }, '等待首次刷新…'),
   );
   page.appendChild(foot);
@@ -321,11 +322,9 @@ export async function render(root, ctx) {
       ui.el('span', { class: 'legend-item' }, ui.dot('bad'), '告警'),
       ui.el('span', { class: 'legend-item' }, ui.dot('muted'), '无在线仪表 / 离线'),
       ui.el('span', { class: 'legend-item muted' }, '虚线：反冲洗废水或非主流程'),
-      ui.el('span', { class: 'legend-item muted' }, '点击单元查看设备、点位、告警与联锁'),
     );
     return ui.card({
       title: '动态工艺图',
-      sub: process.meta && process.meta.note ? process.meta.note : '',
       actions: ui.el('button', { class: 'btn ghost sm', type: 'button', onclick: () => ctx.refresh() }, ui.icon('refresh'), '重绘'),
       body: ui.el('div', {}, wrap, legend),
       flush: true,
@@ -449,7 +448,7 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '反冲洗状态',
-      sub: '阶段时长：气冲 30s → 气水联合 90s → 漂洗 45s；开始/中止请在远程控制页操作',
+      sub: '气冲 30s → 气水联合 90s → 漂洗 45s',
       actions: ctx.user && ctx.user.perms && ctx.user.perms.includes('control')
         ? ui.el('a', { class: 'btn ghost sm', href: '#/control' }, '远程控制')
         : ui.badge('无控制权限', 'muted', '仅展示反冲洗阶段'),
@@ -481,7 +480,7 @@ export async function render(root, ctx) {
         ref.note.textContent = `进行中：${phase.name} · 已进行 ${Math.round(elapsed)}s / 预计 ${phase.sec}s（按本页观察计时，打开页面前的进度未计入）`;
       } else {
         ref.bar.style.width = '0%';
-        ref.note.textContent = '空闲：当前没有进行中的反冲洗；阶段时长按方案设置，进度按本页观察估算。';
+        ref.note.textContent = '空闲';
       }
     });
   }
@@ -530,7 +529,6 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '单元卡片',
-      sub: '按工艺顺序列出 11 个单元；状态与关键读数与上方工艺图联动刷新',
       body: grid,
       flush: true,
       class: 'unit-cards',
@@ -620,7 +618,6 @@ export async function render(root, ctx) {
     );
     return ui.card({
       title: '联锁说明',
-      sub: '按方案设定的三条工艺联锁 + 反冲洗压力提示；判定随实时值刷新',
       actions: ui.badge('只读判定', 'muted'),
       body,
       class: 'interlock-card',
@@ -716,7 +713,7 @@ export async function render(root, ctx) {
 
     ui.drawer({
       title: unit.name,
-      sub: `单元 ${unit.code} · ${UNIT_STATUS_TEXT[unit.status] || unit.status} · 数据来自内置模拟网关`,
+      sub: `单元 ${unit.code} · ${UNIT_STATUS_TEXT[unit.status] || unit.status}`,
       body,
     });
   }
