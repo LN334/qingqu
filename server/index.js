@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 /**
  * 智赋乡水 · 智慧水处理平台 —— 服务入口。
  * 零第三方依赖：Node 内置 http + 静态资源 + WebSocket + JSON 文件存储 + 内置模拟网关。
@@ -81,7 +81,7 @@ const app = {
   telemetry,
   hub,
   log: logger,
-  version: '1.0.0',
+  version: '1.0.3',
 };
 Object.defineProperty(app, 'db', { get: () => store.data, enumerable: true });
 

@@ -209,13 +209,11 @@ export async function render(root, ctx) {
     [0, 1, 2, 3, 4, 5].map(() => el('div', { class: 'k-card k-card-skeleton' }, ui.skeleton(2, 'block'))),
   );
 
-  const chainNote = el('span', { class: 'k-sec-note' }, '数据来源：内置模拟网关（SIM-GW）');
   const chainHost = el('div', { class: 'k-chain', role: 'list' }, ui.skeleton(2, 'block'));
   const chainCard = el('section', { class: 'k-panel k-chain-panel' },
     el('div', { class: 'k-sec-head' },
       el('h2', {}, '工艺流程（11 单元）'),
-      el('span', { class: 'k-sec-hint' }, '点击单元查看读数、设备与告警'),
-      chainNote,
+      el('span', { class: 'k-sec-hint' }, '点击查看详情'),
     ),
     chainHost,
   );
@@ -237,24 +235,20 @@ export async function render(root, ctx) {
   const bwStateNode = el('span', { class: 'k-bw-state' }, '反冲洗状态：—');
   const commandNode = el('div', { class: 'k-command' }, el('span', { class: 'muted' }, '最近命令：—'));
   const actionPanel = el('section', { class: 'k-panel k-action-panel', 'aria-label': '快捷操作' },
-    el('div', { class: 'k-sec-head' },
-      el('h2', {}, '快捷操作'),
-      el('span', { class: 'k-sec-hint' }, '仅两项安全动作'),
-    ),
+    el('div', { class: 'k-sec-head' }, el('h2', {}, '快捷操作')),
     bwStateNode,
     el('div', { class: 'k-action-btns' }, bwBtn, refreshBtn),
     commandNode,
-    el('p', { class: 'k-foot-note' }, '全部命令仅作用于本机模拟网关（SIM-GW），不会下发至真实 PLC 或现场设备；操作理由自动记为「现场触摸屏快捷操作」。'),
     canControl ? null : el('div', { class: 'k-inline-note warn' }, '当前账号没有控制权限（control），快捷操作已禁用。'),
   );
 
-  const sourcesNode = el('span', {}, '数据来源：内置模拟网关（SIM-GW）');
+  const sourcesNode = el('span', {}, '模拟网关');
   const footer = el('footer', { class: 'k-foot' },
     sourcesNode,
     el('span', { class: 'k-foot-sep' }, '·'),
-    el('span', {}, '自动刷新：5 秒；支持 ctx.subscribe(telemetry) 即时推送'),
+    el('span', {}, '5 秒自动刷新'),
     el('span', { class: 'k-foot-sep' }, '·'),
-    el('span', {}, '目标分辨率 1920×1080 / 兼容 1366×768'),
+    el('span', {}, '1920×1080'),
   );
 
   const main = el('main', { class: 'k-main' }, cardsHost, chainCard,
@@ -554,10 +548,10 @@ export async function render(root, ctx) {
           : ui.empty('该单元无未关闭告警', '当前该单元所有点位均在规则区间内。', 'alarm'),
       ),
       el('div', { class: 'k-drawer-foot' },
-        `${procUnit.name || unit.name} · 数据来源：内置模拟网关（SIM-GW）· 最后更新：${fmt.timeSec(timeOf((readings[0] || {})) || state.at)}`,
+        `${procUnit.name || unit.name} · 更新 ${fmt.timeSec(timeOf((readings[0] || {})) || state.at)}`,
       ),
     );
-    ctx.drawer({ title: unit.name || unit.short || unit.code, sub: '单元实时读数、设备与告警', body });
+    ctx.drawer({ title: unit.name || unit.short || unit.code, body });
   }
 
   /* ---------- 告警区 ---------- */

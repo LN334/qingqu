@@ -153,7 +153,7 @@ export async function render(root, ctx) {
       kpiBox,
       ui.card({
         title: '筛选',
-        sub: '按状态、类型、优先级与关键字过滤；点击任意行查看工单详情',
+        sub: '点击任意行查看详情',
         body: toolbar,
         class: 'wo-filter',
       }),

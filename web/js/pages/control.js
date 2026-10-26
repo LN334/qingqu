@@ -63,21 +63,17 @@ export async function render(root, ctx) {
       `按工艺单元下发控制命令，全部命令仅作用于本机模拟网关。站点：${ctx.site ? ctx.site.name : ctx.siteId}。`,
       el('div', { class: 'row' }, updatedLabel, refreshBtn),
     ),
-    ui.notice(
-      '所有命令仅作用于本机模拟网关（SIM-GW），不会下发至真实 PLC 或现场设备；每条命令记录操作人、操作理由与完整状态时间线，写入审计日志。',
-      'warn',
-    ),
     canControl ? null : ui.notice('当前角色无云端控制权限', 'bad'),
     statsHost,
     ui.card({
       title: '控制动作面板',
-      sub: '点击「执行」填写操作理由并确认影响；高风险动作提交后需二次确认，联锁不满足时命令会直接失败并给出原因',
+      sub: '高风险动作需二次确认',
       actions: el('span', { class: `badge ${canControl ? 'good' : 'muted'}` }, canControl ? '可下发命令' : '只读'),
       body: actionsHost,
     }),
     ui.card({
       title: '命令记录',
-      sub: '状态机：待确认 → 待下发 → 已下发 → 执行中 → 成功 / 失败；下发 30 秒无回执记为超时；仅前两态可取消',
+      sub: '下发 30 秒无回执记为超时',
       actions: legendHost,
       flush: true,
       body: el('div', { class: 'cmd-body' }, cmdTableHost, pagerHost),

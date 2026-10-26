@@ -111,6 +111,15 @@ function showLogin(message) {
   if (message) { err.textContent = message; err.hidden = false; } else { err.hidden = true; }
   const saved = localStorage.getItem('zf.username');
   if (saved) $('#login-username').value = saved;
+  const toggle = $('#login-demo-toggle');
+  if (toggle && !toggle.dataset.bound) {
+    toggle.dataset.bound = '1';
+    toggle.addEventListener('click', () => {
+      const list = $('#demo-accounts');
+      list.hidden = !list.hidden;
+      toggle.textContent = list.hidden ? '演示账号' : '收起演示账号';
+    });
+  }
   setTimeout(() => $('#login-username').focus(), 50);
 }
 
@@ -135,7 +144,7 @@ async function onLoginSubmit(e) {
     err.hidden = false;
   } finally {
     btn.disabled = false;
-    btn.textContent = '进入平台';
+    btn.textContent = '登录';
   }
 }
 

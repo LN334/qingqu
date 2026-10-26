@@ -25,10 +25,7 @@ const hasPerm = (ctx, key) => ((ctx.user && ctx.user.perms) || []).includes(key)
 function guardBody(title, perm) {
   return ui.card({
     title,
-    body: ui.el('div', { class: 'stack-sm' },
-      ui.notice(`当前账号没有「${title}」所需权限（${perm}），请联系平台管理员开通。`, 'warn'),
-      ui.el('p', { class: 'small muted' }, '平台采用基于角色的功能权限 + 站点数据范围双重控制；本页签其他内容不受影响。'),
-    ),
+    body: ui.notice(`当前账号没有「${title}」所需权限（${perm}），请联系平台管理员开通。`, 'warn'),
   });
 }
 
@@ -333,7 +330,7 @@ export async function render(root, ctx) {
     ui.mount(bodyBox, ui.el('div', { class: 'stack' },
       ui.card({
         title: '角色与权限矩阵',
-        sub: '只读展示：功能权限按角色分配，数据范围由站点归属决定',
+        sub: '功能权限按角色分配，数据范围按站点',
         body: matrix,
         flush: false,
       }),
@@ -352,7 +349,6 @@ export async function render(root, ctx) {
           })),
         ))),
       }),
-      ui.notice('角色由平台预置，暂不支持页面内修改；如需调整账号角色，请在「用户」页签编辑。'),
     ));
   }
 
@@ -487,7 +483,7 @@ export async function render(root, ctx) {
 
     ui.mount(bodyBox, ui.card({
       title: '通知通道',
-      sub: '告警与工单通知的分发渠道，修改后即时生效；测试发送会写入审计日志',
+      sub: '修改后即时生效',
       body: channels.length ? ui.table({
         columns: [
           {
@@ -607,7 +603,7 @@ export async function render(root, ctx) {
 
     ui.mount(bodyBox, ui.card({
       title: '审计日志',
-      sub: '所有写操作均记录操作人、对象、结果与来源 IP；日志不可修改',
+      sub: '日志不可修改',
       body: ui.el('div', { class: 'stack-sm' },
         ui.el('div', { class: 'toolbar audit-toolbar' },
           actionSel,

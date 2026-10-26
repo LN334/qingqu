@@ -41,7 +41,6 @@ export async function render(root, ctx) {
   ui.mount(root, ui.el('div', { class: 'p-mobile' },
     ui.el('div', { class: 'mobile-frame' },
       ui.el('div', { class: 'mobile-preview-tip' },
-        ui.el('span', {}, '手机端预览 · 桌面宽度下按 430px 手机容器居中显示'),
         ui.el('button', {
           class: 'btn sm ghost', type: 'button',
           onclick: () => ctx.go('#/dashboard'),

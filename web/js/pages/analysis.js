@@ -291,21 +291,18 @@ function build(ctx, data, days) {
   const charts = ui.el('div', { class: 'grid cols-3' },
     ui.card({
       title: '逐日处理水量',
-      sub: waterAvailable ? '进水流量积分（在线仪表通道）' : '待接入',
+      sub: waterAvailable ? '进水流量积分' : '待接入',
       body: waterAvailable ? waterChart : ui.empty('处理水量待接入', '进水流量计未接入或无有效数据，不做估算', 'monitor'),
-      foot: ui.el('span', { class: 'tiny muted' }, `流量按小时桶积分；30 天窗口使用 6 小时聚合桶。${cover}`),
     }),
     ui.card({
       title: '逐日能耗',
-      sub: '装置累计用电量差值（在线电表）',
+      sub: '累计用电量差值',
       body: energyChart,
-      foot: ui.el('span', { class: 'tiny muted' }, `电费合计 ${ui.fmt.money(cost.electricity || 0)}，按 ${price.electricity} 元/kWh 演示电价折算。${cover}`),
     }),
     ui.card({
       title: '逐日药剂投加',
       sub: 'PAC / PAM 累计投加量差值',
       body: chemChart,
-      foot: ui.el('span', { class: 'tiny muted' }, `PAC 合计 ${numOrDash(pac.total, 1)} L，PAM 合计 ${numOrDash(pam.total, 1)} L（累计量差值口径）。${cover}`),
     }),
   );
 
@@ -318,21 +315,18 @@ function build(ctx, data, days) {
   const charts2 = ui.el('div', { class: 'grid cols-3' },
     ui.card({
       title: '成本构成',
-      sub: '电费与药剂费（演示单价）',
+      sub: '电费与药剂费',
       body: costItems.length ? costChart : ui.empty('暂无成本数据', '窗口内没有能耗或药剂消耗'),
-      foot: ui.el('span', { class: 'tiny muted' }, `吨水成本 ${numOrDash(cost.perM3, 2)} 元/m³。`),
     }),
     ui.card({
       title: '告警按日',
-      sub: `窗口内共 ${alarms.total || 0} 次告警`,
+      sub: `共 ${alarms.total || 0} 次`,
       body: alarmChart,
-      foot: ui.el('span', { class: 'tiny muted' }, `未恢复 ${alarms.unresolved || 0} 条；告警数据来自告警中心。`),
     }),
     ui.card({
       title: '设备健康分布',
       sub: `在线率 ${numOrDash(availability.dataRate, 1)}% · 平均健康度 ${numOrDash(availability.deviceHealth, 1)}%`,
       body: healthChart,
-      foot: ui.el('span', { class: 'tiny muted' }, '运行时长与保养信息来自设备台账（PLC 累计量）。'),
     }),
   );
 
@@ -415,35 +409,14 @@ function build(ctx, data, days) {
 
   const unitCard = ui.card({
     title: '单元效率',
-    sub: `${(units.items || []).length} 个处理单元 · 告警与设备健康来自当前站点台账`,
     body: ui.el('div', { class: 'a-unit-wrap' }, unitTable),
     foot: ui.el('div', { class: 'row wrap' },
       ui.el('span', { class: 'tiny muted' }, `设备 ${(eff.devices || []).length} 台 · 运行率 ${numOrDash(eff.uptime, 1)}% · 待保养 ${eff.maintDue || 0} 台`),
-      ui.el('span', { class: 'spacer' }),
-      ui.el('span', { class: 'tiny muted' }, (eff.utilization && eff.utilization.note) || '设备运行时长来自 PLC 累计量，启停次数来自运行状态跳变计数。'),
     ),
-  });
-
-  /* ---------------- 口径说明 ---------------- */
-  const notes = Array.isArray(summary.notes) ? summary.notes.slice() : [];
-  const footNote = ui.el('ul', { class: 'a-notes' },
-    ...notes.map(n => ui.el('li', {}, n)),
-    ui.el('li', {}, '电价、药剂单价为演示假设值，仅用于趋势对比，不作为结算依据。'),
-    ui.el('li', {}, '在线仪表通道仅覆盖流量、液位、pH、DO、压力、功率与累计量；COD、氨氮、总氮、总磷、SS 为人工化验数据，存在取样周期，不代表实时水质。'),
-    ui.el('li', {}, '历史遥测保留 7 天，30 天窗口的逐日趋势仅覆盖存在落库数据的日期；缺失日期不插值、不估算。'),
-  );
-  const noteCard = ui.card({
-    title: '口径说明',
-    sub: '关于水量、能耗、药耗与成本的取数方式',
-    body: ui.el('div', { class: 'stack' },
-      waterAvailable ? null : ui.notice('进水管路未安装流量计（或数据未接入），处理水量与吨水类指标标记为「待接入」，不进行估算。', 'warn'),
-      footNote,
-    ),
-    foot: ui.el('span', { class: 'tiny muted' }, `统计窗口 ${ui.fmt.dateTime(summary.from)} 至 ${ui.fmt.dateTime(summary.to)}，共 ${agg.days.length} 个自然日。`),
   });
 
   return {
-    nodes: [kpis, charts, charts2, unitCard, noteCard],
+    nodes: [kpis, charts, charts2, unitCard],
     draw() {
       if (waterAvailable) {
         if (!agg.waterPts.length) {

@@ -142,18 +142,18 @@ export async function render(root, ctx) {
     el('div', { class: 'overview-grid' },
       ui.card({
         title: '近 7 日告警趋势',
-        sub: '按日统计（含已恢复与已关闭），柱色表示当日最高等级',
+        sub: '按日统计',
         body: el('div', { class: 'stack tight' }, trendBox, trendFoot),
       }),
       ui.card({
         title: '活动告警构成',
-        sub: '未处理 + 已确认，按级别分布',
+        sub: '按级别分布',
         body: donutBox,
       }),
     ),
     ui.card({
       title: '告警处置',
-      sub: '处置动作写入审计日志；列表与统计每 30 秒自动刷新，收到实时事件时立即更新',
+      sub: '每 30 秒自动刷新',
       flush: true,
       body: el('div', { class: 'tabs-body' }, el('div', { class: 'tabs-pad' }, tabsHost), bodyHost),
     }),

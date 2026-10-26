@@ -228,7 +228,6 @@ export function pageHead(title, desc, actions) {
   return el('div', { class: 'page-head' },
     el('div', {},
       el('h2', { class: 'page-title' }, title),
-      desc ? el('p', { class: 'page-desc' }, desc) : null,
     ),
     actions ? el('div', { class: 'page-actions' }, actions) : null,
   );

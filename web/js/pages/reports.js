@@ -313,28 +313,10 @@ export async function render(root, ctx) {
 
   const listCard = ui.card({
     title: '报表列表',
-    sub: `共 ${count} 份报表 · 类型由服务端报表引擎生成`,
+    sub: `共 ${count} 份`,
     class: 'r-list',
     body: listBody,
-    foot: ui.el('div', { class: 'row wrap' },
-      ui.el('span', { class: 'tiny muted' }, Object.keys(types).map(k => `${types[k]}`).join(' / ')),
-      ui.el('span', { class: 'spacer' }),
-      ui.el('span', { class: 'tiny muted' }, canExport ? '查看、导出、删除均需 report.export 权限' : '当前账号仅可查看报表'),
-    ),
   });
 
-  const helpCard = ui.card({
-    title: '报表说明',
-    sub: '关于报表口径与权限',
-    body: ui.kvRows([
-      ['报表类型', Object.keys(types).map(k => types[k]).join('、')],
-      ['数据来源', '在线遥测（水量、能耗、药耗、告警、工单）+ 人工化验（COD、氨氮、总氮、总磷、SS）'],
-      ['生成方式', '服务端同步生成，生成后状态为「已生成」'],
-      ['导出格式', 'CSV（UTF-8 带 BOM，含运行概况、水质与去除率、化验记录、告警明细、工单明细五段）'],
-      ['权限', '生成 / 导出 / 删除均需 report.export 权限'],
-    ]),
-    foot: ui.el('span', { class: 'tiny muted' }, '报表内容为生成时刻的快照，不会随之后的数据变化自动更新。'),
-  });
-
-  ui.mount(page, head, listCard, helpCard);
+  ui.mount(page, head, listCard);
 }

@@ -85,7 +85,8 @@ function readingText(reading, digits = 1) {
     if (/\.RUN$/.test(code)) return raw ? '运行' : '停止';
     return raw ? '运行' : '停止';
   }
-  const text = reading.type === 'counter' ? ui.fmt.int(raw) : ui.fmt.num(raw, digits);
+  const digitsUsed = reading.type === 'counter' ? 0 : (Math.abs(raw) < 1 ? 2 : digits);
+  const text = reading.type === 'counter' ? ui.fmt.int(raw) : ui.fmt.num(raw, digitsUsed);
   return reading.unit ? `${text} ${reading.unit}` : text;
 }
 
@@ -257,8 +258,8 @@ export async function render(root, ctx) {
       ),
       ui.el('div', { class: 'site-fact' },
         ui.el('span', { class: 'fact-k' }, '数据来源'),
-        ui.el('span', { class: 'fact-v' }, '内置模拟网关 · 人工化验'),
-        ui.el('span', { class: 'fact-n' }, '外部接口（未接入）'),
+        ui.el('span', { class: 'fact-v' }, '模拟网关'),
+        ui.el('span', { class: 'fact-n' }, '外部接口'),
       ),
       ui.el('div', { class: 'site-fact' },
         ui.el('span', { class: 'fact-k' }, '最后更新'),
@@ -268,7 +269,6 @@ export async function render(root, ctx) {
     );
     const wrap = ui.el('div', {});
     wrap.appendChild(strip);
-    wrap.appendChild(ui.notice(ov.notice || '数据来源与口径见各指标说明。', ''));
     return wrap;
   }
 
@@ -311,7 +311,6 @@ export async function render(root, ctx) {
         value: ui.fmt.num(vol, 2),
         unit: 'm³',
         iconName: 'monitor',
-        delta: `口径：FLOW.IN 对时间积分（${volume.hint || '5 分钟粒度'}）`,
       }),
       ui.kpi({
         label: 'COD（人工化验）',
@@ -319,15 +318,13 @@ export async function render(root, ctx) {
         unit: 'mg/L',
         iconName: 'quality',
         delta: `进水 → 出水 · 去除率 ${isNum(removal.COD) ? ui.fmt.pct(removal.COD) : '—'} · 出水采样 ${ui.fmt.timeSec(latest.outlet && latest.outlet.sampledAt)}`,
-        hint: '人工化验结果，非在线仪表值；来源：总出水（清水池）',
       }),
       ui.kpi({
         label: '运行设备',
         value: `${running}/${devicesTotal || '—'}`,
         unit: '台',
         iconName: 'device',
-        delta: `口径：设备状态为“运行” / 全部设备 · 在线 ${onlineDevices} 台`,
-        hint: '泵、风机、搅拌器等运行状态设备；不包含仅在线的仪表',
+        delta: `在线 ${onlineDevices} 台`,
       }),
       ui.kpi({
         label: '点位在线率',
@@ -404,7 +401,6 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '工艺流程（11 单元）',
-      sub: '按方案第 3 章图纸顺序：原料罐 → 格栅池 → 初沉池 → 配水槽1 → BAF → PAC → PAM → 配水槽2 → 硫自养池 → 清水池；反冲洗废水进废水水箱',
       actions: ui.el('a', { class: 'btn ghost sm', href: '#/process' }, ui.icon('process'), '进入工艺监控'),
       body: strip,
       flush: true,
@@ -425,7 +421,6 @@ export async function render(root, ctx) {
     const foot = ui.el('div', { class: 'trend-foot' });
     const node = ui.card({
       title: '24 小时趋势',
-      sub: '数据来源：内置模拟网关遥测历史（30 分钟聚合）；阈值线来自当前启用的告警规则',
       actions,
       body: host,
       foot,
@@ -453,8 +448,8 @@ export async function render(root, ctx) {
 
     function ruleCaption(code) {
       const hit = (rules || []).filter((r) => r.pointCode === code && r.enabled !== false);
-      if (!hit.length) return '该指标当前无启用告警规则，不绘制阈值参考线。';
-      return '阈值参考线：' + hit.map((r) => `${r.id}「${r.threshold || r.name}」`).join('；');
+      if (!hit.length) return '';
+      return '阈值：' + hit.map((r) => r.threshold || r.name).join('；');
     }
 
     function statsText(metric, points) {
@@ -464,7 +459,7 @@ export async function render(root, ctx) {
       const max = Math.max(...values);
       const avg = values.reduce((a, b) => a + b, 0) / values.length;
       const unitText = metric.unit ? ` ${metric.unit}` : '';
-      return `近 24h：最小 ${ui.fmt.num(min, metric.digits)} · 平均 ${ui.fmt.num(avg, metric.digits)} · 最大 ${ui.fmt.num(max, metric.digits)}${unitText} · ${points.length} 个采样点 · 来源：内置模拟网关`;
+      return `近 24h：最小 ${ui.fmt.num(min, metric.digits)} · 平均 ${ui.fmt.num(avg, metric.digits)} · 最大 ${ui.fmt.num(max, metric.digits)}${unitText} · ${points.length} 个采样点`;
     }
 
     async function draw() {
@@ -523,7 +518,6 @@ export async function render(root, ctx) {
     }
     return ui.card({
       title: '智能诊断摘要',
-      sub: '基于当前实时值与告警规则推导，非预测模型；每条均给出依据链',
       actions: ui.el('a', { class: 'btn ghost sm', href: '#/diagnosis' }, '查看全部'),
       body: list,
       flush: true,
@@ -575,7 +569,7 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '待办工单',
-      sub: '未关闭工单（待接单 / 已接单 / 处理中 / 待验收）',
+      sub: '未关闭工单',
       actions: ui.el('a', { class: 'btn ghost sm', href: '#/workorders' }, '工单中心'),
       body: list,
       flush: true,
@@ -595,9 +589,8 @@ export async function render(root, ctx) {
       ['点位在线率', `${ui.fmt.num(health.pointsOnline, 0)}/${ui.fmt.num(health.pointsTotal, 0)} 个（${isNum(health.pointsTotal) && Number(health.pointsTotal) > 0 ? ui.fmt.pct((Number(health.pointsOnline) / Number(health.pointsTotal)) * 100) : '—'}）`],
       ['数据延迟', isNum(health.delaySec) ? `${health.delaySec} 秒` : '—'],
       ['最近数据时间', `${ui.fmt.timeSec(health.latestAt)}（${ui.fmt.ago(health.latestAt)}）`],
-      ['网关状态', health.gateway === 'connected' ? '已连接（内置模拟网关）' : '连接异常'],
-      ['缺失在线仪表', missing.length ? `${missing.join('、')}：图纸未布点，按方案不采信估算值` : '无'],
-      ['人工化验', '进出水 COD/氨氮等由化验室录入，非在线值'],
+      ['网关状态', health.gateway === 'connected' ? '已连接' : '连接异常'],
+      ['缺失在线仪表', missing.length ? `${missing.join('、')}：图纸未布点` : '无'],
     ];
     const list = ui.el('div', { class: 'health-list' });
     rows.forEach(([k, v]) => {
@@ -608,7 +601,6 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '数据健康',
-      sub: '在线率、数据时效与指标覆盖说明',
       body: list,
       class: 'mini-card',
     });
@@ -636,12 +628,8 @@ export async function render(root, ctx) {
     });
     return ui.card({
       title: '平台公告与通知',
-      sub: '系统公告、化验复核与命令执行提醒；未读通知在顶栏同步提示',
       actions: unread ? ui.badge(`${unread} 条未读`, 'warn') : ui.badge('全部已读', 'muted'),
-      body: ui.el('div', {},
-        ui.notice(ov.notice || '演示数据由内置模拟网关生成，人工化验与待接入指标不冒充在线实时值。', ''),
-        list,
-      ),
+      body: ui.el('div', {}, list),
       class: 'notice-card',
     });
   }
