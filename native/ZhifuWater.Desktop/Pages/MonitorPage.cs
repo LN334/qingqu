@@ -70,7 +70,7 @@ public sealed class MonitorPage : PageBase
         };
         chartHead.Children.Add(_hours);
 
-        _chart = new LineChart { Height = 268, NormalizePerSeries = false, ShowYLabels = true };
+        _chart = new LineChart { Height = 268, NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         _pointMeta = Kit.T("", 10.5, Pal.Muted2, wrap: TextWrapping.Wrap);
         var chartBody = new StackPanel();
         chartBody.Children.Add(_chart);

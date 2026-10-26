@@ -14,11 +14,11 @@ v2.0 起提供两个**可以直接安装运行的原生 App**：
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`Qingqu-Setup-2.0.5.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.5/Qingqu-Setup-2.0.5.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.5/zhifu-water-mobile.apk)（约 151 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置本机引擎，不填服务器就能用 |
+| Windows 桌面版 | [`Qingqu-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Setup-2.0.6.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用，无需另装 Node.js |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.6/zhifu-water-mobile.apk)（约 151 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置本机引擎，不填服务器就能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与 SHA256 见 [Releases · v2.0.5](https://github.com/LN334/qingqu/releases/tag/v2.0.5)。仓库不提交二进制产物（见 `.gitignore`），也可按「构建」章节自行打包。
+> 全部版本与 SHA256 见 [Releases · v2.0.6](https://github.com/LN334/qingqu/releases/tag/v2.0.6)。仓库不提交二进制产物（见 `.gitignore`），也可按「构建」章节自行打包。
 
 ---
 
@@ -26,7 +26,7 @@ v2.0 起提供两个**可以直接安装运行的原生 App**：
 
 ### 方式一：Windows 桌面版（推荐）
 
-1. 下载 `Qingqu-Setup-2.0.5.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
+1. 下载 `Qingqu-Setup-2.0.6.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
 2. 从桌面「清渠」启动。原生窗口，不需要浏览器、不需要 Node.js。
 3. 用演示账号登录；首次启动会把内置种子数据复制到 `%LOCALAPPDATA%\ZhifuWater\data\db.json`，之后的数据读写都在本机。
 
@@ -158,7 +158,7 @@ native\publish\Qingqu.exe --smoke
 
 # 安装包（NSIS）
 & "C:\Program Files (x86)\NSIS\makensis.exe" native\installer\setup.nsi
-# 产物：native/installer/Qingqu-Setup-2.0.5.exe
+# 产物：native/installer/Qingqu-Setup-2.0.6.exe
 ```
 
 ### 安卓端（需 JDK 17 + Android SDK build-tools/platform 34）
