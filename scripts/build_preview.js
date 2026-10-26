@@ -116,7 +116,7 @@ try { __req('app.js'); } catch (e) { console.error(e); document.body.insertAdjac
 
 /* ---------------- CSS 内联 ---------------- */
 
-const cssFiles = ['app.css', 'pages-dash.css', 'pages-control.css', 'pages-data.css', 'pages-ops.css', 'pages-kiosk.css'];
+const cssFiles = ['app.css', 'pages-dash.css', 'pages-control.css', 'pages-data.css', 'pages-ops.css', 'pages-kiosk.css', 'theme.css'];
 let css = '';
 for (const f of cssFiles) {
   const p = path.join(WEB, 'css', f);

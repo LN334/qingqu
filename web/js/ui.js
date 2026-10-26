@@ -392,6 +392,11 @@ export function table({ columns, rows, emptyText, emptySub, onRow, rowClass, flu
 
 /* ---------------- SVG 图表 ---------------- */
 const PALETTE = ['#0b7a70', '#1f6fb2', '#c0762a', '#8a4fa3', '#157f4b', '#b32d22'];
+const PALETTE_DARK = ['#4fd1c5', '#63b3ed', '#e0b25a', '#b794f4', '#68d391', '#ef8f84'];
+function activePalette() {
+  const dark = typeof document !== 'undefined' && document.body && document.body.dataset.theme === 'dark';
+  return dark ? PALETTE_DARK : PALETTE;
+}
 
 function svgEl(tag, attrs = {}) {
   const node = document.createElementNS('http://www.w3.org/2000/svg', tag);
@@ -476,7 +481,7 @@ export function chartLine(container, { series = [], height = 220, yMin, yMax, un
   }
 
   series.forEach((s, idx) => {
-    const color = s.color || PALETTE[idx % PALETTE.length];
+    const color = s.color || activePalette()[idx % activePalette().length];
     const pts = (s.points || []).filter((p) => p.v !== null && Number.isFinite(Number(p.v)));
     if (!pts.length) return;
     let d = '';
@@ -497,7 +502,7 @@ export function chartLine(container, { series = [], height = 220, yMin, yMax, un
     const legend = el('div', { class: 'chart-legend' });
     series.forEach((s, idx) => {
       legend.appendChild(el('span', {},
-        el('i', { style: { background: s.color || PALETTE[idx % PALETTE.length] } }),
+        el('i', { style: { background: s.color || activePalette()[idx % activePalette().length] } }),
         `${s.name || `序列 ${idx + 1}`}${unit ? `（${unit}）` : ''}`,
       ));
     });
@@ -582,7 +587,7 @@ export function chartDonut(container, { items = [], size = 150, thickness = 16, 
       const len = (v / total) * circ;
       const circle = svgEl('circle', {
         cx: c, cy: c, r, fill: 'none',
-        stroke: it.color || PALETTE[i % PALETTE.length], 'stroke-width': thickness,
+        stroke: it.color || activePalette()[i % activePalette().length], 'stroke-width': thickness,
         'stroke-dasharray': `${Math.max(0, len - 1.5)} ${circ}`, 'stroke-dashoffset': -(offset) + circ / 4,
         'stroke-linecap': 'butt',
       });
@@ -604,7 +609,7 @@ export function chartDonut(container, { items = [], size = 150, thickness = 16, 
   container.appendChild(svg);
   const legend = el('div', { class: 'chart-legend' });
   for (const it of items) {
-    legend.appendChild(el('span', {}, el('i', { style: { background: it.color || PALETTE[items.indexOf(it) % PALETTE.length] } }), `${it.label} ${it.value}${unit}`));
+    legend.appendChild(el('span', {}, el('i', { style: { background: it.color || activePalette()[items.indexOf(it) % activePalette().length] } }), `${it.label} ${it.value}${unit}`));
   }
   container.appendChild(legend);
   return svg;

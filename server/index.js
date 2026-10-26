@@ -81,7 +81,7 @@ const app = {
   telemetry,
   hub,
   log: logger,
-  version: '1.0.5',
+  version: '1.0.6',
 };
 Object.defineProperty(app, 'db', { get: () => store.data, enumerable: true });
 

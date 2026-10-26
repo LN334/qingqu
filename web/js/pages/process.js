@@ -344,8 +344,8 @@ export async function render(root, ctx) {
       role: 'button',
       'aria-label': `${unit.name}，${UNIT_STATUS_TEXT[unit.status] || unit.status}，点击查看单元详情`,
     });
-    group.appendChild(svgNode('rect', { x, y, width: w, height: h, rx: 10, class: 'u-box' }));
-    group.appendChild(svgNode('rect', { x, y: y, width: 6, height: h, rx: 3, class: 'u-accent' }));
+    group.appendChild(svgNode('rect', { x, y, width: w, height: h, rx: 3, class: 'u-box' }));
+    group.appendChild(svgNode('rect', { x, y: y, width: 4, height: h, rx: 2, class: 'u-accent' }));
 
     const orderText = svgNode('text', { x: x + 16, y: y + 18, class: 'u-order' });
     orderText.textContent = String(order).padStart(2, '0');

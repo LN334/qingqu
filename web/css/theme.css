@@ -1,0 +1,306 @@
+/* 视觉覆盖层：工业监控台风格（最后加载，覆盖 app.css 与各 pages-*.css）
+   原则：低圆角、细边框、无阴影、密排数据、弱化装饰色，状态只做小面积标识。 */
+
+:root{
+  --ink:#111a1f;
+  --ink-2:#26343d;
+  --muted:#5c6b75;
+  --muted-2:#8a979f;
+  --line:#d3dbe0;
+  --line-soft:#e8edf0;
+  --bg:#eceff2;
+  --surface:#ffffff;
+  --surface-2:#f6f8f9;
+  --accent:#0b6bb5;
+  --accent-strong:#085291;
+  --accent-soft:#e9f2fa;
+  --blue:#2a5f8a;
+  --blue-soft:#ecf2f7;
+  --good:#1c6b45;
+  --good-soft:#e9f2ec;
+  --warn:#8a5a12;
+  --warn-soft:#f7efe2;
+  --bad:#a32c22;
+  --bad-soft:#f7e9e7;
+  --info:#2a5f8a;
+  --info-soft:#ecf2f7;
+  --radius:2px;
+  --radius-sm:2px;
+  --shadow:0 1px 2px rgba(17,26,31,.04);
+  --shadow-lg:0 16px 40px -16px rgba(17,26,31,.28),0 2px 6px rgba(17,26,31,.06);
+  --sidebar-w:212px;
+  --topbar-h:48px;
+}
+
+body{font-size:13px;line-height:1.5}
+
+/* ---------- 侧栏 ---------- */
+.sidebar{background:#101a20;background-image:none;color:#a9bcc4}
+.brand{padding:14px 14px 10px;gap:9px;color:#e9f1f4}
+.brand-mark{width:26px;height:26px;border-radius:3px;background:rgba(255,255,255,.06)}
+.brand-mark svg{width:18px;height:18px;color:#7db8e8}
+.brand-text b{font-size:13px;letter-spacing:.02em;font-weight:600}
+.brand-text span{font-size:9.5px;color:#6d838d;letter-spacing:.06em;margin-top:0}
+.nav{padding:4px 8px 12px}
+.nav-group{margin-top:10px}
+.nav-group:first-child{margin-top:2px}
+.nav-group-label{font-size:9.5px;letter-spacing:.12em;color:#5d727c;padding:0 8px 4px}
+.nav-item{height:30px;padding:0 8px;border-radius:2px;color:#a3b6be;font-size:12px;gap:9px;margin-bottom:0}
+.nav-item .icon{width:15px;height:15px;opacity:.7}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#e3edf0}
+.nav-item.active{background:rgba(255,255,255,.07);color:#f2f7f8;font-weight:500}
+.nav-item.active::before{left:-8px;top:4px;bottom:4px;width:2px;border-radius:0;background:#3d8fd0}
+.nav-item .nav-badge{min-width:16px;height:16px;border-radius:2px;font-size:9.5px;padding:0 4px;background:#b02318;font-weight:600}
+.sidebar-foot{padding:10px 14px 12px}
+.gateway-state{font-size:10.5px;color:#8aa0a8}
+.ver{font-size:9.5px;color:#566a73;margin-top:4px;letter-spacing:.04em}
+
+/* ---------- 顶栏 ---------- */
+.topbar{background:#fff;backdrop-filter:none;padding:0 16px;gap:12px;border-bottom:1px solid var(--line)}
+.crumb-section{font-size:11px;letter-spacing:.02em;color:#7b8a93}
+#page-title{font-size:14px;font-weight:600;letter-spacing:0}
+.site-picker{height:28px;border:0;background:transparent;padding:0;border-radius:2px}
+.site-picker:hover{background:var(--surface-2)}
+.site-picker .select.bare{height:28px;font-size:12px;font-weight:500;max-width:190px;padding-right:20px;background-position:calc(100% - 9px) 12px,calc(100% - 4px) 12px}
+.last-updated{font-size:10.5px;color:#7b8a93}
+.pulse{width:5px;height:5px;animation:none;box-shadow:none;background:var(--good)}
+.icon-btn{width:26px;height:26px;border-radius:2px;color:#41545e}
+.icon-btn:hover{background:var(--surface-2);border-color:var(--line)}
+.icon-btn .icon{width:15px;height:15px;stroke-width:1.6}
+.bell-count{min-width:14px;height:14px;border-radius:2px;font-size:9px;border-width:1px;padding:0 3px}
+.user-chip{padding:2px 6px 2px 2px;border-radius:2px}
+.avatar{width:24px;height:24px;border-radius:2px;background:#0b6bb5;font-size:10.5px;font-weight:600;letter-spacing:0}
+.user-chip-text b{font-size:12px;font-weight:500}
+.user-chip-text span{font-size:9.5px;color:#7b8a93}
+.menu{border-radius:3px;padding:4px;box-shadow:var(--shadow-lg)}
+.menu-item{border-radius:2px;padding:6px 8px;font-size:12px}
+
+/* ---------- 视图与页面 ---------- */
+.view{padding:14px 16px 28px}
+.page{max-width:1680px;gap:10px}
+.page-head{gap:12px;align-items:center}
+.page-title{font-size:17px;font-weight:600;letter-spacing:-.01em}
+.page-desc{font-size:12px;color:#7b8a93}
+
+/* ---------- 卡片 ---------- */
+.card{border:1px solid var(--line);border-radius:2px;box-shadow:none;background:var(--surface)}
+.card-head{padding:8px 12px;gap:8px;align-items:center;border-bottom:1px solid var(--line-soft)}
+.card-title{font-size:12.5px;font-weight:600;letter-spacing:0}
+.card-sub{font-size:10.5px;color:#7b8a93;margin-top:1px;line-height:1.45}
+.card-body{padding:10px 12px 12px}
+.card-body.flush{padding:0}
+.card-foot{padding:6px 12px;font-size:10.5px;color:#7b8a93}
+.card > .card-head + .card-body{padding-top:10px}
+
+/* ---------- KPI ---------- */
+.kpi{border:1px solid var(--line);border-radius:2px;box-shadow:none;background:var(--surface);padding:10px 12px}
+.kpi::after{display:none}
+.kpi-label{font-size:11px;letter-spacing:0;color:#67767f;gap:5px}
+.kpi-label .icon{width:13px;height:13px;opacity:.7}
+.kpi-value{font-size:21px;font-weight:600;line-height:1.25;margin-top:3px;letter-spacing:-.01em}
+.kpi-value small{font-size:11px;font-weight:500;color:#7b8a93}
+.kpi-delta{font-size:10.5px;margin-top:2px;color:#7b8a93;gap:4px}
+
+/* 驾驶舱指标条：8 项压成一张表格式指标带 */
+.p-dashboard .kpi-grid{
+  gap:1px;background:var(--line);border:1px solid var(--line);border-radius:2px;overflow:hidden;
+}
+.p-dashboard .kpi-grid .kpi{
+  border:0;border-radius:0;box-shadow:none;min-height:92px;padding:10px 13px;
+}
+.p-dashboard .kpi-grid .kpi-value{font-size:22px}
+.p-dashboard .kpi-grid .kpi-delta{min-height:0;font-size:10.5px}
+.p-dashboard .dash-body{gap:10px}
+
+/* ---------- 表格 ---------- */
+table.data{font-size:12px}
+table.data th{
+  background:#f5f7f8;color:#61707a;font-size:10.5px;font-weight:600;letter-spacing:.03em;
+  padding:6px 9px;border-bottom:1px solid var(--line);
+}
+table.data td{padding:6px 9px;border-bottom:1px solid var(--line-soft)}
+table.data tbody tr:hover{background:#f8fafb}
+table.data tbody tr.selected{background:#eef5f4}
+table.data .cell-sub{font-size:10.5px;color:#7b8a93;margin-top:0}
+
+/* ---------- 标签 / 按钮 / 表单 ---------- */
+.badge{border-radius:2px;font-size:10.5px;font-weight:500;padding:1px 5px;line-height:1.5}
+.badge.good{background:#eef5f0;color:#1a5e3d;border-color:#cfe2d6}
+.badge.warn{background:#f8f1e6;color:#7a4f0f;border-color:#e8d7bd}
+.badge.bad{background:#f8ecea;color:#8f261d;border-color:#e6c9c4}
+.badge.info{background:#eef3f8;color:#234f74;border-color:#cfdde9}
+.badge.muted{background:#f4f6f7;color:#61707a;border-color:#e2e7ea}
+.badge.accent{background:#e9f2fa;color:#0a4e86;border-color:#c6dbee}
+.dot{width:6px;height:6px}
+
+.btn{border-radius:2px;height:28px;padding:0 11px;font-size:12px;font-weight:500;box-shadow:none}
+.btn:hover{background:#f4f6f7;border-color:#c3ced5}
+.btn:active{transform:none}
+.btn.primary{background:var(--accent);border-color:var(--accent)}
+.btn.primary:hover{background:var(--accent-strong);border-color:var(--accent-strong)}
+.btn.danger{background:#a32c22;border-color:#a32c22}
+.btn.danger:hover{background:#8c241b;border-color:#8c241b}
+.btn.sm{height:22px;padding:0 7px;font-size:11px;border-radius:2px}
+.btn.lg{height:34px;padding:0 16px;font-size:12.5px;border-radius:2px}
+.btn .icon{width:13px;height:13px}
+.btn-group{gap:4px}
+
+.input,.select,.textarea{border-radius:2px;font-size:12.5px}
+.input,.select{height:30px;padding:0 8px}
+.label{font-size:11px;color:#67767f;margin-bottom:3px}
+.hint{font-size:10.5px;color:#7b8a93}
+
+.tabs{gap:2px;border-bottom:1px solid var(--line)}
+.tab{padding:6px 9px;font-size:12px;border-radius:0}
+.segmented{border-radius:2px;padding:1px}
+.segmented button{border-radius:2px;font-size:11.5px;height:24px;padding:0 8px}
+
+/* ---------- 图表 ---------- */
+.chart svg text,.chart text{font-size:10px;fill:#7b8a93}
+.chart .series-line{stroke-width:1.6}
+.chart .series-area{opacity:.06}
+.chart .grid-line{stroke:#eef2f4}
+.chart .axis-line{stroke:#dbe3e8}
+
+/* ---------- 登录 ---------- */
+.login-card{width:360px;border-radius:4px;box-shadow:0 24px 60px -24px rgba(0,0,0,.5);padding:26px 24px 18px}
+.login-logo{width:34px;height:34px;border-radius:3px}
+.login-brand-text b{font-size:15px}
+.login-brand-text span{font-size:11px}
+.login-title{font-size:16px;margin-bottom:14px}
+.login-foot{font-size:10.5px;margin-top:14px}
+.login-form .btn.block{height:36px;font-size:13px}
+
+/* ---------- 工艺图 / 触摸屏 / 页面卡片统一收角 ---------- */
+.unit-card,.notice,.ad-card,.wo-card,.insp-card,.dev-card,.dcard,.k-card,.ac-card,.qc-card{
+  border-radius:2px;box-shadow:none;
+}
+.p-kiosk .k-card{box-shadow:none}
+
+/* 页面级卡片/标签统一收角（覆盖各 pages-*.css 的 8-18px 圆角） */
+[class*="-card"],[class^="card"],.impact-box,.wo-row,.ac-readings,.param-group,.chip,.tag,.site-tag,.unit-drawer .table-wrap{border-radius:2px !important}
+[class*="-card"],[class^="card"],.action-card,.unit-card,.k-card{box-shadow:none !important}
+.chip,.tag,.site-tag{padding:1px 6px;font-size:11px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+
+/* ===== 侧栏版布局收紧：面板化标题、指标带、密排 ===== */
+.view{padding:12px 14px 24px}
+.page{gap:8px}
+.page-head{padding-bottom:6px;border-bottom:1px solid var(--line);align-items:center}
+.page-title{font-size:15px;font-weight:600}
+.card{border-color:#cfd8dd}
+.card-head{background:#f6f8f9;border-bottom:1px solid var(--line);padding:7px 11px}
+.card-title{font-size:12px}
+.card-sub{font-size:10px}
+.card-body{padding:9px 11px 11px}
+.kpi.tone-bad .kpi-value{color:#a32c22}
+.kpi.tone-warn .kpi-value{color:#8a5a12}
+.p-dashboard .dash-body{gap:8px}
+
+/* 驾驶舱 8 项指标压成一条指标带 */
+.p-dashboard .kpi-grid{
+  display:flex;flex-wrap:nowrap;gap:0;background:#fff;border:1px solid var(--line);
+  border-radius:2px;overflow:hidden;
+}
+.p-dashboard .kpi-grid .kpi{
+  flex:1 1 0;min-width:0;border:0;border-right:1px solid var(--line-soft);border-radius:0;
+  min-height:0;padding:7px 10px 8px;background:#fff;
+}
+.p-dashboard .kpi-grid .kpi:last-child{border-right:0}
+.p-dashboard .kpi-grid .kpi-label{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-dashboard .kpi-grid .kpi-value{font-size:16px;margin-top:2px;white-space:nowrap;letter-spacing:-.01em}
+.p-dashboard .kpi-grid .kpi-value small{font-size:9.5px}
+.p-dashboard .kpi-grid .kpi-delta{font-size:9.5px;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:0;display:block}
+.p-dashboard .kpi-grid .kpi .icon{display:none}
+@media (max-width:1350px){
+  .p-dashboard .kpi-grid{flex-wrap:wrap}
+  .p-dashboard .kpi-grid .kpi{flex:1 1 25%;border-bottom:1px solid var(--line-soft)}
+}
+/* 指标带只保留标签与数值，去掉被截断的注解 */
+.p-dashboard .kpi-grid .kpi-delta{display:none}
+.p-dashboard .kpi-grid .kpi{display:flex;flex-direction:column;justify-content:center}
+.p-dashboard .kpi-grid .kpi-label{color:#6b7a83}
+
+/* ===== A · 深色监控大屏（驾驶舱 / 实时监测） ===== */
+body[data-theme="dark"]{
+  --ink:#d8e7ef;--ink-2:#b9ced9;--muted:#89a6b5;--muted-2:#6d8c9c;
+  --line:#173143;--line-soft:#112a39;
+  --bg:#06121c;--surface:#0a1b28;--surface-2:#081826;
+  --accent:#3f9fe0;--accent-strong:#2f8cc9;--accent-soft:#0d2c41;
+  --blue:#5aa9e6;--blue-soft:#0d2c41;
+  --good:#41c58f;--good-soft:#0b2d23;--warn:#e0a53f;--warn-soft:#312310;
+  --bad:#e9685c;--bad-soft:#361714;--info:#5aa9e6;--info-soft:#0d2c41;
+  color:var(--ink);background:var(--bg);
+}
+body[data-theme="dark"] .topbar{background:#07141f;border-bottom-color:var(--line)}
+body[data-theme="dark"] #page-title{color:#e8f4f9}
+body[data-theme="dark"] .crumb-section,body[data-theme="dark"] .last-updated{color:#7c9aab}
+body[data-theme="dark"] .site-picker:hover{background:#0d2231}
+body[data-theme="dark"] .icon-btn{color:#9ab6c4}
+body[data-theme="dark"] .icon-btn:hover{background:#0d2231}
+body[data-theme="dark"] .card{background:var(--surface);border-color:var(--line)}
+body[data-theme="dark"] .card-head{background:#081a26;border-bottom-color:var(--line)}
+body[data-theme="dark"] .card-title{color:#dceaf1}
+body[data-theme="dark"] .card-sub,body[data-theme="dark"] .card-foot{color:#82a0b0}
+body[data-theme="dark"] .page-head{border-bottom-color:var(--line)}
+body[data-theme="dark"] .kpi{background:var(--surface);border-color:var(--line)}
+body[data-theme="dark"] .kpi-label{color:#8ba8b8}
+body[data-theme="dark"] .kpi-value{color:#f0f9fc}
+body[data-theme="dark"] .kpi-value small,body[data-theme="dark"] .kpi-delta{color:#89a6b5}
+body[data-theme="dark"] .p-dashboard .kpi-grid{background:var(--line)!important;border-color:var(--line)!important}
+body[data-theme="dark"] .p-dashboard .kpi-grid .kpi{background:var(--surface)!important;border-right-color:var(--line-soft)!important}
+body[data-theme="dark"] table.data th{background:#081a26;color:#8ba8b8;border-bottom-color:var(--line)}
+body[data-theme="dark"] table.data td{border-bottom-color:var(--line-soft);color:#cfe1ea}
+body[data-theme="dark"] table.data tbody tr:hover{background:#0d2534}
+body[data-theme="dark"] table.data tbody tr.selected{background:#0f2f42}
+body[data-theme="dark"] .badge.good{background:#0b2d23;color:#63d3a5;border-color:#1b4a3a}
+body[data-theme="dark"] .badge.warn{background:#312310;color:#e6b968;border-color:#57401a}
+body[data-theme="dark"] .badge.bad{background:#361714;color:#f08f84;border-color:#5d2a24}
+body[data-theme="dark"] .badge.info{background:#0d2c41;color:#8cc5ee;border-color:#1f4763}
+body[data-theme="dark"] .badge.muted{background:#132c3b;color:#9ab6c4;border-color:#204152}
+body[data-theme="dark"] .badge.accent{background:#0d2c41;color:#8cc5ee;border-color:#1f4763}
+body[data-theme="dark"] .btn{background:#0d2432;border-color:#22485c;color:#cfe1ea}
+body[data-theme="dark"] .btn:hover{background:#123043}
+body[data-theme="dark"] .btn.ghost{background:transparent;color:#9ab6c4;border-color:#22485c}
+body[data-theme="dark"] .input,body[data-theme="dark"] .select,body[data-theme="dark"] .textarea{background:#081a26;border-color:#22485c;color:#dcebf2}
+body[data-theme="dark"] .tab{color:#89a6b5}
+body[data-theme="dark"] .tab.active{color:#eaf5f9}
+body[data-theme="dark"] .tabs{border-bottom-color:var(--line)}
+body[data-theme="dark"] .chart text{fill:#8ba8b8}
+body[data-theme="dark"] .chart .grid-line{stroke:#112a39}
+body[data-theme="dark"] .chart .axis-line{stroke:#1b3b4d}
+body[data-theme="dark"] .notice{background:#0b2432;border-color:#1d4358;color:#a9c7d6}
+body[data-theme="dark"] .empty{color:#7f9dab}
+body[data-theme="dark"] .p-dashboard .site-strip{background:linear-gradient(180deg,#0b2231,#0a1b28);border-color:var(--line)}
+body[data-theme="dark"] .p-dashboard .site-fact{border-right-color:var(--line-soft)}
+body[data-theme="dark"] .p-dashboard .flow-strip{background:linear-gradient(180deg,#0a1e2b,#081925)}
+body[data-theme="dark"] .p-dashboard .flow-node{background:#0b2231;border-color:#1c3d51}
+body[data-theme="dark"] .p-dashboard .flow-node.status-alarm{border-color:#5a2824;background:#1b1213}
+body[data-theme="dark"] .p-dashboard .flow-node.status-attention,body[data-theme="dark"] .p-dashboard .flow-node.status-stale{border-color:#4a3820;background:#1a1712}
+body[data-theme="dark"] .p-dashboard .ref-label{stroke:#0b2231}
+body[data-theme="dark"] .p-dashboard .mini-row:hover,body[data-theme="dark"] .p-dashboard .notice-item:hover{background:#0d2534}
+body[data-theme="dark"] .p-monitor .filter-bar,body[data-theme="dark"] .p-monitor .stat-strip{background:var(--surface);border-color:var(--line)}
+
+/* ===== C · 工业组态（工艺 / 控制） ===== */
+body[data-theme="industrial"]{
+  --bg:#e9edf0;--surface:#fff;--surface-2:#f3f5f6;
+  --line:#c8d2d8;--line-soft:#e0e6ea;
+  --accent:#0b6bb5;--accent-strong:#085291;--accent-soft:#e9f2fa;
+  --radius:0px;--radius-sm:0px;
+}
+body[data-theme="industrial"] .card-head{background:#eef2f4}
+body[data-theme="industrial"] .page-title{font-size:14px;letter-spacing:.02em}
+body[data-theme="industrial"] .kpi-value{font-size:20px}
+body[data-theme="industrial"] .p-process .unit-card,body[data-theme="industrial"] .p-control .action-card{border-radius:0}
+
+/* 登录背景统一为水务深蓝 */
+.login{background:radial-gradient(1100px 620px at 18% 8%,#0d3a56 0%,#071d2d 58%,#040f18 100%)}
+body[data-theme="dark"] .p-dashboard .site-main{background:linear-gradient(180deg,#0c2433,#0a1b28)}
+body[data-theme="dark"] .p-dashboard .flow-arrow{color:#2a5a72}
+body[data-theme="dark"] .p-monitor .point-table td{color:#cfe1ea}
+body[data-theme="dark"] .empty{color:#7f9dab}
+body[data-theme="dark"] .empty b{color:#b9ced9}
+body[data-theme="dark"] .empty .icon{color:#3d6072}
+.login-logo{background:linear-gradient(160deg,#0d6bb5,#0a4d86)!important}
+.brand-mark{background:rgba(61,143,208,.12)}
+body[data-theme="dark"] .empty,body[data-theme="dark"] .empty b,body[data-theme="dark"] .empty span{color:#a8c4d2!important}
+body[data-theme="dark"] .empty b{color:#cfe1ea!important}
