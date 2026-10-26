@@ -8,7 +8,7 @@
     <AssemblyName>ZhifuWater</AssemblyName>
     <RootNamespace>ZhifuWater.Desktop</RootNamespace>
     <ApplicationIcon>..\..\desktop\build\icon.ico</ApplicationIcon>
-    <Version>2.0.1</Version>
+    <Version>2.0.2</Version>
     <Company>LN334</Company>
     <Product>智赋乡水 · 智慧水处理平台</Product>
     <AssemblyTitle>智赋乡水</AssemblyTitle>

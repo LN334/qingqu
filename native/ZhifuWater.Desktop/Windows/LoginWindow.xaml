@@ -69,7 +69,7 @@
             </StackPanel>
         </Border>
 
-        <TextBlock Text="v2.0.1"
+        <TextBlock Text="v2.0.2"
                    FontSize="10.5" Foreground="{DynamicResource Muted2}"
                    HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16" />
     </Grid>

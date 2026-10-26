@@ -35,7 +35,7 @@
                 <Border DockPanel.Dock="Bottom" Padding="12,7,12,9">
                     <StackPanel>
                         <TextBlock x:Name="SidebarSource" FontSize="9.5" Foreground="#7E939D" TextWrapping="Wrap" />
-                        <TextBlock Text="v2.0.1" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
+                        <TextBlock Text="v2.0.2" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
                     </StackPanel>
                 </Border>
 

@@ -28,8 +28,7 @@ public partial class MainWindow : Window
         ("运维", "workorders", "工单管理"),
         ("运维", "inspections", "巡检管理"),
         ("运维", "devices", "设备台账"),
-        ("系统", "admin", "系统管理"),
-        ("现场", "kiosk", "现场触摸屏")
+        ("系统", "admin", "系统管理")
     };
 
     private readonly AppServices _services;
