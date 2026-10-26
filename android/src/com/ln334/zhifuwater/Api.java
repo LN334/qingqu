@@ -52,12 +52,46 @@ public final class Api {
 
     public static void get(Context c, String path, Cb cb) {
         Session s = Session.of(c);
+        if (s.isDemo()) {
+            demo(c, "GET", path, null, cb);
+            return;
+        }
         run("GET", join(s.baseUrl(), path), s.token(), null, cb);
     }
 
     public static void post(Context c, String path, JSONObject body, Cb cb) {
         Session s = Session.of(c);
+        if (s.isDemo()) {
+            demo(c, "POST", path, body, cb);
+            return;
+        }
         run("POST", join(s.baseUrl(), path), s.token(), body == null ? "{}" : body.toString(), cb);
+    }
+
+    /** 离线演示模式：读取打包进 APK 的接口快照，在内存中处理确认/流转/提交。 */
+    private static void demo(final Context c, final String method, final String path,
+                             final JSONObject body, final Cb cb) {
+        POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                final JSONObject root = Demo.respond(c, method, path, body);
+                final boolean ok = root != null && root.optBoolean("ok", false);
+                final String message;
+                if (ok) {
+                    message = null;
+                } else {
+                    JSONObject err = root == null ? null : root.optJSONObject("error");
+                    String m = err == null ? null : err.optString("message", "");
+                    message = m == null || m.length() == 0 ? "离线演示暂不支持该操作" : m;
+                }
+                MAIN.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.done(ok ? root : null, message);
+                    }
+                });
+            }
+        });
     }
 
     private static String join(String base, String path) {
