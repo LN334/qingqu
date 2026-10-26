@@ -60,11 +60,97 @@ public sealed class LineChart : FrameworkElement
     public string EmptyText { get; set; } = "暂无数据";
     public string YUnit { get; set; } = "";
 
+    /// <summary>允许左右拖动查看历史；双击回到跟随最新。</summary>
+    public bool EnablePan { get; set; }
+    /// <summary>可见时间窗；为空表示显示全部。</summary>
+    public TimeSpan? ViewWindow { get; set; }
+    /// <summary>是否跟随最新数据自动右移。</summary>
+    public bool FollowLatest { get; set; } = true;
+
+    private bool _dragging;
+    private double _dragX;
+    private double _viewEndMs;
+    private bool _hasViewEnd;
+
     public LineChart()
     {
         Height = 200;
         MinHeight = 120;
         ClipToBounds = true;
+    }
+
+    private (double Min, double Max) DataSpan()
+    {
+        var pts = Series.SelectMany(s => s.Points).Where(p => p.T > 0).ToList();
+        if (pts.Count == 0) return (0, 0);
+        return (pts.Min(p => p.T), pts.Max(p => p.T));
+    }
+
+    private double PlotWidth() => Math.Max(10, ActualWidth - (ShowYLabels ? 54.0 : 20.0));
+
+    protected override System.Windows.Media.HitTestResult HitTestCore(System.Windows.Media.PointHitTestParameters hitTestParameters)
+        => new System.Windows.Media.PointHitTestResult(this, hitTestParameters.HitPoint);
+
+    protected override void OnMouseLeftButtonDown(System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (!EnablePan) return;
+        if (e.ClickCount == 2)
+        {
+            FollowLatest = true;
+            _hasViewEnd = false;
+            ViewWindow = null;
+            InvalidateVisual();
+            e.Handled = true;
+            return;
+        }
+        var (lo, hi) = DataSpan();
+        if (hi <= lo) return;
+        _dragging = true;
+        _dragX = e.GetPosition(this).X;
+        _viewEndMs = FollowLatest || !_hasViewEnd ? hi : _viewEndMs;
+        CaptureMouse();
+        Cursor = System.Windows.Input.Cursors.Hand;
+        e.Handled = true;
+    }
+
+    protected override void OnMouseMove(System.Windows.Input.MouseEventArgs e)
+    {
+        if (!_dragging) return;
+        var (lo, hi) = DataSpan();
+        var full = hi - lo;
+        var span = Math.Min(ViewWindow?.TotalMilliseconds ?? full, full);
+        if (span <= 0) return;
+        var x = e.GetPosition(this).X;
+        var dx = x - _dragX;
+        _dragX = x;
+        _viewEndMs = Math.Clamp(_viewEndMs - dx / PlotWidth() * span, lo + span, hi);
+        _hasViewEnd = true;
+        FollowLatest = false;
+        InvalidateVisual();
+        e.Handled = true;
+    }
+
+    protected override void OnMouseLeftButtonUp(System.Windows.Input.MouseButtonEventArgs e)
+    {
+        if (!_dragging) return;
+        _dragging = false;
+        ReleaseMouseCapture();
+        Cursor = System.Windows.Input.Cursors.Arrow;
+        e.Handled = true;
+    }
+
+    protected override void OnMouseWheel(System.Windows.Input.MouseWheelEventArgs e)
+    {
+        if (!EnablePan) return;
+        var (lo, hi) = DataSpan();
+        var full = hi - lo;
+        if (full <= 0) return;
+        var current = Math.Min(ViewWindow?.TotalMilliseconds ?? full, full);
+        var next = Math.Clamp(current * (e.Delta > 0 ? 0.75 : 1.33),
+            Math.Min(TimeSpan.FromHours(1).TotalMilliseconds, full), full);
+        ViewWindow = next >= full - 1 ? null : TimeSpan.FromMilliseconds(next);
+        InvalidateVisual();
+        e.Handled = true;
     }
 
     protected override Size MeasureOverride(Size availableSize)
@@ -96,9 +182,21 @@ public sealed class LineChart : FrameworkElement
 
         var units = Series.Select(s => s.Unit).Distinct().ToList();
         var perSeries = NormalizePerSeries || units.Count > 1;
+        // 单位很短（%、℃、元）时并入每个刻度，避免左上角单位与最高刻度挤成「% 65.4」这种读不出来的组合
+        var inlineUnit = !perSeries && YUnit.Length is > 0 and <= 3 ? YUnit : "";
 
-        var minT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Min();
-        var maxT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Max();
+        var dataMinT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Min();
+        var dataMaxT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Max();
+        var fullSpan = dataMaxT - dataMinT;
+        var winSpan = ViewWindow.HasValue ? Math.Min(ViewWindow.Value.TotalMilliseconds, fullSpan) : fullSpan;
+        double minT = dataMinT, maxT = dataMaxT;
+        if (fullSpan > 0 && winSpan > 0 && winSpan < fullSpan - 1)
+        {
+            if (FollowLatest || !_hasViewEnd) _viewEndMs = dataMaxT;
+            _viewEndMs = Math.Clamp(_viewEndMs, dataMinT + winSpan, dataMaxT);
+            minT = _viewEndMs - winSpan;
+            maxT = _viewEndMs;
+        }
         var byTime = minT > 0 && maxT > minT;
 
         // 网格 + 纵轴
@@ -115,14 +213,15 @@ public sealed class LineChart : FrameworkElement
             if (ShowYLabels && !perSeries)
             {
                 var value = globalMax - (globalMax - globalMin) * i / steps;
-                ChartDraw.Draw(this, dc, value.ToString(value >= 100 ? "F0" : value >= 10 ? "F1" : "F2"), new Point(plot.Left - 6, y - 7), 10, Pal.Muted2, TextAlignment.Right);
+                var tickText = value.ToString(value >= 100 ? "F0" : value >= 10 ? "F1" : "F2") + inlineUnit;
+                ChartDraw.Draw(this, dc, tickText, new Point(plot.Left - 6, y - 7), 10, Pal.Muted2, TextAlignment.Right);
             }
             else if (ShowYLabels && i == 0 && perSeries)
             {
                 ChartDraw.Draw(this, dc, "按各自量程", new Point(plot.Left - 6, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
             }
         }
-        if (ShowYLabels && !string.IsNullOrEmpty(YUnit))
+        if (ShowYLabels && !string.IsNullOrEmpty(YUnit) && inlineUnit.Length == 0)
             ChartDraw.Draw(this, dc, YUnit, new Point(6, plot.Top - 2), 9.5, Pal.Muted2);
 
         // 横轴时间标签
@@ -130,6 +229,7 @@ public sealed class LineChart : FrameworkElement
         var crossesDay = byTime && (maxT - minT) <= 26L * 3600 * 1000
             && DateTimeOffset.FromUnixTimeMilliseconds((long)minT).LocalDateTime.Date
                != DateTimeOffset.FromUnixTimeMilliseconds((long)maxT).LocalDateTime.Date;
+        var prevDate = DateTime.MinValue;
         for (var i = 0; i < labelCount; i++)
         {
             var frac = labelCount == 1 ? 0 : i / (double)(labelCount - 1);
@@ -140,15 +240,16 @@ public sealed class LineChart : FrameworkElement
                 var span = maxT - minT;
                 var fmt = span > 26L * 3600 * 1000 ? "MM-dd" : "HH:mm";
                 var t = DateTimeOffset.FromUnixTimeMilliseconds((long)(minT + (maxT - minT) * frac)).LocalDateTime;
-                // 跨天时把日期并入最后一个刻度，避免与单独绘制的日期标签叠在同一坐标
-                var label = crossesDay && i == labelCount - 1 ? t.ToString("MM-dd HH:mm") : t.ToString(fmt);
+                // 跨天时把日期并入「每天的第一个刻度」，这样昨天、今天各出现一次日期，而不是只有最右端带着日期
+                var label = crossesDay && t.Date != prevDate ? t.ToString("MM-dd HH:mm") : t.ToString(fmt);
+                prevDate = t.Date;
                 ChartDraw.Draw(this, dc, label, new Point(x, plot.Bottom + 5), 9.5, Pal.Muted2,
                     i == 0 ? TextAlignment.Left : i == labelCount - 1 ? TextAlignment.Right : TextAlignment.Center);
             }
         }
 
-        // 各条曲线
-        var legendX = 8.0;
+        // 各条曲线（按可见时间窗裁剪）
+        dc.PushClip(new RectangleGeometry(plot));
         for (var si = 0; si < Series.Count; si++)
         {
             var s = Series[si];
@@ -203,17 +304,25 @@ public sealed class LineChart : FrameworkElement
             var last = s.Points[^1];
             dc.DrawEllipse(brush, null, new Point(X(last), Y(last.V)), 2.6, 2.6);
 
-            if (ShowLegend)
+        }
+        dc.Pop();
+
+        // 图例
+        if (ShowLegend)
+        {
+            var legendX = 8.0;
+            for (var si = 0; si < Series.Count; si++)
             {
+                var s = Series[si];
+                if (s.Points.Count == 0) continue;
+                var brush = ChartDraw.Color(s.Color, si);
+                var last = s.Points[^1];
                 var suffix = string.IsNullOrEmpty(s.Unit) || s.Name.EndsWith(s.Unit, StringComparison.Ordinal) ? "" : s.Unit;
                 var text = $"{s.Name} {last.V:0.##}{suffix}";
                 var maxItem = Math.Max(110, (w - 16) / Math.Max(1, Series.Count) - 14);
                 var ft = ChartDraw.Text(text, 10, Pal.Ink2, this, maxItem);
                 var itemWidth = ft.Width + 20;
-                if (legendX + itemWidth > w)
-                {
-                    legendX = 8;
-                }
+                if (legendX + itemWidth > w) legendX = 8;
                 dc.DrawRectangle(brush, null, new Rect(legendX, 7, 7, 7));
                 dc.DrawText(ft, new Point(legendX + 11, 3));
                 legendX += itemWidth + 12;
@@ -254,7 +363,9 @@ public sealed class BarChart : FrameworkElement
             ChartDraw.Draw(this, dc, "暂无数据", new Point(w / 2, h / 2 - 8), 12, Pal.Muted2, TextAlignment.Center);
             return;
         }
-        const double left = 34, right = 8, top = 16, bottom = 22;
+        var inlineUnit = Unit.Length is > 0 and <= 3 ? Unit : "";
+        var left = inlineUnit.Length > 0 ? 48.0 : 34.0;
+        const double right = 8, top = 16, bottom = 22;
         var plotW = Math.Max(10, w - left - right);
         var plotH = Math.Max(10, h - top - bottom);
         var max = Bars.Max(b => b.Value);
@@ -266,7 +377,7 @@ public sealed class BarChart : FrameworkElement
             var y = top + plotH * i / 3;
             dc.DrawLine(i == 3 ? axisPen : gridPen, new Point(left, y), new Point(w - right, y));
             var v = max - max * i / 3;
-            ChartDraw.Draw(this, dc, v.ToString(v >= 10 ? "F0" : "F1"), new Point(left - 5, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
+            ChartDraw.Draw(this, dc, v.ToString(v >= 10 ? "F0" : "F1") + inlineUnit, new Point(left - 5, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
         }
         var slot = plotW / Bars.Count;
         var bw = Math.Max(3, Math.Min(52, slot * BarWidth));
@@ -292,7 +403,7 @@ public sealed class BarChart : FrameworkElement
             if (showLabel)
                 ChartDraw.Draw(this, dc, bar.Key, new Point(x + bw / 2, top + plotH + 5), 9.5, Pal.Muted2, TextAlignment.Center, slot + 4);
         }
-        if (!string.IsNullOrEmpty(Unit))
+        if (!string.IsNullOrEmpty(Unit) && inlineUnit.Length == 0)
             ChartDraw.Draw(this, dc, Unit, new Point(4, 1), 9.5, Pal.Muted2);
     }
 }
