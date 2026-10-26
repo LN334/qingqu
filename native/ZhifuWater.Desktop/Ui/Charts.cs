@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -127,6 +127,9 @@ public sealed class LineChart : FrameworkElement
 
         // 横轴时间标签
         var labelCount = w > 700 ? 5 : 4;
+        var crossesDay = byTime && (maxT - minT) <= 26L * 3600 * 1000
+            && DateTimeOffset.FromUnixTimeMilliseconds((long)minT).LocalDateTime.Date
+               != DateTimeOffset.FromUnixTimeMilliseconds((long)maxT).LocalDateTime.Date;
         for (var i = 0; i < labelCount; i++)
         {
             var frac = labelCount == 1 ? 0 : i / (double)(labelCount - 1);
@@ -137,16 +140,11 @@ public sealed class LineChart : FrameworkElement
                 var span = maxT - minT;
                 var fmt = span > 26L * 3600 * 1000 ? "MM-dd" : "HH:mm";
                 var t = DateTimeOffset.FromUnixTimeMilliseconds((long)(minT + (maxT - minT) * frac)).LocalDateTime;
-                ChartDraw.Draw(this, dc, t.ToString(fmt), new Point(x, plot.Bottom + 5), 9.5, Pal.Muted2,
+                // 跨天时把日期并入最后一个刻度，避免与单独绘制的日期标签叠在同一坐标
+                var label = crossesDay && i == labelCount - 1 ? t.ToString("MM-dd HH:mm") : t.ToString(fmt);
+                ChartDraw.Draw(this, dc, label, new Point(x, plot.Bottom + 5), 9.5, Pal.Muted2,
                     i == 0 ? TextAlignment.Left : i == labelCount - 1 ? TextAlignment.Right : TextAlignment.Center);
             }
-        }
-        if (byTime && (maxT - minT) <= 26L * 3600 * 1000)
-        {
-            var first = DateTimeOffset.FromUnixTimeMilliseconds(minT).LocalDateTime;
-            var last = DateTimeOffset.FromUnixTimeMilliseconds(maxT).LocalDateTime;
-            if (last.Date != first.Date && w > 420)
-                ChartDraw.Draw(this, dc, last.ToString("MM-dd"), new Point(plot.Right, plot.Bottom + 5), 9.5, Pal.Muted2, TextAlignment.Right);
         }
 
         // 各条曲线
