@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -37,17 +37,7 @@ public abstract class PageBase : UserControl
             _built = true;
             Build();
             var dock = new DockPanel { LastChildFill = true };
-            var footBorder = new Border
-            {
-                Background = Pal.Surface,
-                BorderBrush = Pal.LineSoft,
-                BorderThickness = new Thickness(0, 1, 0, 0),
-                Padding = new Thickness(14, 4, 14, 5),
-            };
             _footnote = new TextBlock { FontSize = 10.5, Foreground = Pal.Muted2, TextTrimming = TextTrimming.CharacterEllipsis };
-            footBorder.Child = _footnote;
-            DockPanel.SetDock(footBorder, Dock.Bottom);
-            dock.Children.Add(footBorder);
             dock.Children.Add(new Border { Background = Pal.Bg, Child = _content });
             Content = dock;
         }
