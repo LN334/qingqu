@@ -36,3 +36,12 @@ desktop/scripts/app/
 android/build_log.txt
 android/test/out/
 android/test/json.jar
+
+# 原生桌面（C#/WPF）
+native/**/bin/
+native/**/obj/
+native/publish/
+native/installer/*.exe
+native/_probe/
+native/.vs/
+*.user

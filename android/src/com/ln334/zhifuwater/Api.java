@@ -52,6 +52,10 @@ public final class Api {
 
     public static void get(Context c, String path, Cb cb) {
         Session s = Session.of(c);
+        if (s.isLocal()) {
+            local(c, "GET", path, null, cb);
+            return;
+        }
         if (s.isDemo()) {
             demo(c, "GET", path, null, cb);
             return;
@@ -61,11 +65,45 @@ public final class Api {
 
     public static void post(Context c, String path, JSONObject body, Cb cb) {
         Session s = Session.of(c);
+        if (s.isLocal()) {
+            local(c, "POST", path, body, cb);
+            return;
+        }
         if (s.isDemo()) {
             demo(c, "POST", path, body, cb);
             return;
         }
         run("POST", join(s.baseUrl(), path), s.token(), body == null ? "{}" : body.toString(), cb);
+    }
+
+    /**
+     * 本机模式：不走网络，直接读 LocalDb + LocalEngine 的内存/SQLite 数据，
+     * 返回结构与服务器完全一致，页面无需区分数据来源。
+     */
+    private static void local(final Context c, final String method, final String path,
+                              final JSONObject body, final Cb cb) {
+        LocalEngine.get(c).start();
+        POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                final JSONObject root = LocalApi.respond(c, method, path, body);
+                final boolean ok = root != null && root.optBoolean("ok", false);
+                final String message;
+                if (ok) {
+                    message = null;
+                } else {
+                    JSONObject err = root == null ? null : root.optJSONObject("error");
+                    String m = err == null ? null : err.optString("message", "");
+                    message = m == null || m.length() == 0 ? "本机数据处理失败" : m;
+                }
+                MAIN.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        cb.done(ok ? root : null, message);
+                    }
+                });
+            }
+        });
     }
 
     /** 离线演示模式：读取打包进 APK 的接口快照，在内存中处理确认/流转/提交。 */

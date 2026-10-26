@@ -166,18 +166,19 @@ public class ProfilePage extends BasePage {
 
         // 连接设置
         addSection("连接设置", null, null);
-        boolean demo = session.isDemo();
+        boolean local = session.isLocal();
         LinearLayout server = U.card(ctx);
-        server.addView(U.tv(ctx, demo ? "数据来源" : "服务器地址", 11.5f, U.MUTED, true));
-        TextView urlView = U.tv(ctx, demo ? "离线演示 · 内置快照" : (session.baseUrl().length() == 0 ? "未设置" : session.baseUrl()),
+        server.addView(U.tv(ctx, local ? "数据来源" : "服务器地址", 11.5f, U.MUTED, true));
+        TextView urlView = U.tv(ctx, local ? "本机演示 · 本地数据库"
+                        : (session.baseUrl().length() == 0 ? "未设置" : session.baseUrl()),
                 13, U.INK, true);
         urlView.setPadding(0, U.dp(ctx, 4), 0, 0);
         server.addView(urlView);
-        TextView change = U.ghostButton(ctx, demo ? "连接真实服务器" : "修改服务器地址");
+        TextView change = U.ghostButton(ctx, local ? "连接电脑上的平台服务" : "修改服务器地址");
         change.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (session.isDemo()) {
+                if (session.isLocal()) {
                     connectServer();
                 } else {
                     changeServer();
@@ -185,7 +186,8 @@ public class ProfilePage extends BasePage {
             }
         });
         server.addView(change, U.lpWith(ctx, U.MATCH, U.dp(ctx, 44), 0, 12, 0, 0));
-        TextView tip = U.tv(ctx, demo ? "连接服务器可查看实时数据，需要重新登录。" : "修改服务器后需要重新登录，令牌会失效。",
+        TextView tip = U.tv(ctx, local ? "本机模式不连服务器，数据保存在手机本地；连接服务器需重新输入账号密码。"
+                        : "修改服务器后需要重新登录，令牌会失效。",
                 10.5f, U.MUTED2, false);
         server.addView(tip, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 8, 0, 0));
         addCard(server);
@@ -210,7 +212,7 @@ public class ProfilePage extends BasePage {
         });
         body.addView(logout, U.lpWith(ctx, U.MATCH, U.dp(ctx, 48), 0, 8, 0, 0));
 
-        TextView footer = U.tv(ctx, "智赋乡水 · 原生安卓客户端 v1.0.0", 10.5f, U.MUTED2, false);
+        TextView footer = U.tv(ctx, "智赋乡水 · 原生安卓客户端 v2.1.0", 10.5f, U.MUTED2, false);
         footer.setGravity(Gravity.CENTER);
         body.addView(footer, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 14, 0, 0));
     }

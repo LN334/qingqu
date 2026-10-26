@@ -44,6 +44,7 @@ public class MainActivity extends Activity {
     private int current = -1;
     private int busyCount = 0;
     private JSONArray sitesCache;
+    private LocalEngine.Listener engineListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +107,10 @@ public class MainActivity extends Activity {
         titles.addView(U.tv(this, "智慧水处理平台 · 移动端", 9.5f, U.MUTED2, false),
                 U.lpWith(this, U.MATCH, U.WRAP, 0, 2, 0, 0));
         row1.addView(titles, U.lp(0, U.WRAP, 1f));
+
+        TextView modeBadge = U.chip(this, session.isLocal() ? "本机演示" : "服务器",
+                session.isLocal() ? U.BRAND : U.MUTED, R.drawable.bg_chip_brand);
+        row1.addView(modeBadge, U.lpWith(this, U.WRAP, U.WRAP, 0, 0, 8, 0));
 
         FrameLayout refresh = new FrameLayout(this);
         refresh.setBackground(U.roundBg(this, U.BRAND_BG, 13));
@@ -431,8 +436,50 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (session != null && session.isLocal()) {
+            LocalEngine engine = LocalEngine.get(this);
+            engine.addListener(engineListener());
+            engine.start();
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (session != null && session.isLocal()) {
+            LocalEngine engine = LocalEngine.get(this);
+            engine.removeListener(engineListener());
+            engine.stop();
+        }
+    }
+
+    /** 本机引擎每次推进后的回调：只让总览与告警页静默刷新。 */
+    private LocalEngine.Listener engineListener() {
+        if (engineListener == null) {
+            engineListener = new LocalEngine.Listener() {
+                @Override
+                public void onTick(long atMs) {
+                    onLocalTick(atMs);
+                }
+            };
+        }
+        return engineListener;
+    }
+
+    private void onLocalTick(long atMs) {
+        if (current != 0 && current != 1) return;
+        BasePage p = pages[current];
+        if (p != null) p.quietReload();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         if (Api.onUnauthorized != null) Api.onUnauthorized = null;
+        if (session != null && session.isLocal() && engineListener != null) {
+            LocalEngine.get(this).removeListener(engineListener);
+        }
     }
 }

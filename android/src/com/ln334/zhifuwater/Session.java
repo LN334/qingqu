@@ -19,6 +19,12 @@ public final class Session {
     private static final String K_SITE_ID = "site_id";
     private static final String K_SITE_NAME = "site_name";
     private static final String K_DEMO = "demo_mode";
+    private static final String K_MODE = "mode";
+
+    /** 本机模式：数据来自 SQLite，由 LocalEngine 每 5 秒推进。 */
+    public static final String MODE_LOCAL = "local";
+    /** 服务器模式：数据来自电脑上的平台服务。 */
+    public static final String MODE_SERVER = "server";
 
     public static final String DEFAULT_SITE_ID = "site-1";
     public static final String DEFAULT_SITE_NAME = "安吉·鲁家村示范站";
@@ -53,13 +59,37 @@ public final class Session {
         return !TextUtils.isEmpty(token());
     }
 
-    /** 离线演示模式：不连接服务器，使用 APK 内置的演示快照。 */
-    public boolean isDemo() {
-        return sp.getBoolean(K_DEMO, false);
+    /**
+     * 当前数据模式：local（本机 SQLite + 模拟引擎）/ server（电脑上的平台服务）。
+     * 兼容旧版本只记录了 demo_mode 的安装。
+     */
+    public String mode() {
+        String m = sp.getString(K_MODE, null);
+        if (MODE_LOCAL.equals(m) || MODE_SERVER.equals(m)) return m;
+        return sp.getBoolean(K_DEMO, false) ? MODE_LOCAL : MODE_SERVER;
     }
 
+    public void setMode(String mode) {
+        String m = MODE_LOCAL.equals(mode) ? MODE_LOCAL : MODE_SERVER;
+        sp.edit().putString(K_MODE, m).putBoolean(K_DEMO, MODE_LOCAL.equals(m)).apply();
+    }
+
+    public boolean isLocal() {
+        return MODE_LOCAL.equals(mode());
+    }
+
+    public boolean isServer() {
+        return MODE_SERVER.equals(mode());
+    }
+
+    /** 兼容旧代码：演示 = 本机模式。 */
+    public boolean isDemo() {
+        return isLocal();
+    }
+
+    /** 兼容旧代码：设置演示开关即切换数据模式。 */
     public void setDemo(boolean demo) {
-        sp.edit().putBoolean(K_DEMO, demo).apply();
+        setMode(demo ? MODE_LOCAL : MODE_SERVER);
     }
 
     public void clearToken() {
@@ -108,7 +138,7 @@ public final class Session {
     }
 
     public void logout() {
-        sp.edit().remove(K_TOKEN).remove(K_USER).remove(K_DEMO).apply();
+        sp.edit().remove(K_TOKEN).remove(K_USER).remove(K_DEMO).remove(K_MODE).apply();
     }
 
     /**

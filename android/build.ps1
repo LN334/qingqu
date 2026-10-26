@@ -106,8 +106,8 @@ Invoke-Tool $aapt2 @(
     '--java', 'build\gen',
     '--min-sdk-version', '24',
     '--target-sdk-version', '34',
-    '--version-code', '3',
-    '--version-name', '1.0.2',
+    '--version-code', '4',
+    '--version-name', '2.1.0',
     '-A', 'assets',
     '--auto-add-overlay',
     'build\res.zip'
@@ -241,7 +241,7 @@ Write-Host ("  产物   : {0}" -f $apkItem.FullName)
 Write-Host ("  大小   : {0:N0} 字节（{1:N2} MB）" -f $apkItem.Length, ($apkItem.Length / 1MB))
 Write-Host ("  SHA256 : {0}" -f $sha)
 Write-Host  '  包名   : com.ln334.zhifuwater'
-Write-Host  '  版本   : 1.0.2 (versionCode 3)'
+Write-Host  '  版本   : 2.1.0 (versionCode 4)'
 Write-Host  '  签名   : keystore\debug.jks / androiddebugkey'
 Write-Host '==========================================='
 exit 0

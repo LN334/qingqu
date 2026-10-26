@@ -18,6 +18,10 @@ import java.util.List;
  */
 public class OverviewPage extends BasePage {
 
+    /** 静默刷新（每 5 秒）时保留工艺条横向位置。 */
+    private HorizontalScrollView stripView;
+    private int stripX;
+
     OverviewPage(MainActivity host) {
         super(host);
     }
@@ -55,6 +59,7 @@ public class OverviewPage extends BasePage {
     }
 
     private void render(JSONObject data) {
+        if (stripView != null) stripX = stripView.getScrollX();
         clearBody();
         addHead();
 
@@ -69,6 +74,7 @@ public class OverviewPage extends BasePage {
         if (health != null) buildHealth(health);
         if (process != null) buildProcess(process);
         buildRecentAlarms(alarms);
+        afterRender();
     }
 
     /* ------------------------------ 站点卡片 ------------------------------ */
@@ -270,6 +276,16 @@ public class OverviewPage extends BasePage {
         }
         scroll.addView(strip, new HorizontalScrollView.LayoutParams(U.WRAP, U.WRAP));
         body.addView(scroll, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 0, 0, 12));
+        stripView = scroll;
+        final int x = stripX;
+        if (x > 0) {
+            scroll.post(new Runnable() {
+                @Override
+                public void run() {
+                    scroll.scrollTo(x, 0);
+                }
+            });
+        }
     }
 
     private View unitCard(final JSONObject unit) {

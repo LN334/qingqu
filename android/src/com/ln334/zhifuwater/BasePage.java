@@ -18,6 +18,8 @@ abstract class BasePage {
     protected final LinearLayout body;
 
     private boolean loaded;
+    private boolean quiet;
+    private int restoreY;
 
     BasePage(MainActivity host) {
         this.host = host;
@@ -47,6 +49,35 @@ abstract class BasePage {
         loaded = false;
     }
 
+    /**
+     * 静默刷新：本地引擎每 5 秒推进一次后调用，不显示加载条、不清空页面，
+     * 渲染完成后尽量恢复原来的滚动位置。
+     */
+    void quietReload() {
+        if (!alive()) return;
+        quiet = true;
+        restoreY = scroll.getScrollY();
+        load();
+    }
+
+    /** 页面渲染结束后调用：静默刷新时把滚动位置放回去。 */
+    protected void afterRender() {
+        quiet = false;
+        if (restoreY <= 0) return;
+        final int y = restoreY;
+        restoreY = 0;
+        scroll.post(new Runnable() {
+            @Override
+            public void run() {
+                scroll.scrollTo(0, y);
+            }
+        });
+    }
+
+    protected int scrollPosition() {
+        return scroll.getScrollY();
+    }
+
     abstract void load();
 
     protected abstract String pageTitle();
@@ -58,6 +89,11 @@ abstract class BasePage {
     }
 
     protected void setBusy(boolean busy) {
+        if (quiet) {
+            // 静默刷新期间不闪加载条；页面渲染结束时一并清掉静默标记
+            if (!busy) quiet = false;
+            return;
+        }
         host.busy(busy);
     }
 
@@ -92,6 +128,12 @@ abstract class BasePage {
     }
 
     protected void showError(String msg) {
+        if (quiet) {
+            // 静默刷新失败不打断用户：保留旧内容，等下一轮再试
+            quiet = false;
+            restoreY = 0;
+            return;
+        }
         setBusy(false);
         clearBody();
         addHead();
