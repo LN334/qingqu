@@ -92,6 +92,11 @@ function showLogin(message) {
   document.getElementById('shell').hidden = true;
   document.getElementById('login').hidden = false;
   if (state.wsState === 'online' && live) { live.close(); live = null; }
+  const form = $('#login-form');
+  if (form && !form.dataset.bound) {
+    form.dataset.bound = '1';
+    form.addEventListener('submit', onLoginSubmit);
+  }
   const accounts = $('#demo-accounts');
   ui.clear(accounts);
   for (const a of DEMO_ACCOUNTS) {
@@ -467,8 +472,6 @@ let wired = false;
 function wireShell() {
   if (wired) return;
   wired = true;
-
-  $('#login-form').addEventListener('submit', onLoginSubmit);
 
   window.addEventListener('hashchange', () => navigate());
 
