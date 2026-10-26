@@ -17,10 +17,10 @@ const ROUTES = [
   { id: 'inspections', title: '巡检管理', section: '运维', icon: 'inspection', file: 'inspections.js' },
   { id: 'devices', title: '设备台账', section: '运维', icon: 'device', file: 'devices.js' },
   { id: 'admin', title: '系统管理', section: '系统', icon: 'admin', file: 'admin.js' },
-  { id: 'kiosk', title: '现场触摸屏', section: '现场', icon: 'kiosk', file: 'kiosk.js' },
+  { id: 'kiosk', title: '现场触摸屏', section: '现场', icon: 'kiosk', file: 'kiosk.js', hidden: true },
 ];
 
-const PAGE_THEME = { process: 'industrial', control: 'industrial' };
+const PAGE_THEME = {};
 
 const DEMO_ACCOUNTS = [
   { username: 'admin', name: '平台管理员', role: 'super', title: '平台超级管理员' },
@@ -190,6 +190,7 @@ function renderNav() {
   ui.clear(nav);
   let lastSection = null;
   for (const route of ROUTES) {
+    if (route.hidden) continue;
     if (route.section !== lastSection) {
       lastSection = route.section;
       nav.appendChild(ui.el('div', { class: 'nav-group-label' }, route.section));
@@ -261,9 +262,9 @@ async function navigate() {
 }
 
 function setTitle(title, section) {
-  $('#page-title').textContent = title || '智赋乡水';
+  $('#page-title').textContent = title || '清渠';
   if (section) $('#crumb-section').textContent = section;
-  document.title = `${title} · 智赋乡水智慧水处理平台`;
+  document.title = `${title} · 清渠`;
 }
 
 function cleanupPage() {
