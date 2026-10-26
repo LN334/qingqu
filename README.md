@@ -1,24 +1,30 @@
-# 清渠 · 村镇水处理站智能运维平台（原生桌面 + 原生安卓）
+# 清渠 · 村镇水处理站智能运维平台
 
-面向 **100 L/h 污水处理实验展示装置** 的智能监测、远程运维与工艺数据平台，按《智赋乡水_智慧水处理平台建设方案_V2.2_定稿版》实现。
+村镇污水站通常只有一两个人值守：工艺靠经验、异常靠电话、台账靠纸。清渠把这些事搬进一套装在自己电脑和手机上的软件——实时看工艺、异常先报警、处置留痕迹、数据可追溯。
 
-v2.0 起提供两个**可以直接安装运行的原生 App**：
+v2 起提供两个**原生 App**，装完即用：
 
-- **Windows 桌面端**：C# / .NET 8 / WPF 原生界面，内置 C# 业务层（不再依赖 Node.js 与 Electron，没有 WebView）。
-- **安卓 App**：Java + Android 框架原生控件，内置 SQLite 与本机实时模拟引擎，**不连电脑也能独立运行**；也可以选择连接平台服务。
-- 仓库中仍保留 Node 版 Web 实现（`server/` + `web/`），供浏览器访问与二次开发参考。
+- **Windows 桌面端**：C# / .NET 8 / WPF 原生窗口，业务层与数据都在本机，不依赖浏览器、Node.js 或服务器。
+- **安卓 App**：Java + 框架控件 + SQLite，内置本机引擎，**不连电脑也能独立运行**；也可以连平台服务看同一份数据。
+- 仓库中保留 Web 版（`server/` + `web/`），供浏览器访问与二次开发。
 
-其它基本盘不变：两个站点（安吉·鲁家村示范站、黟县·碧山复制试点站）、11 单元工艺链、权限与数据范围、命令联锁与审计、告警/工单/巡检/化验闭环；所有实时值都标来源与时间，没有的仪表标「待接入 / 人工化验」，不编造数据。
+### 它管什么
+
+- **一座站的完整工艺链**：原料罐 → 格栅池 → 初沉池 → 配水槽 1 → BAF → PAC → PAM → 配水槽 2 → 硫自养反硝化池 → 清水池 → 废水箱，液位、pH、DO、流量、压差、加药、反冲洗每 5 秒刷新。
+- **异常先于人来**：阈值 + 持续时长 + 迟滞 + 升级的四级告警；确认、恢复、关闭全程留痕，附带 MTTA / MTTR。
+- **处置闭环**：告警或巡检异常可一键转工单，接单 → 处理 → 验收 → 关闭，责任人和时间都记录在案。
+- **数据有出处**：在线仪表与人工化验分开展示，没有的仪表明确标「待接入」，不拿估算值冒充实测。
+- **权限到站点**：6 类角色 + 站点数据范围双重校验，越界由业务层拒绝，而不是只在界面上藏按钮。
 
 ### 下载
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`Qingqu-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Setup-2.0.6.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.6/zhifu-water-mobile.apk)（约 151 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置本机引擎，不填服务器就能用 |
+| Windows 桌面版 | [`Qingqu-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Setup-2.0.6.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.6/zhifu-water-mobile.apk)（约 155 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与 SHA256 见 [Releases · v2.0.6](https://github.com/LN334/qingqu/releases/tag/v2.0.6)。仓库不提交二进制产物（见 `.gitignore`），也可按「构建」章节自行打包。
+> 全部版本与 SHA256 见 [Releases · v2.0.6](https://github.com/LN334/qingqu/releases/tag/v2.0.6)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
 ---
 
@@ -66,7 +72,7 @@ node server/index.js
 
 ---
 
-## 二、按方案实现的功能
+## 二、功能一览
 
 | 方案章节 | 平台落地 |
 | --- | --- |
