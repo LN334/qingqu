@@ -101,11 +101,13 @@ public class AlarmsPage extends BasePage {
         }
         if (filtered.isEmpty()) {
             showEmpty(filter == 0 ? "当前没有活动告警，运行平稳。" : "该分类下暂无告警。");
+            afterRender();
             return;
         }
         for (JSONObject alarm : filtered) {
             addCard(alarmCard(alarm));
         }
+        afterRender();
     }
 
     private View summaryChip(String text, int fg, int bg) {

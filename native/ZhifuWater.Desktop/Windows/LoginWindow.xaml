@@ -1,0 +1,83 @@
+﻿<Window x:Class="ZhifuWater.Desktop.Windows.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="智赋乡水 · 登录"
+        Width="1080" Height="720"
+        MinWidth="900" MinHeight="620"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource Bg}"
+        FontFamily="{DynamicResource UiFont}"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#F5F8FA" Offset="0" />
+                <GradientStop Color="#E4EEF5" Offset="0.55" />
+                <GradientStop Color="#DCE8F1" Offset="1" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Ellipse Width="560" Height="560" Fill="#0B6BB5" Opacity="0.05"
+                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-180,-140,0" IsHitTestVisible="False" />
+        <Ellipse Width="380" Height="380" Fill="#0B6BB5" Opacity="0.04"
+                 HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="-120,0,0,-120" IsHitTestVisible="False" />
+        <Border Height="4" Background="{DynamicResource Accent}" VerticalAlignment="Top" />
+
+        <Border Style="{DynamicResource DialogCard}" Width="404" Padding="28,26,28,24"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <Border Width="40" Height="40" Background="{DynamicResource Accent}" CornerRadius="3">
+                        <TextBlock Text="智" Foreground="White" FontSize="21" FontWeight="SemiBold"
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="智赋乡水" FontSize="21" FontWeight="SemiBold" Foreground="{DynamicResource Ink}" />
+                        <TextBlock Text="农村污水运维平台 · 桌面端" FontSize="11" Foreground="{DynamicResource Muted2}" Margin="0,2,0,0" />
+                    </StackPanel>
+                </StackPanel>
+
+                <Border Height="1" Background="{DynamicResource LineSoft}" Margin="0,18,0,16" />
+
+                <TextBlock Text="账号" FontSize="11" Foreground="{DynamicResource Muted}" />
+                <TextBox x:Name="AccountBox" Height="34" Margin="0,5,0,12" VerticalContentAlignment="Center"
+                         FontSize="13" MaxLength="32" />
+
+                <TextBlock Text="密码" FontSize="11" Foreground="{DynamicResource Muted}" />
+                <PasswordBox x:Name="PasswordBox" Height="34" Margin="0,5,0,4" VerticalContentAlignment="Center"
+                             FontSize="13" MaxLength="32" />
+
+                <TextBlock x:Name="ErrorText" FontSize="11.5" Foreground="{DynamicResource Bad}"
+                           TextWrapping="Wrap" Visibility="Collapsed" Margin="0,2,0,0" />
+
+                <Button x:Name="LoginButton" Content="登 录" Height="36" Margin="0,14,0,0"
+                        Style="{DynamicResource PrimaryButton}" IsDefault="True" Click="OnLoginClick" />
+
+                <Grid Margin="0,14,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Text="演示账号：admin / water123" FontSize="10.5" Foreground="{DynamicResource Muted2}"
+                               VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Content="填入演示账号" Style="{DynamicResource LinkButton}"
+                            Padding="0" Click="OnFillClick" />
+                </Grid>
+
+                <Border Background="{DynamicResource Surface2}" BorderBrush="{DynamicResource LineSoft}"
+                        BorderThickness="1" Padding="10,8" Margin="0,18,0,0">
+                    <StackPanel>
+                        <TextBlock Text="演示环境说明" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" />
+                        <TextBlock Text="数据来自本地演示引擎，无需网络。登录后可在顶部切换 site-1（鲁家村站）/ site-2（碧山站）。"
+                                   FontSize="10.5" Foreground="{DynamicResource Muted2}" TextWrapping="Wrap" Margin="0,3,0,0" />
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <TextBlock Text="v2.0 · 原生 WPF (.NET 8) · 无 WebView · 数据直连业务层"
+                   FontSize="10.5" Foreground="{DynamicResource Muted2}"
+                   HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16" />
+    </Grid>
+</Window>

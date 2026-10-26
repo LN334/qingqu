@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ZhifuWater</AssemblyName>
+    <RootNamespace>ZhifuWater.Desktop</RootNamespace>
+    <ApplicationIcon>..\..\desktop\build\icon.ico</ApplicationIcon>
+    <Version>2.0.0</Version>
+    <Company>LN334</Company>
+    <Product>智赋乡水 · 智慧水处理平台</Product>
+    <AssemblyTitle>智赋乡水</AssemblyTitle>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZhifuWater.Core\ZhifuWater.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- 首次运行的数据快照（安装包与开发输出都带上，Core 会复制到 %LOCALAPPDATA%\ZhifuWater）。 -->
+    <Content Include="..\seed\db.json" Link="seed\db.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
