@@ -21,6 +21,8 @@ const ROUTES = [
   { id: 'kiosk', title: '现场触摸屏', section: '移动端', icon: 'kiosk', file: 'kiosk.js' },
 ];
 
+const PAGE_THEME = { dashboard: 'dark', monitor: 'dark', process: 'industrial', control: 'industrial' };
+
 const DEMO_ACCOUNTS = [
   { username: 'admin', name: '平台管理员', role: 'super', title: '平台超级管理员' },
   { username: 'wang', name: '王敏', role: 'region', title: '区域管理员' },
@@ -89,6 +91,7 @@ async function boot() {
 
 /* ---------------- 登录 ---------------- */
 function showLogin(message) {
+  document.body.dataset.theme = 'light';
   document.getElementById('shell').hidden = true;
   document.getElementById('login').hidden = false;
   if (state.wsState === 'online' && live) { live.close(); live = null; }
@@ -250,6 +253,7 @@ async function navigate() {
   if (!route) route = ROUTES[0];
   state.route = route;
   state.query = query;
+  document.body.dataset.theme = PAGE_THEME[route.id] || 'light';
   highlightNav();
   setTitle(route.title, route.section);
   await renderPage(route, query);
