@@ -12,11 +12,11 @@
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`ZhifuWater-Setup-1.0.4.exe`](https://github.com/LN334/shuiwu/releases/download/v1.0.4/ZhifuWater-Setup-1.0.4.exe)（106 MB） | Electron 桌面程序，安装后自带服务与界面，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v1.0.4/zhifu-water-mobile.apk)（106 KB） | 原生 Android（Java + 框架 API，**非 WebView**），连接同一局域网内的平台服务 |
+| Windows 桌面版 | [`ZhifuWater-Setup-1.0.5.exe`](https://github.com/LN334/shuiwu/releases/download/v1.0.5/ZhifuWater-Setup-1.0.5.exe)（106 MB） | Electron 桌面程序，安装后自带服务与界面，无需另装 Node.js |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v1.0.5/zhifu-water-mobile.apk)（106 KB） | 原生 Android（Java + 框架 API，**非 WebView**），连接同一局域网内的平台服务 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与校验值见 [Releases · v1.0.4](https://github.com/LN334/shuiwu/releases/tag/v1.0.4)；仓库内不提交二进制产物（见 `.gitignore`），也可按下面「构建」章节自行打包。
+> 全部版本与校验值见 [Releases · v1.0.5](https://github.com/LN334/shuiwu/releases/tag/v1.0.5)；仓库内不提交二进制产物（见 `.gitignore`），也可按下面「构建」章节自行打包。
 
 ---
 
@@ -42,7 +42,7 @@ node server/index.js
 看到下面的横幅即启动成功：
 
 ```
-智赋乡水 · 智慧水处理平台 v1.0.4
+智赋乡水 · 智慧水处理平台 v1.0.5
   本机访问: http://127.0.0.1:8765
   演示账号: admin / water123
 ```
@@ -81,7 +81,7 @@ node scripts/build_preview.js           # 生成离线静态预览页（视觉�
 
 ### 方式二：Windows 桌面版（推荐给不装环境的电脑）
 
-1. 下载 Release 中的 `ZhifuWater-Setup-1.0.4.exe`，双击安装（可选择安装目录、创建桌面快捷方式）。
+1. 下载 Release 中的 `ZhifuWater-Setup-1.0.5.exe`，双击安装（可选择安装目录、创建桌面快捷方式）。
 2. 从桌面「智赋乡水 · 智慧水处理平台」启动。程序会在本机随机空闲端口拉起平台服务，再用内置窗口打开界面，**不需要安装 Node.js**。
 3. 运行数据保存在 `%APPDATA%\zhifu-water-desktop\data`，卸载程序不会自动删除该目录。
 
@@ -109,7 +109,7 @@ node scripts/build_preview.js           # 生成离线静态预览页（视觉�
 # 桌面安装包（Windows，需 Node.js 18+）
 cd desktop
 npm install
-npm run dist            # 产物：desktop/dist/ZhifuWater-Setup-1.0.4.exe
+npm run dist            # 产物：desktop/dist/ZhifuWater-Setup-1.0.5.exe
 
 # 安卓 APK（需 JDK 17 + Android SDK build-tools/platform 34）
 cd android
