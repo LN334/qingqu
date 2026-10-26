@@ -15,7 +15,6 @@ public sealed class AnalysisPage : PageBase
     private LineChart _daily = null!;
     private BarChart _cost = null!;
     private DataGrid _units = null!;
-    private StackPanel _notes = null!;
     private TextBlock _info = null!;
     private int _days = 7;
 
@@ -60,10 +59,6 @@ public sealed class AnalysisPage : PageBase
         costCard.Margin = new Thickness(0, 10, 0, 0);
         left.Children.Add(costCard);
 
-        _notes = new StackPanel();
-        var noteCard = Kit.Card("分析说明", _notes, null, null, new Thickness(10, 8, 10, 9));
-        noteCard.Margin = new Thickness(0, 10, 0, 0);
-        left.Children.Add(noteCard);
 
         _units = Table(new[] { "单元", "关键读数", "告警", "健康", "说明" },
             new double[] { 96, 0, 42, 44, 150 });
@@ -101,14 +96,6 @@ public sealed class AnalysisPage : PageBase
         foreach (var item in data.CostBreakdown) _cost.Bars.Add(item);
         _cost.InvalidateVisual();
 
-        _notes.Children.Clear();
-        if (data.Notes.Count == 0) _notes.Children.Add(Kit.T("暂无分析说明", 10.5, Pal.Muted));
-        foreach (var note in data.Notes)
-        {
-            var line = Kit.T("· " + note, 11, Pal.Ink2, wrap: TextWrapping.Wrap);
-            line.Margin = new Thickness(0, 1, 0, 1);
-            _notes.Children.Add(line);
-        }
 
         _units.ItemsSource = data.Units.Select(u => new UiRow
         {

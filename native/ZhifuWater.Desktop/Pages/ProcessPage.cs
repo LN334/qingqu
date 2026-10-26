@@ -41,13 +41,10 @@ public sealed class ProcessPage : PageBase
             legend.Children.Add(Kit.Row(0, dot, Kit.T(Pal.UnitStateText(state), 10.5, Pal.Muted)));
             legend.Children.Add(new Border { Width = 10 });
         }
-        legend.Children.Add(Kit.T("状态色 + 文字双通道", 10, Pal.Muted2));
 
         var top = new StackPanel();
         top.Children.Add(_summary);
         top.Children.Add(legend);
-        top.Children.Add(Kit.T("P&ID 依据 11 单元工艺顺序绘制（双排蛇形），反冲洗阶段在单元内以琥珀条显示；点击单元查看详情。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, top, null, null, new Thickness(12, 10, 12, 10)));
 
         _canvas = new ProcessCanvas { Margin = new Thickness(0, 10, 0, 0) };
@@ -57,7 +54,7 @@ public sealed class ProcessPage : PageBase
             RefreshSelection();
         };
         var pidRight = Kit.Row(8, Kit.Badge("实时状态", "accent"), Kit.T("5 秒刷新", 10, Pal.Muted2));
-        root.Children.Add(Kit.Card("P&ID 工艺流程图", _canvas, pidRight, "11 单元 · 状态色 · 反冲洗", new Thickness(8, 4, 8, 8)));
+        root.Children.Add(Kit.Card("P&ID 工艺流程图", _canvas, pidRight, null, new Thickness(8, 4, 8, 8)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
@@ -73,7 +70,7 @@ public sealed class ProcessPage : PageBase
                 RefreshSelection();
             }
         };
-        var tableCard = Kit.Card("单元状态", _table, Kit.T("点击行或流程图单元", 10, Pal.Muted2), null, new Thickness(0));
+        var tableCard = Kit.Card("单元状态", _table, null, null, new Thickness(0));
         Grid.SetColumn(tableCard, 0);
 
         _bwInfo = Kit.T("", 11, Pal.Muted2, wrap: TextWrapping.Wrap);

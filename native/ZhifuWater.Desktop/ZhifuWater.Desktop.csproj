@@ -8,7 +8,7 @@
     <AssemblyName>Qingqu</AssemblyName>
     <RootNamespace>ZhifuWater.Desktop</RootNamespace>
     <ApplicationIcon>..\..\desktop\build\icon.ico</ApplicationIcon>
-    <Version>2.0.4</Version>
+    <Version>2.0.5</Version>
     <Company>LN334</Company>
     <Product>清渠 · 村镇水处理站智能运维平台</Product>
     <AssemblyTitle>清渠</AssemblyTitle>

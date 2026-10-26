@@ -35,7 +35,7 @@
                 <Border DockPanel.Dock="Bottom" Padding="12,7,12,9">
                     <StackPanel>
                         <TextBlock x:Name="SidebarSource" FontSize="9.5" Foreground="#7E939D" TextWrapping="Wrap" />
-                        <TextBlock Text="v2.0.4" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
+                        <TextBlock Text="v2.0.5" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
                     </StackPanel>
                 </Border>
 
@@ -114,7 +114,7 @@
                     BorderBrush="{DynamicResource LineSoft}" BorderThickness="0,1,0,0">
                 <Grid Margin="14,0,12,0">
                     <TextBlock x:Name="FooterSource" FontSize="10" Foreground="{DynamicResource Muted2}"
-                               VerticalAlignment="Center" Text="数据来源：本地演示引擎" />
+                               VerticalAlignment="Center" Text="本机业务层" />
                     <TextBlock x:Name="FooterRight" FontSize="10" Foreground="{DynamicResource Muted2}"
                                VerticalAlignment="Center" HorizontalAlignment="Right" Text="最后更新 —" />
                 </Grid>

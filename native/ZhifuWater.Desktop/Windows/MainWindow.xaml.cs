@@ -363,7 +363,7 @@ public partial class MainWindow : Window
     private void OnChangePasswordClick(object sender, RoutedEventArgs e)
     {
         UserPopup.IsOpen = false;
-        var dlg = new FormDialog(this, "修改密码", "演示账号原密码为 water123；新密码至少 6 位。");
+        var dlg = new FormDialog(this, "修改密码", "原密码为 water123；新密码至少 6 位。");
         var oldBox = dlg.AddPassword("原密码");
         var newBox = dlg.AddPassword("新密码");
         var confirmBox = dlg.AddPassword("确认新密码");

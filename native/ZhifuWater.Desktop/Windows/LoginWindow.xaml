@@ -59,9 +59,9 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock Text="演示账号：admin / water123" FontSize="10.5" Foreground="{DynamicResource Muted2}"
+                    <TextBlock Text="账号 admin / 密码 water123" FontSize="10.5" Foreground="{DynamicResource Muted2}"
                                VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Content="填入演示账号" Style="{DynamicResource LinkButton}"
+                    <Button Grid.Column="1" Content="填入账号" Style="{DynamicResource LinkButton}"
                             Padding="0" Click="OnFillClick" />
                 </Grid>
 
@@ -69,7 +69,7 @@
             </StackPanel>
         </Border>
 
-        <TextBlock Text="v2.0.4"
+        <TextBlock Text="v2.0.5"
                    FontSize="10.5" Foreground="{DynamicResource Muted2}"
                    HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16" />
     </Grid>
