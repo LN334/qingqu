@@ -59,8 +59,8 @@ public partial class MainWindow : Window
         UserNameText.Text = user.Name;
         MenuName.Text = user.Name + "（" + user.Username + "）";
         MenuRole.Text = user.RoleName + (user.Role == "super" ? " · 全部站点" : " · " + string.Join("、", user.SiteIds));
-        SidebarSource.Text = "数据来源：" + services.BackendName;
-        FooterSource.Text = "数据来源：" + services.BackendName;
+        SidebarSource.Text = "本机业务层 · 每 5 秒刷新";
+        FooterSource.Text = "本机业务层";
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => UpdateClock();
@@ -258,8 +258,8 @@ public partial class MainWindow : Window
 
     private void UpdateFooter()
     {
-        FooterSource.Text = "数据来源：" + _services.BackendName + " · " + _services.Data.Site.Name;
-        FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss");
+        FooterSource.Text = "站点：" + _services.Data.Site.Name;
+        FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
     }
 
     public void UpdateBadges()
@@ -273,7 +273,7 @@ public partial class MainWindow : Window
             var unread = _services.Data.UnreadNotifications;
             BellBadge.Visibility = unread > 0 ? Visibility.Visible : Visibility.Collapsed;
             BellBadgeText.Text = unread > 99 ? "99+" : unread.ToString();
-            FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("yyyy-MM-dd HH:mm:ss");
+            FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
         }
         catch
         {

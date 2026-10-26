@@ -34,7 +34,7 @@
                     </Border>
                     <StackPanel Margin="11,0,0,0" VerticalAlignment="Center">
                         <TextBlock Text="智赋乡水" FontSize="21" FontWeight="SemiBold" Foreground="{DynamicResource Ink}" />
-                        <TextBlock Text="农村污水运维平台 · 桌面端" FontSize="11" Foreground="{DynamicResource Muted2}" Margin="0,2,0,0" />
+                        <TextBlock Text="智慧水处理平台" FontSize="11" Foreground="{DynamicResource Muted2}" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
 
@@ -65,18 +65,11 @@
                             Padding="0" Click="OnFillClick" />
                 </Grid>
 
-                <Border Background="{DynamicResource Surface2}" BorderBrush="{DynamicResource LineSoft}"
-                        BorderThickness="1" Padding="10,8" Margin="0,18,0,0">
-                    <StackPanel>
-                        <TextBlock Text="演示环境说明" FontSize="10.5" FontWeight="SemiBold" Foreground="{DynamicResource Muted}" />
-                        <TextBlock Text="数据来自本地演示引擎，无需网络。登录后可在顶部切换 site-1（鲁家村站）/ site-2（碧山站）。"
-                                   FontSize="10.5" Foreground="{DynamicResource Muted2}" TextWrapping="Wrap" Margin="0,3,0,0" />
-                    </StackPanel>
-                </Border>
+                
             </StackPanel>
         </Border>
 
-        <TextBlock Text="v2.0 · 原生 WPF (.NET 8) · 无 WebView · 数据直连业务层"
+        <TextBlock Text="v2.0.1"
                    FontSize="10.5" Foreground="{DynamicResource Muted2}"
                    HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16" />
     </Grid>
