@@ -1,4 +1,4 @@
-# 智赋乡水 · 智慧水处理平台（原生桌面 + 原生安卓）
+﻿# 智赋乡水 · 智慧水处理平台（原生桌面 + 原生安卓）
 
 面向 **100 L/h 污水处理实验展示装置** 的智能监测、远程运维与工艺数据平台，按《智赋乡水_智慧水处理平台建设方案_V2.2_定稿版》实现。
 
@@ -14,11 +14,11 @@ v2.0 起提供两个**可以直接安装运行的原生 App**：
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`ZhifuWater-Setup-2.0.1.exe`](https://github.com/LN334/shuiwu/releases/download/v2.0.1/ZhifuWater-Setup-2.0.1.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v2.0.1/zhifu-water-mobile.apk)（约 151 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置本机引擎，不填服务器就能用 |
+| Windows 桌面版 | [`ZhifuWater-Setup-2.0.2.exe`](https://github.com/LN334/shuiwu/releases/download/v2.0.2/ZhifuWater-Setup-2.0.2.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用，无需另装 Node.js |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v2.0.2/zhifu-water-mobile.apk)（约 151 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置本机引擎，不填服务器就能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与 SHA256 见 [Releases · v2.0.1](https://github.com/LN334/shuiwu/releases/tag/v2.0.1)。仓库不提交二进制产物（见 `.gitignore`），也可按「构建」章节自行打包。
+> 全部版本与 SHA256 见 [Releases · v2.0.2](https://github.com/LN334/shuiwu/releases/tag/v2.0.2)。仓库不提交二进制产物（见 `.gitignore`），也可按「构建」章节自行打包。
 
 ---
 
@@ -26,7 +26,7 @@ v2.0 起提供两个**可以直接安装运行的原生 App**：
 
 ### 方式一：Windows 桌面版（推荐）
 
-1. 下载 `ZhifuWater-Setup-2.0.1.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
+1. 下载 `ZhifuWater-Setup-2.0.2.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
 2. 从桌面「智赋乡水」启动。原生窗口，不需要浏览器、不需要 Node.js。
 3. 用演示账号登录；首次启动会把内置种子数据复制到 `%APPDATA%\ZhifuWater\data\db.json`，之后的数据读写都在本机。
 
@@ -85,7 +85,7 @@ node server/index.js
 | 系统管理 | 用户/角色/设置/通知通道/审计日志/备份与恢复 |
 | 权限与数据范围 | 6 角色 × 功能权限，站点范围双重校验；业务层拒绝越权（界面只做展示层禁用） |
 | 安卓 App | 原生 5 Tab（总览 / 告警 / 工单 / 巡检 / 我的），本机 SQLite + 5 秒实时引擎，可离线；也可连服务器 |
-| 现场触摸屏 | 原生全屏大字值守界面（1920×1080 / 1366×768）：站点状态、6 项关键读数、11 单元工艺链、最近告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
+| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；用 `ZhifuWater.exe --kiosk` 启动：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
 | 多端同源 | 桌面端与安卓端共用同一套业务规则与数据模型（桌面 C# Core、安卓 LocalCore 各自移植），Web 端可作为服务端 |
 
 ---
@@ -128,7 +128,7 @@ zhifu-water-platform/
 ├── native/                   桌面端（C# / .NET 8）
 │   ├── ZhifuWater.Core/      业务层：存储、登录、遥测、模拟引擎、告警、命令、工单、报表
 │   ├── ZhifuWater.Core.Tests/ 业务层自测（174 断言）
-│   ├── ZhifuWater.Desktop/   WPF 界面：15 个页面 + 触摸屏窗口
+│   ├── ZhifuWater.Desktop/   WPF 界面：14 个页面 + 触摸屏独立窗口（--kiosk）
 │   ├── installer/setup.nsi   NSIS 安装包脚本
 │   └── seed/db.json          首次启动的种子数据
 ├── android/                  安卓端（Java，手工打包，无 Gradle）
@@ -158,7 +158,7 @@ native\publish\ZhifuWater.exe --smoke
 
 # 安装包（NSIS）
 & "C:\Program Files (x86)\NSIS\makensis.exe" native\installer\setup.nsi
-# 产物：native/installer/ZhifuWater-Setup-2.0.1.exe
+# 产物：native/installer/ZhifuWater-Setup-2.0.2.exe
 ```
 
 ### 安卓端（需 JDK 17 + Android SDK build-tools/platform 34）

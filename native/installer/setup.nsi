@@ -4,7 +4,7 @@
 
 !define APP_NAME "智赋乡水"
 !define APP_FULL "智赋乡水 · 智慧水处理平台"
-!define APP_VERSION "2.0.1"
+!define APP_VERSION "2.0.2"
 !define APP_PUBLISHER "LN334"
 !define APP_EXE "ZhifuWater.exe"
 !define REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\ZhifuWaterNative"
