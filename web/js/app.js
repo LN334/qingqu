@@ -17,11 +17,10 @@ const ROUTES = [
   { id: 'inspections', title: '巡检管理', section: '运维', icon: 'inspection', file: 'inspections.js' },
   { id: 'devices', title: '设备台账', section: '运维', icon: 'device', file: 'devices.js' },
   { id: 'admin', title: '系统管理', section: '系统', icon: 'admin', file: 'admin.js' },
-  { id: 'mobile', title: '手机端视图', section: '移动端', icon: 'mobile', file: 'mobile.js' },
-  { id: 'kiosk', title: '现场触摸屏', section: '移动端', icon: 'kiosk', file: 'kiosk.js' },
+  { id: 'kiosk', title: '现场触摸屏', section: '现场', icon: 'kiosk', file: 'kiosk.js' },
 ];
 
-const PAGE_THEME = { dashboard: 'dark', monitor: 'dark', process: 'industrial', control: 'industrial' };
+const PAGE_THEME = { process: 'industrial', control: 'industrial' };
 
 const DEMO_ACCOUNTS = [
   { username: 'admin', name: '平台管理员', role: 'super', title: '平台超级管理员' },

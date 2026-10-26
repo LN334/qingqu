@@ -34,3 +34,5 @@ desktop.ini
 desktop/scripts/app/
 
 android/build_log.txt
+android/test/out/
+android/test/json.jar
