@@ -7,9 +7,9 @@ UI 全部由 Java 代码构建，`res/` 只放颜色、文字、样式、XML sha
 
 | 项 | 值 |
 | --- | --- |
-| APK | `dist/zhifu-water-mobile.apk`（约 92 KB） |
+| APK | `dist/zhifu-water-mobile.apk`（约 123 KB） |
 | 包名 | `com.ln334.zhifuwater` |
-| 版本 | 1.0.0（versionCode 1） |
+| 版本 | 1.0.2（versionCode 3） |
 | SDK | minSdk 24 / targetSdk 34 |
 | 启动页 | `com.ln334.zhifuwater.LoginActivity` |
 | 签名 | v2 + v3（debug 自签名，`keystore/debug.jks`，store/key 口令 `android`，alias `androiddebugkey`） |
@@ -28,9 +28,14 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 
 ## 使用
 
-1. 手机与运行平台的电脑同一局域网；
-2. 打开 App，服务器地址填 `http://电脑IP:8765`（只填 IP 时自动补 `:8765`），账号 `admin`，密码 `water123`；
-3. 登录后底部 5 个 Tab：总览 / 告警 / 工单 / 巡检 / 我的；顶栏右上角刷新，站点行可切换 site-1 / site-2。
+两种进入方式：
+
+1. **离线演示（默认推荐）**：打开 App 直接点「直接进入演示（无需服务器）」，无需填写地址，也不需要电脑在旁边。
+   演示数据是构建时从平台抓取的接口快照，打包在 APK 的 `assets/demo/` 内；告警确认、工单流转、巡检提交都只修改手机内存里的这份数据，退出即恢复。
+2. **连接真实服务器**：手机与运行平台的电脑同一局域网，服务器地址填 `http://电脑IP:8765`（只填 IP 时自动补 `:8765`），账号 `admin`，密码 `water123`。
+
+进入后底部 5 个 Tab：总览 / 告警 / 工单 / 巡检 / 我的；顶栏右上角刷新，站点行可切换 site-1 / site-2。
+在「我的 → 连接设置」里可以随时在「离线演示」和「真实服务器」之间切换。
 
 ## 页面与接口
 
@@ -54,6 +59,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 
 - 巡检提交的 `result` 用服务端实际接受的 `ok / attention / abnormal`（平台 `server/api/ops.js` 只认这三个值，任务书里的 `normal` 会被 400 拒绝）；界面上仍显示「正常 / 关注 / 异常」。
 - 工艺单元实际返回 12 个（任务书写 11 个，按接口真实数据渲染，横向滚动）。
-- 无消息推送、无离线缓存、无图表绘制（KPI 用卡片与大号数字表达，趋势数据未画曲线）。
+- 无消息推送、无图表绘制（KPI 用卡片与大号数字表达，趋势数据未画曲线）。
+- 离线演示是**构建时的数据快照**（`assets/demo/*.json`），时间不会走动；需要实时数据时切到真实服务器。
 - 未做深色模式、平板适配与多语言（仅简体中文）。
 - 本机没有可用的安卓设备/模拟器（adb devices 为空、SDK 无 system-images），因此只完成编译、打包、签名与包信息校验，未做真机安装验证。

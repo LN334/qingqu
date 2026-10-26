@@ -18,6 +18,7 @@ public final class Session {
     private static final String K_USERNAME = "username";
     private static final String K_SITE_ID = "site_id";
     private static final String K_SITE_NAME = "site_name";
+    private static final String K_DEMO = "demo_mode";
 
     public static final String DEFAULT_SITE_ID = "site-1";
     public static final String DEFAULT_SITE_NAME = "安吉·鲁家村示范站";
@@ -50,6 +51,15 @@ public final class Session {
 
     public boolean isLoggedIn() {
         return !TextUtils.isEmpty(token());
+    }
+
+    /** 离线演示模式：不连接服务器，使用 APK 内置的演示快照。 */
+    public boolean isDemo() {
+        return sp.getBoolean(K_DEMO, false);
+    }
+
+    public void setDemo(boolean demo) {
+        sp.edit().putBoolean(K_DEMO, demo).apply();
     }
 
     public void clearToken() {
@@ -98,7 +108,7 @@ public final class Session {
     }
 
     public void logout() {
-        sp.edit().remove(K_TOKEN).remove(K_USER).apply();
+        sp.edit().remove(K_TOKEN).remove(K_USER).remove(K_DEMO).apply();
     }
 
     /**

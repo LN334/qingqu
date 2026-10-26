@@ -104,11 +104,25 @@ public class LoginActivity extends Activity {
         });
         card.addView(loginButton, U.lpWith(this, U.MATCH, U.dp(this, 50), 0, 18, 0, 0));
 
+        TextView demoButton = U.ghostButton(this, "直接进入演示（无需服务器）");
+        demoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                enterDemo();
+            }
+        });
+        card.addView(demoButton, U.lpWith(this, U.MATCH, U.dp(this, 46), 0, 10, 0, 0));
+
+        TextView demoHint = U.tv(this, "演示模式不连接电脑，数据为内置快照。",
+                10.5f, U.MUTED2, false);
+        demoHint.setLineSpacing(U.dp(this, 2), 1f);
+        card.addView(demoHint, U.lpWith(this, U.MATCH, U.WRAP, 0, 10, 0, 0));
+
         TextView footer = U.tv(this, "平台演示账号 admin / water123", 11.5f, U.MUTED2, false);
         footer.setGravity(Gravity.CENTER);
         page.addView(footer, U.lpWith(this, U.MATCH, U.WRAP, 0, 18, 0, 0));
 
-        TextView version = U.tv(this, "v1.0.0 · 原生安卓客户端", 10.5f, U.MUTED2, false);
+        TextView version = U.tv(this, "v1.0.2 · 原生安卓客户端", 10.5f, U.MUTED2, false);
         version.setGravity(Gravity.CENTER);
         page.addView(version, U.lpWith(this, U.MATCH, U.WRAP, 0, 6, 0, 0));
 
@@ -198,6 +212,18 @@ public class LoginActivity extends Activity {
                 goMain();
             }
         });
+    }
+
+    private void enterDemo() {
+        Session s = Session.of(this);
+        s.setDemo(true);
+        s.setToken("demo");
+        s.setUsername("admin");
+        s.setBaseUrl("");
+        s.setUser(Demo.user(this));
+        s.setSite(Session.DEFAULT_SITE_ID, Session.DEFAULT_SITE_NAME);
+        U.toast(this, "已进入离线演示");
+        goMain();
     }
 
     private void goMain() {

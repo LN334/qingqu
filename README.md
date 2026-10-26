@@ -6,14 +6,14 @@
 - **单站先落地、多站可复制**：内置 2 个站点（安吉·鲁家村示范站、黟县·碧山复制试点站），其中 2 号站为精简复制版。
 - **零外部依赖**：只用 Node.js 标准库与本机文件存储，不联网、不装数据库，解压目录即可运行。
 - **数据有来源**：所有实时值标注来源与数据时间；无仪表、无在线分析的指标一律标「待接入 / 人工化验」，不做假数据。
-- **三种用法**：源码直接运行（Web 版） / Windows 桌面安装包（内置服务，双击即用） / 原生安卓 App（Java 编写，直连平台 API）。
+- **三种用法**：源码直接运行（Web 版） / Windows 桌面安装包（内置服务，双击即用） / 原生安卓 App（Java 编写，内置离线演示数据，也可直连平台 API）。
 
 ### 下载
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
 | Windows 桌面版 | [`ZhifuWater-Setup-1.0.6.exe`](https://github.com/LN334/shuiwu/releases/download/v1.0.6/ZhifuWater-Setup-1.0.6.exe)（107 MB） | Electron 桌面程序，安装后自带服务与界面，无需另装 Node.js |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v1.0.6/zhifu-water-mobile.apk)（106 KB） | 原生 Android（Java + 框架 API，**非 WebView**），连接同一局域网内的平台服务 |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/shuiwu/releases/download/v1.0.6/zhifu-water-mobile.apk)（123 KB） | 原生 Android（Java + 框架 API，**非 WebView**）；内置离线演示数据，不连电脑也能直接看；也可连同一局域网内的平台服务 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
 > 全部版本与校验值见 [Releases · v1.0.6](https://github.com/LN334/shuiwu/releases/tag/v1.0.6)；仓库内不提交二进制产物（见 `.gitignore`），也可按下面「构建」章节自行打包。
@@ -98,10 +98,10 @@ node scripts/build_preview.js           # 生成离线静态预览页（视觉�
 ### 方式三：安卓 App（原生）
 
 1. 下载 Release 中的 `zhifu-water-mobile.apk`，在手机上允许「安装未知来源应用」后安装。
-2. 保证手机与运行平台的电脑在**同一局域网**，在 App 登录页填写服务器地址，例如 `http://192.168.1.20:8765`（电脑端 `ipconfig` 可查 IPv4）。
-3. 用 `admin / water123` 登录。底部 5 个 Tab：总览、告警、工单、巡检、我的。
+2. **不想连电脑**：打开 App 点「直接进入演示（无需服务器）」即可浏览总览、告警、工单与巡检；确认告警、流转工单、提交巡检都在本机生效。
+3. **要看实时数据**：保证手机与运行平台的电脑在**同一局域网**，在登录页填写服务器地址，例如 `http://192.168.1.20:8765`（电脑端 `ipconfig` 可查 IPv4），用 `admin / water123` 登录。
 
-> 说明：安卓端是**完全原生**的 Java 客户端（Activity + 框架 View + HttpURLConnection + JSON），不使用 WebView、Gradle、androidx 或任何第三方库；只调用平台公开的 REST 接口，与 Web 端共用同一套账号、权限与数据。首次启动会提示允许明文 HTTP（局域网演示环境）。
+> 说明：安卓端是**完全原生**的 Java 客户端（Activity + 框架 View + HttpURLConnection + JSON），不使用 WebView、Gradle、androidx 或任何第三方库。离线演示使用构建时抓取并打包进 APK 的接口快照（`android/assets/demo/`），不读写平台数据；连接服务器时走平台公开的 REST 接口，与 Web 端共用同一套账号、权限与数据。首次启动会提示允许明文 HTTP（局域网演示环境）。
 
 ### 构建（可选）
 
@@ -241,7 +241,7 @@ node scripts/smoke.js
 2. 文件存储在单机、单进程下可靠；多实例并发写需改用数据库。
 3. 报表 CSV 为 UTF-8 BOM 编码，适合 Excel；正式报表模板（Word/PDF）需按方案第 11 章扩展。
 4. 通知通道为「模拟发送」（站内通知必达，短信/微信/邮件记录发送结果），接入真实通道需配置供应商密钥。
-5. 手机端有两种形态：Web 端 `#/mobile` 响应式工作台，以及 Release 中的原生安卓 App；两者都要求能访问平台服务（同一局域网）。Web 版未做离线缓存，断网补传在方案中属现场边缘网关职责。
+5. 手机端有两种形态：Web 端 `#/mobile` 响应式工作台（需访问平台服务），以及 Release 中的原生安卓 App（**内置离线演示数据，可不连服务器使用**；连服务器时为实时数据）。Web 版未做离线缓存，断网补传在方案中属现场边缘网关职责。
 6. 桌面版使用 Electron 内置窗口，未做自动更新（electron-updater）；升级需下载新安装包覆盖安装。
 7. 本平台是方案 V2.2 的**演示实现**，用于评审、演示与后续开发的基线，不替代现场 PLC 安全联锁。
 

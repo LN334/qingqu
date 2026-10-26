@@ -106,8 +106,9 @@ Invoke-Tool $aapt2 @(
     '--java', 'build\gen',
     '--min-sdk-version', '24',
     '--target-sdk-version', '34',
-    '--version-code', '2',
-    '--version-name', '1.0.1',
+    '--version-code', '3',
+    '--version-name', '1.0.2',
+    '-A', 'assets',
     '--auto-add-overlay',
     'build\res.zip'
 ) 'aapt2 link'
@@ -149,6 +150,29 @@ Write-Host ("    classes.dex : {0:N0} 字节" -f (Get-Item 'build\dex\classes.de
 # ---------------------------------------------------------------- 5 装入 APK
 Write-Step '打入 classes.dex'
 Invoke-Tool $jar @('uf', 'build\unsigned.apk', '-C', 'build\dex', 'classes.dex') 'jar 写入 classes.dex'
+
+# ---------------------------------------------------------------- 5.5 资源路径规范化
+# Windows 下 aapt2 可能把 assets 子目录写成反斜杠，Android AssetManager 只认正斜杠。
+Write-Step '规范化 assets 路径（反斜杠改为 /）'
+Add-Type -AssemblyName System.IO.Compression.FileSystem | Out-Null
+$inApk = (Resolve-Path 'build\unsigned.apk').Path
+$tmpApk = Join-Path $root 'build\unsigned_norm.apk'
+$srcZip = [System.IO.Compression.ZipFile]::OpenRead($inApk)
+try {
+    $dstZip = [System.IO.Compression.ZipFile]::Open($tmpApk, 'Create')
+    try {
+        foreach ($entry in $srcZip.Entries) {
+            $name = $entry.FullName.Replace('\', '/')
+            $newEntry = $dstZip.CreateEntry($name, [System.IO.Compression.CompressionLevel]::Optimal)
+            $newEntry.LastWriteTime = $entry.LastWriteTime
+            $inStream = $entry.Open()
+            $outStream = $newEntry.Open()
+            try { $inStream.CopyTo($outStream) } finally { $outStream.Close(); $inStream.Close() }
+        }
+    } finally { $dstZip.Dispose() }
+} finally { $srcZip.Dispose() }
+Remove-Item 'build\unsigned.apk' -Force
+Move-Item $tmpApk 'build\unsigned.apk'
 
 # ---------------------------------------------------------------- 6 zipalign
 Write-Step 'zipalign：4 字节对齐'
@@ -217,7 +241,7 @@ Write-Host ("  产物   : {0}" -f $apkItem.FullName)
 Write-Host ("  大小   : {0:N0} 字节（{1:N2} MB）" -f $apkItem.Length, ($apkItem.Length / 1MB))
 Write-Host ("  SHA256 : {0}" -f $sha)
 Write-Host  '  包名   : com.ln334.zhifuwater'
-Write-Host  '  版本   : 1.0.1 (versionCode 2)'
+Write-Host  '  版本   : 1.0.2 (versionCode 3)'
 Write-Host  '  签名   : keystore\debug.jks / androiddebugkey'
 Write-Host '==========================================='
 exit 0

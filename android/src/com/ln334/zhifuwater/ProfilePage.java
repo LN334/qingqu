@@ -166,21 +166,27 @@ public class ProfilePage extends BasePage {
 
         // 连接设置
         addSection("连接设置", null, null);
+        boolean demo = session.isDemo();
         LinearLayout server = U.card(ctx);
-        server.addView(U.tv(ctx, "服务器地址", 11.5f, U.MUTED, true));
-        TextView urlView = U.tv(ctx, session.baseUrl().length() == 0 ? "未设置" : session.baseUrl(),
+        server.addView(U.tv(ctx, demo ? "数据来源" : "服务器地址", 11.5f, U.MUTED, true));
+        TextView urlView = U.tv(ctx, demo ? "离线演示 · 内置快照" : (session.baseUrl().length() == 0 ? "未设置" : session.baseUrl()),
                 13, U.INK, true);
         urlView.setPadding(0, U.dp(ctx, 4), 0, 0);
         server.addView(urlView);
-        TextView change = U.ghostButton(ctx, "修改服务器地址");
+        TextView change = U.ghostButton(ctx, demo ? "连接真实服务器" : "修改服务器地址");
         change.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                changeServer();
+                if (session.isDemo()) {
+                    connectServer();
+                } else {
+                    changeServer();
+                }
             }
         });
         server.addView(change, U.lpWith(ctx, U.MATCH, U.dp(ctx, 44), 0, 12, 0, 0));
-        TextView tip = U.tv(ctx, "修改服务器后需要重新登录，令牌会失效。", 10.5f, U.MUTED2, false);
+        TextView tip = U.tv(ctx, demo ? "连接服务器可查看实时数据，需要重新登录。" : "修改服务器后需要重新登录，令牌会失效。",
+                10.5f, U.MUTED2, false);
         server.addView(tip, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 8, 0, 0));
         addCard(server);
 
@@ -263,6 +269,17 @@ public class ProfilePage extends BasePage {
             }
         });
         return card;
+    }
+
+    private void connectServer() {
+        session.setDemo(false);
+        session.clearToken();
+        session.setUser(null);
+        Api.onUnauthorized = null;
+        Intent intent = new Intent(host, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        host.startActivity(intent);
+        host.finish();
     }
 
     private void changeServer() {
