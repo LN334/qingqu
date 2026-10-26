@@ -132,7 +132,7 @@ public sealed class DashboardPage : PageBase
             _trendChips.Add((code, button, label, hex));
             chips.Children.Add(button);
         }
-        return Kit.Card("24 小时关键趋势", _trend, chips, "默认展示原料罐液位；点击指标名可叠加对比（叠加时按各自量程归一）", new Thickness(8, 4, 8, 4));
+        return Kit.Card("24 小时关键趋势", _trend, chips, null, new Thickness(8, 4, 8, 4));
     }
 
     private void ToggleTrend(string code)

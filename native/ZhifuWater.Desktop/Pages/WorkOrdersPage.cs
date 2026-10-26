@@ -72,7 +72,7 @@ public sealed class WorkOrdersPage : PageBase
                 ShowDetail();
             }
         };
-        var tableCard = Kit.Card("工单列表", _table, Kit.T("写操作后自动刷新", 10, Pal.Muted2), null, new Thickness(10, 8, 10, 8));
+        var tableCard = Kit.Card("工单列表", _table, null, null, new Thickness(10, 8, 10, 8));
 
         _detail = new StackPanel();
         var detailCard = Kit.Card("工单详情", Kit.Scroll(_detail, 0), null, null, new Thickness(10, 8, 10, 8));

@@ -252,7 +252,7 @@ public sealed class AdminPage : PageBase
         var body = new StackPanel();
         body.Children.Add(_channels);
         body.Children.Add(actions);
-        body.Children.Add(Kit.T("通知通道用于告警与工单提醒；演示模式下测试消息只写入本地通知，不会真正外发。", 10, Pal.Muted2));
+        body.Children.Add(Kit.T("测试消息只写入本地通知，不会外发。", 10, Pal.Muted2));
         _body.Children.Add(Kit.Card("通知通道", body, null, "短信 / 企业微信 / 邮件 / Webhook", new Thickness(10, 8, 10, 8)));
     }
 
@@ -297,7 +297,7 @@ public sealed class AdminPage : PageBase
         var body = new StackPanel();
         body.Children.Add(_backups);
         body.Children.Add(actions);
-        body.Children.Add(Kit.T("恢复备份会用快照覆盖当前演示数据，操作不可撤销；每次恢复都会记入审计。", 10, Pal.Muted2));
+        body.Children.Add(Kit.T("恢复备份会覆盖当前数据，操作不可撤销。", 10, Pal.Muted2));
         _body.Children.Add(Kit.Card("数据备份", body, null, "本地 JSON 快照", new Thickness(10, 8, 10, 8)));
     }
 
