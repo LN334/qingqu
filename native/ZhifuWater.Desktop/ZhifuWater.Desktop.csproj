@@ -5,13 +5,13 @@
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyName>ZhifuWater</AssemblyName>
+    <AssemblyName>Qingqu</AssemblyName>
     <RootNamespace>ZhifuWater.Desktop</RootNamespace>
     <ApplicationIcon>..\..\desktop\build\icon.ico</ApplicationIcon>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Company>LN334</Company>
-    <Product>智赋乡水 · 智慧水处理平台</Product>
-    <AssemblyTitle>智赋乡水</AssemblyTitle>
+    <Product>清渠 · 村镇水处理站智能运维平台</Product>
+    <AssemblyTitle>清渠</AssemblyTitle>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <InvariantGlobalization>false</InvariantGlobalization>
   </PropertyGroup>

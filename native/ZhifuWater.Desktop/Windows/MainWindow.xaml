@@ -1,7 +1,7 @@
 ﻿<Window x:Class="ZhifuWater.Desktop.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="智赋乡水 · 智慧水处理平台"
+        Title="清渠 · 村镇水处理站智能运维平台"
         Width="1440" Height="900" MinWidth="1180" MinHeight="720"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Bg}"
@@ -20,12 +20,12 @@
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <Border Width="26" Height="26" Background="{DynamicResource Accent}" CornerRadius="2">
-                                <TextBlock Text="智" Foreground="White" FontSize="14" FontWeight="SemiBold"
+                                <TextBlock Text="清" Foreground="White" FontSize="14" FontWeight="SemiBold"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="智赋乡水" Foreground="#F2F7F8" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="智慧水处理平台" Foreground="#7E939D" FontSize="9.5" />
+                                <TextBlock Text="清渠" Foreground="#F2F7F8" FontSize="14" FontWeight="SemiBold" />
+                                <TextBlock Text="村镇水处理站智能运维平台" Foreground="#7E939D" FontSize="9.5" />
                             </StackPanel>
                         </StackPanel>
                         <Border Height="1" Background="#1E2B33" Margin="0,11,0,0" />
@@ -35,7 +35,7 @@
                 <Border DockPanel.Dock="Bottom" Padding="12,7,12,9">
                     <StackPanel>
                         <TextBlock x:Name="SidebarSource" FontSize="9.5" Foreground="#7E939D" TextWrapping="Wrap" />
-                        <TextBlock Text="v2.0.2" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
+                        <TextBlock Text="v2.0.3" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
                     </StackPanel>
                 </Border>
 
