@@ -386,7 +386,7 @@ function seedOps(now, assets) {
     platformName: '清渠 · 村镇水处理站智能运维平台',
     shortName: '清渠',
     orgName: '清渠（示范项目组）',
-    version: '2.0.6',
+    version: '2.0.7',
     docVersion: 'V2.2',
     demoMode: true,
     dataRetentionDays: 7,
