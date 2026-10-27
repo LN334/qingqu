@@ -153,6 +153,44 @@ public sealed class LineChart : FrameworkElement
         e.Handled = true;
     }
 
+    /// <summary>按可见跨度挑横轴步长：保证刻度间距不小于约 86px，步长取自 1/2/5/10/15/30 分、1/2/3/6/12 小时、1/2/7/14/30 天。</summary>
+    private static TimeSpan PickTimeStep(double spanMs, double plotW)
+    {
+        var candidates = new[]
+        {
+            TimeSpan.FromMinutes(1), TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(5), TimeSpan.FromMinutes(10),
+            TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(30), TimeSpan.FromHours(1), TimeSpan.FromHours(2),
+            TimeSpan.FromHours(3), TimeSpan.FromHours(6), TimeSpan.FromHours(12), TimeSpan.FromDays(1),
+            TimeSpan.FromDays(2), TimeSpan.FromDays(7), TimeSpan.FromDays(14), TimeSpan.FromDays(30),
+        };
+        const double minGap = 86; // 最宽标签「10-26 00:00」约 66px，再留 20px 空档
+        foreach (var step in candidates)
+        {
+            var intervals = spanMs / step.TotalMilliseconds;
+            if (intervals > 0 && plotW / intervals >= minGap) return step;
+        }
+        return candidates[^1];
+    }
+
+    /// <summary>把时刻向上取整到步长边界：不足 1 天的步长对齐本地整点，≥ 1 天的步长对齐本地零点并按整天序号归位。</summary>
+    private static DateTimeOffset FirstTickAtOrAfter(DateTimeOffset t, TimeSpan step)
+    {
+        var stepMs = step.TotalMilliseconds;
+        var dayMs = TimeSpan.FromDays(1).TotalMilliseconds;
+        if (stepMs >= dayMs)
+        {
+            var midnight = new DateTimeOffset(t.Date, t.Offset);
+            if (midnight < t) midnight = midnight.AddDays(1);
+            var days = (long)Math.Round(stepMs / dayMs);
+            var dayIndex = (long)Math.Floor((midnight - DateTimeOffset.UnixEpoch).TotalDays);
+            var rem = ((dayIndex % days) + days) % days;
+            return rem == 0 ? midnight : midnight.AddDays(days - rem);
+        }
+        var dayStart = new DateTimeOffset(t.Date, t.Offset);
+        var snapped = Math.Ceiling((t - dayStart).TotalMilliseconds / stepMs) * stepMs;
+        return dayStart.AddMilliseconds(snapped);
+    }
+
     protected override Size MeasureOverride(Size availableSize)
     {
         var width = double.IsInfinity(availableSize.Width) ? 600 : availableSize.Width;
@@ -218,34 +256,88 @@ public sealed class LineChart : FrameworkElement
             }
             else if (ShowYLabels && i == 0 && perSeries)
             {
-                ChartDraw.Draw(this, dc, "按各自量程", new Point(plot.Left - 6, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
+                ChartDraw.Draw(this, dc, "各量程", new Point(plot.Left - 6, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
             }
         }
-        if (ShowYLabels && !string.IsNullOrEmpty(YUnit) && inlineUnit.Length == 0)
+        if (ShowYLabels && !perSeries && !string.IsNullOrEmpty(YUnit) && inlineUnit.Length == 0)
             ChartDraw.Draw(this, dc, YUnit, new Point(6, plot.Top - 2), 9.5, Pal.Muted2);
 
-        // 横轴时间标签
-        var labelCount = w > 700 ? 5 : 4;
-        var crossesDay = byTime && (maxT - minT) <= 26L * 3600 * 1000
-            && DateTimeOffset.FromUnixTimeMilliseconds((long)minT).LocalDateTime.Date
-               != DateTimeOffset.FromUnixTimeMilliseconds((long)maxT).LocalDateTime.Date;
-        var prevDate = DateTime.MinValue;
-        for (var i = 0; i < labelCount; i++)
+        // 横轴时间刻度：步长取「好看的」整点/整天，并对齐到本地零点，读得出 0 点、6 点、换班时间
+        if (byTime)
         {
-            var frac = labelCount == 1 ? 0 : i / (double)(labelCount - 1);
-            var x = plot.Left + plotW * frac;
-            dc.DrawLine(axisPen, new Point(x, plot.Bottom), new Point(x, plot.Bottom + 3));
-            if (byTime)
+            var spanMs = maxT - minT;
+            var step = PickTimeStep(spanMs, plotW);
+            var minLocal = DateTimeOffset.FromUnixTimeMilliseconds((long)minT).ToLocalTime();
+            var maxLocal = DateTimeOffset.FromUnixTimeMilliseconds((long)maxT).ToLocalTime();
+            var dateOnly = spanMs > 26L * 3600 * 1000;
+            var crossesDay = !dateOnly && minLocal.Date != maxLocal.Date;
+            // 候选标注点：左端窗口起点 → 整点刻度 → 右端「现在」。横轴不以刻度收尾，两端各钉一个真实时刻，
+            // 这样右端不会因为「最后一个整点还差几十分钟」而空出一段没有标注的死白。
+            var marks = new List<(DateTimeOffset T, int End)> { (minLocal, -1) };
+            for (var t = FirstTickAtOrAfter(minLocal, step); t <= maxLocal; t = t.Add(step)) marks.Add((t, 0));
+            marks.Add((maxLocal, 1));
+
+            var prevDate = DateTime.MinValue;
+            var labels = new List<(string Text, double X, double Width, int End)>();
+            foreach (var (t, end) in marks)
             {
-                var span = maxT - minT;
-                var fmt = span > 26L * 3600 * 1000 ? "MM-dd" : "HH:mm";
-                var t = DateTimeOffset.FromUnixTimeMilliseconds((long)(minT + (maxT - minT) * frac)).LocalDateTime;
-                // 跨天时把日期并入「每天的第一个刻度」，这样昨天、今天各出现一次日期，而不是只有最右端带着日期
-                var label = crossesDay && t.Date != prevDate ? t.ToString("MM-dd HH:mm") : t.ToString(fmt);
+                // 跨天时日期并入「每天的第一个标注」，昨天、今天各出现一次日期
+                var showDate = crossesDay && t.Date != prevDate;
                 prevDate = t.Date;
-                ChartDraw.Draw(this, dc, label, new Point(x, plot.Bottom + 5), 9.5, Pal.Muted2,
-                    i == 0 ? TextAlignment.Left : i == labelCount - 1 ? TextAlignment.Right : TextAlignment.Center);
+                // 左端起点只写日期：它是"窗口从哪天开始"，写全时刻会挤掉紧挨着的整点刻度
+                var text = dateOnly || (end < 0 && crossesDay) ? t.ToString("MM-dd")
+                    : showDate ? t.ToString("MM-dd HH:mm")
+                    : t.ToString("HH:mm");
+                var x = plot.Left + plotW * (t.ToUnixTimeMilliseconds() - minT) / spanMs;
+                labels.Add((text, x, ChartDraw.Text(text, 9.5, Pal.Muted2, this).Width, end));
             }
+
+            // 先定落位（中间的刻度碰到画布边就改成靠边对齐），碰撞判定与绘制共用这一份几何，
+            // 否则会出现「算的时候说不撞、画的时候撞上」，把该保留的端点日期挤掉。
+            var place = new (double Anchor, TextAlignment Align)[labels.Count];
+            for (var i = 0; i < labels.Count; i++)
+            {
+                var (_, lx, lw, lend) = labels[i];
+                if (lend < 0) place[i] = (lx, TextAlignment.Left);
+                else if (lend > 0) place[i] = (lx, TextAlignment.Right);
+                else if (lx - lw / 2 < plot.Left) place[i] = (Math.Max(lx, plot.Left), TextAlignment.Left);
+                else if (lx + lw / 2 > plot.Right) place[i] = (Math.Min(lx, plot.Right), TextAlignment.Right);
+                else place[i] = (lx, TextAlignment.Center);
+            }
+
+            (double L, double R) Box(int i)
+            {
+                var (anchor, align) = place[i];
+                var w = labels[i].Width;
+                return align == TextAlignment.Left ? (anchor, anchor + w)
+                    : align == TextAlignment.Right ? (anchor - w, anchor)
+                    : (anchor - w / 2, anchor + w / 2);
+            }
+
+            var keep = new bool[labels.Count];
+            for (var i = 0; i < keep.Length; i++) keep[i] = true;
+            var last = labels.Count - 1;
+            // 右端「现在」优先保留：撞上它的整点刻度让位；现在正好压在整点上时文案重复，也只留右端
+            for (var i = 1; i < last; i++)
+                if (labels[i].Text == labels[last].Text || Box(i).R + 8 > Box(last).L) keep[i] = false;
+            // 左端起点只负责说明「窗口从哪开始」，被第一个整点刻度压住时让位（刻度才是读点，起点让刻度）
+            var firstTick = -1;
+            for (var i = 1; i < last; i++)
+                if (keep[i]) { firstTick = i; break; }
+            if (firstTick > 0 && Box(0).R + 8 > Box(firstTick).L) keep[0] = false;
+
+            for (var i = 0; i < labels.Count; i++)
+            {
+                if (!keep[i]) continue;
+                var (text, x, _, end) = labels[i];
+                if (end == 0) dc.DrawLine(axisPen, new Point(x, plot.Bottom), new Point(x, plot.Bottom + 3));
+                ChartDraw.Draw(this, dc, text, new Point(place[i].Anchor, plot.Bottom + 5), 9.5, Pal.Muted2, place[i].Align);
+            }
+
+            // 左端那截「前一天的尾巴」被日界刻度挤掉轴下标注时，把它的日期写进图内左下角：
+            // 轴下那一行留给整点读点，日期不至于整段消失（用户提过「25 号怎么不显示」）。
+            if (!keep[0] && crossesDay && minLocal.Date != maxLocal.Date)
+                ChartDraw.Draw(this, dc, minLocal.ToString("MM-dd"), new Point(plot.Left + 2, plot.Bottom - 14), 9.5, Pal.Muted2, TextAlignment.Left);
         }
 
         // 各条曲线（按可见时间窗裁剪）

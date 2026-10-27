@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -79,6 +79,14 @@ public static class Smoke
 
             var webView = typeof(App).Assembly.GetTypes().Where(t => t.FullName != null && t.FullName.Contains("WebView", StringComparison.OrdinalIgnoreCase)).ToList();
             if (webView.Count > 0) throw new InvalidOperationException("检测到 WebView 依赖：" + string.Join(",", webView.Select(t => t.FullName)));
+
+            var lnkTest = Path.Combine(Path.GetTempPath(), "qingqu-shortcut-selftest.lnk");
+            try { if (File.Exists(lnkTest)) File.Delete(lnkTest); } catch { }
+            var lnkMade = ShortcutGuard.Create(lnkTest, Environment.ProcessPath ?? string.Empty);
+            var lnkOk = lnkMade && File.Exists(lnkTest);
+            try { if (File.Exists(lnkTest)) File.Delete(lnkTest); } catch { }
+            SmokeConsole.WriteLine((lnkOk ? "SHORTCUT-SELFTEST OK " : "SHORTCUT-SELFTEST FAILED ") + lnkTest);
+            if (!lnkOk) throw new InvalidOperationException("桌面快捷方式自修复不可用（WScript.Shell 未生成 .lnk）");
 
             SmokeConsole.WriteLine($"DESKTOP-SMOKE OK pages={pages} kiosk={units} main={mainMs}ms total={sw.ElapsedMilliseconds}ms");
             if (shots) SmokeConsole.WriteLine("DESKTOP-SHOTS " + shotDir);
