@@ -20,12 +20,12 @@ v2 起提供两个**原生 App**，装完即用：
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`Qingqu-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Setup-2.0.6.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
-| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.6.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.6/Qingqu-Kiosk-Setup-2.0.6.exe)（约 49 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.6/zhifu-water-mobile.apk)（约 155 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
+| Windows 桌面版 | [`Qingqu-Setup-2.0.7.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.7/Qingqu-Setup-2.0.7.exe)（约 46 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
+| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.7.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.7/Qingqu-Kiosk-Setup-2.0.7.exe)（约 49 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.7/zhifu-water-mobile.apk)（约 155 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与 SHA256 见 [Releases · v2.0.6](https://github.com/LN334/qingqu/releases/tag/v2.0.6)。仓库不提交二进制产物，也可按「构建」章节自行打包。
+> 全部版本与 SHA256 见 [Releases · v2.0.7](https://github.com/LN334/qingqu/releases/tag/v2.0.7)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
 ---
 
@@ -33,7 +33,7 @@ v2 起提供两个**原生 App**，装完即用：
 
 ### 方式一：Windows 桌面版（推荐）
 
-1. 下载 `Qingqu-Setup-2.0.6.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
+1. 下载 `Qingqu-Setup-2.0.7.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
 2. 从桌面「清渠」启动。原生窗口，不需要浏览器、不需要 Node.js。
 3. 用演示账号登录；首次启动会把内置种子数据复制到 `%LOCALAPPDATA%\ZhifuWater\data\db.json`，之后的数据读写都在本机。
 
@@ -56,7 +56,7 @@ node server/index.js
 
 浏览器打开 **http://127.0.0.1:8765**（需 Node.js 18+，无其他依赖）。Windows 也可双击 `启动平台.bat`。
 
-Web 端与桌面端同为 2.0.6：品牌、浅色水务蓝界面、数据模型一致；现场触摸屏入口不在侧栏，直接访问 `http://127.0.0.1:8765/#/kiosk` 进入全屏视图。
+Web 端与桌面端同为 2.0.7：品牌、浅色水务蓝界面、数据模型一致；现场触摸屏入口不在侧栏，直接访问 `http://127.0.0.1:8765/#/kiosk` 进入全屏视图。
 
 ### 演示账号
 
@@ -94,7 +94,7 @@ Web 端与桌面端同为 2.0.6：品牌、浅色水务蓝界面、数据模型�
 | 系统管理 | 用户/角色/设置/通知通道/审计日志/备份与恢复 |
 | 权限与数据范围 | 6 角色 × 功能权限，站点范围双重校验；业务层拒绝越权（界面只做展示层禁用） |
 | 安卓 App | 原生 5 Tab（总览 / 告警 / 工单 / 巡检 / 我的），本机 SQLite + 5 秒实时引擎，可离线；也可连服务器 |
-| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；由单独的 `Qingqu-Kiosk-Setup-2.0.6.exe` 安装，开机自启：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
+| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；由单独的 `Qingqu-Kiosk-Setup-2.0.7.exe` 安装，开机自启：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、BAF 反冲洗快捷操作，5 秒自动刷新 |
 | 多端同源 | 桌面端与安卓端共用同一套业务规则与数据模型（桌面 C# Core、安卓 LocalCore 各自移植），Web 端可作为服务端 |
 
 ---
@@ -169,7 +169,7 @@ native\publish\Qingqu.exe --smoke
 
 # 安装包（NSIS）
 & "C:\Program Files (x86)\NSIS\makensis.exe" native\installer\setup.nsi
-# 产物：native/installer/Qingqu-Setup-2.0.6.exe
+# 产物：native/installer/Qingqu-Setup-2.0.7.exe
 ```
 
 ### 安卓端（需 JDK 17 + Android SDK build-tools/platform 34）

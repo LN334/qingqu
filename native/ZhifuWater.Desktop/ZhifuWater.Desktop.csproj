@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
@@ -8,7 +8,7 @@
     <AssemblyName>Qingqu</AssemblyName>
     <RootNamespace>ZhifuWater.Desktop</RootNamespace>
     <ApplicationIcon>..\..\desktop\build\icon.ico</ApplicationIcon>
-    <Version>2.0.6</Version>
+    <Version>2.0.7</Version>
     <Company>LN334</Company>
     <Product>清渠 · 村镇水处理站智能运维平台</Product>
     <AssemblyTitle>清渠</AssemblyTitle>
