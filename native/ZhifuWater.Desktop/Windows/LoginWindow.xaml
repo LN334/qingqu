@@ -1,4 +1,4 @@
-﻿<Window x:Class="ZhifuWater.Desktop.Windows.LoginWindow"
+<Window x:Class="ZhifuWater.Desktop.Windows.LoginWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="清渠 · 登录"
@@ -69,7 +69,7 @@
             </StackPanel>
         </Border>
 
-        <TextBlock Text="v2.0.6"
+        <TextBlock Text="v2.0.7"
                    FontSize="10.5" Foreground="{DynamicResource Muted2}"
                    HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,16" />
     </Grid>

@@ -1,10 +1,10 @@
-﻿Unicode true
+Unicode true
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
 
 !define APP_NAME "清渠"
 !define APP_FULL "清渠 · 村镇水处理站智能运维平台"
-!define APP_VERSION "2.0.6"
+!define APP_VERSION "2.0.7"
 !define APP_PUBLISHER "LN334"
 !define APP_EXE "Qingqu.exe"
 !define REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\QingquNative"
