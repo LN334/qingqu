@@ -45,3 +45,5 @@ native/installer/*.exe
 native/_probe/
 native/.vs/
 *.user
+
+native/publish-kiosk/

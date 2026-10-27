@@ -120,7 +120,7 @@ public sealed class DashboardPage : PageBase
 
     private UIElement BuildTrendCard()
     {
-        _trend = new LineChart { Height = 208, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(24), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
+        _trend = new LineChart { Height = 208, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         foreach (var (code, label, hex) in TrendDefs)
         {

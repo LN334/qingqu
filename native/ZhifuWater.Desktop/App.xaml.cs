@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -31,6 +31,7 @@ public partial class App : Application
             return;
         }
 
+        ShortcutGuard.EnsureOnStartup();
         ShowLogin();
     }
 
