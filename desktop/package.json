@@ -2,7 +2,7 @@
   "name": "zhifu-water-desktop",
   "version": "1.0.8",
   "private": true,
-  "description": "智赋乡水 · 智慧水处理平台 桌面端",
+  "description": "旧版 Electron 桌面壳（v1.x 遗留；v2 起由 native/ZhifuWater.Desktop 取代）",
   "main": "main.js",
   "author": "LN334",
   "license": "MIT",

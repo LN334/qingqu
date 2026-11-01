@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -36,7 +35,7 @@ public class AlarmsPage extends BasePage {
 
     @Override
     protected String pageSubtitle() {
-        return "活动告警 / 确认与处置（默认仅显示未关闭告警）";
+        return "";
     }
 
     @Override
@@ -63,24 +62,9 @@ public class AlarmsPage extends BasePage {
         clearBody();
         addHead();
 
-        int all = counts == null ? (items == null ? 0 : items.length()) : counts.optInt("all", 0);
         int active = counts == null ? 0 : counts.optInt("active", 0);
         int acked = counts == null ? 0 : counts.optInt("acknowledged", 0);
-        int critical = counts == null ? 0 : counts.optInt("critical", 0);
-        int major = counts == null ? 0 : counts.optInt("major", 0);
-
-        HorizontalScrollView hs = new HorizontalScrollView(ctx);
-        hs.setHorizontalScrollBarEnabled(false);
-        LinearLayout chips = U.linear(ctx, LinearLayout.HORIZONTAL);
-        chips.addView(summaryChip("全部 " + all, U.NEUTRAL, R.drawable.bg_chip_neutral));
-        chips.addView(summaryChip("未确认 " + active, U.DANGER, R.drawable.bg_chip_danger));
-        chips.addView(summaryChip("已确认 " + acked, U.OK, R.drawable.bg_chip_ok));
-        chips.addView(summaryChip("紧急 " + critical, U.DANGER, R.drawable.bg_chip_danger));
-        chips.addView(summaryChip("重要 " + major, U.WARN, R.drawable.bg_chip_warn));
-        hs.addView(chips, new HorizontalScrollView.LayoutParams(U.WRAP, U.WRAP));
-        body.addView(hs, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 0, 0, 10));
-
-        body.addView(U.segmented(ctx, new String[]{"全部", "未确认", "已确认"}, filter, new U.SegmentCb() {
+        body.addView(U.segmented(ctx, new String[]{"全部", "未确认 " + active, "已确认 " + acked}, filter, new U.SegmentCb() {
             @Override
             public void onSelect(int index) {
                 filter = index;
@@ -100,7 +84,7 @@ public class AlarmsPage extends BasePage {
             }
         }
         if (filtered.isEmpty()) {
-            showEmpty(filter == 0 ? "当前没有活动告警，运行平稳。" : "该分类下暂无告警。");
+            showEmpty("暂无符合条件的告警。");
             afterRender();
             return;
         }
@@ -108,14 +92,6 @@ public class AlarmsPage extends BasePage {
             addCard(alarmCard(alarm));
         }
         afterRender();
-    }
-
-    private View summaryChip(String text, int fg, int bg) {
-        TextView t = U.chip(ctx, text, fg, bg);
-        LinearLayout.LayoutParams p = U.lp(U.WRAP, U.WRAP);
-        p.setMargins(0, 0, U.dp(ctx, 8), 0);
-        t.setLayoutParams(p);
-        return t;
     }
 
     private View alarmCard(final JSONObject alarm) {

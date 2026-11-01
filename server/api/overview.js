@@ -63,7 +63,7 @@ function register(router, app) {
     requireAuth(ctx);
     ok(ctx.res, {
       platform: ctx.db.settings.platformName,
-      version: ctx.db.settings.version,
+      version: app.version,
       docVersion: ctx.db.settings.docVersion,
       demoMode: ctx.db.settings.demoMode,
       levels: Object.keys(LEVEL_NAME).map(k => ({ key: k, name: LEVEL_NAME[k], rank: levelRank(k) })),
@@ -503,7 +503,7 @@ function register(router, app) {
     ok(ctx.res, {
       status: 'ok',
       platform: ctx.db.settings.platformName,
-      version: ctx.db.settings.version,
+      version: app.version,
       docVersion: ctx.db.settings.docVersion,
       demoMode: ctx.db.settings.demoMode,
       startedAt: app.startedAt,

@@ -148,8 +148,8 @@ check('引擎使用 HandlerThread', /new HandlerThread\(/.test(localEngine));
 check('引擎持久化 last_tick', /"last_tick"/.test(localEngine));
 check('引擎写 notifications', /notifications/.test(localEngine));
 check('本地库从 assets/demo 导入', /"demo\/"\s*\+\s*name|getAssets\(\)\.open\("demo\//.test(localDb));
-check('Manifest versionCode=4', /android:versionCode="4"/.test(manifest));
-check('Manifest versionName=2.1.0', /android:versionName="2\.1\.0"/.test(manifest));
+check('Manifest versionCode=5', /android:versionCode="5"/.test(manifest));
+check('Manifest versionName=2.1.1', /android:versionName="2\.1\.1"/.test(manifest));
 check('规则含 5 分钟持续判定', /5 \* MINUTE/.test(localCore));
 
 console.log('STATIC-CHECK pass=' + pass + ' fail=' + fail);

@@ -27,13 +27,17 @@ v2 起提供两个**原生 App**，装完即用：
 
 > 全部版本与 SHA256 见 [Releases · v2.0.7](https://github.com/LN334/qingqu/releases/tag/v2.0.7)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
+**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面与 kiosk 的程序集、安装包版本需与平台发布版本保持一致。Android 是独立发布的原生客户端，APK 版本以 `android/AndroidManifest.xml` 为准，当前源码版本为 **2.1.1（versionCode 5）**；已发布 APK 仍为 v2.1.0。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
+
+各端实际能力、数据持久化位置和同步边界见 [当前架构与端能力](docs/ARCHITECTURE-STATUS.md)。
+
 ---
 
 ## 一、快速开始
 
 ### 方式一：Windows 桌面版（推荐）
 
-1. 下载 `Qingqu-Setup-2.0.7.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
+1. 下载最新已发布的 `Qingqu-Setup-2.0.7.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
 2. 从桌面「清渠」启动。原生窗口，不需要浏览器、不需要 Node.js。
 3. 用演示账号登录；首次启动会把内置种子数据复制到 `%LOCALAPPDATA%\ZhifuWater\data\db.json`，之后的数据读写都在本机。
 
@@ -41,10 +45,10 @@ v2 起提供两个**原生 App**，装完即用：
 
 ### 方式二：安卓 App（原生、可离线）
 
-1. 下载 `zhifu-water-mobile.apk`，在手机上允许「安装未知来源应用」后安装。
+1. 下载最新已发布的 `zhifu-water-mobile.apk`（Android 2.1.0），在手机上允许「安装未知来源应用」后安装。
 2. 打开 App，点「**直接进入（本机演示）**」——不需要电脑、不需要填服务器地址。
-   数据存在手机本地 SQLite，本机引擎每 5 秒推进一次，会自己产生趋势和告警，确认告警、流转工单、提交巡检都会保存。
-3. 如果想看电脑上的真实数据：在登录页展开「连接服务器」，填 `http://电脑IP:8765`，用同一套账号登录。
+   数据存在手机本地 SQLite；本机引擎在后台每 5 秒推进 site-1 的模拟遥测与告警。告警确认、工单流转和巡检提交会持久化在手机上，重启 App 后仍保留。离线演示与电脑端数据彼此独立，也不会连接现场 PLC。
+3. 如果想看电脑上的平台数据：先在电脑上用 `node server/index.js --host 0.0.0.0` 启动服务，再在登录页展开「连接服务器」，填 `http://电脑IP:8765`，用同一套账号登录。服务默认只监听本机地址，局域网连接时需显式开启监听。
 
 > App 是**完全原生**的 Java 实现（Activity + 框架 View + SQLite，无 WebView、无 Gradle、无 androidx、无第三方库）。本机模式下数据仅存在手机上，与电脑端互不影响。
 
@@ -56,7 +60,9 @@ node server/index.js
 
 浏览器打开 **http://127.0.0.1:8765**（需 Node.js 18+，无其他依赖）。Windows 也可双击 `启动平台.bat`。
 
-Web 端与桌面端同为 2.0.7：品牌、浅色水务蓝界面、数据模型一致；现场触摸屏入口不在侧栏，直接访问 `http://127.0.0.1:8765/#/kiosk` 进入全屏视图。
+服务器默认只允许本机访问。需要让同一局域网的手机连接时，使用 `node server/index.js --host 0.0.0.0`，并在受控网络中运行。
+
+Web 端与桌面端同为 2.0.8：品牌、浅色水务蓝界面、数据模型一致；现场触摸屏入口不在侧栏，直接访问 `http://127.0.0.1:8765/#/kiosk` 进入全屏视图。
 
 ### 演示账号
 
@@ -169,7 +175,7 @@ native\publish\Qingqu.exe --smoke
 
 # 安装包（NSIS）
 & "C:\Program Files (x86)\NSIS\makensis.exe" native\installer\setup.nsi
-# 产物：native/installer/Qingqu-Setup-2.0.7.exe
+# 产物：native/installer/Qingqu-Setup-2.0.8.exe
 ```
 
 ### 安卓端（需 JDK 17 + Android SDK build-tools/platform 34）

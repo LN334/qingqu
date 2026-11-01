@@ -29,7 +29,7 @@
 
 | 接口 | 说明 |
 | --- | --- |
-| `GET /api/auth/me` | `{user, demo, settings}`；未登录 `user:null` |
+| `GET /api/auth/me` | `{user, demo, settings, version}`；未登录 `user:null`，`version` 为当前平台发布版本 |
 | `POST /api/auth/login` `{username,password}` | 登录 |
 | `POST /api/auth/logout` | 退出 |
 | `GET /api/meta` | 所有枚举字典：`levels/alarmStatus/workorderStatus/workorderTypes/priorities/paramWriteModes/labStatus/samplePoints/labMetrics/commandStatus/actions/inspectionResults/units/demoPassword` |

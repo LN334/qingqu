@@ -31,7 +31,7 @@ public class InspectionsPage extends BasePage {
 
     @Override
     protected String pageSubtitle() {
-        return "按计划逐项执行巡检，异常项提交后自动生成工单";
+        return "";
     }
 
     @Override
@@ -130,12 +130,14 @@ public class InspectionsPage extends BasePage {
         card.addView(U.tv(ctx, meta.toString(), 10.5f, U.MUTED2, false),
                 U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
 
-        ProgressBar bar = new ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
-        bar.setMax(total <= 0 ? 1 : total);
-        bar.setProgress(doneCount);
-        bar.setProgressTintList(ColorStateList.valueOf(isDone ? U.OK : U.BRAND));
-        bar.setProgressBackgroundTintList(ColorStateList.valueOf(U.LINE));
-        card.addView(bar, U.lpWith(ctx, U.MATCH, U.dp(ctx, 5), 0, 8, 0, 0));
+        if (!isDone) {
+            ProgressBar bar = new ProgressBar(ctx, null, android.R.attr.progressBarStyleHorizontal);
+            bar.setMax(total <= 0 ? 1 : total);
+            bar.setProgress(doneCount);
+            bar.setProgressTintList(ColorStateList.valueOf(U.BRAND));
+            bar.setProgressBackgroundTintList(ColorStateList.valueOf(U.LINE));
+            card.addView(bar, U.lpWith(ctx, U.MATCH, U.dp(ctx, 5), 0, 8, 0, 0));
+        }
 
         LinearLayout actions = U.linear(ctx, LinearLayout.HORIZONTAL);
         actions.setGravity(Gravity.CENTER_VERTICAL);

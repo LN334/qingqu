@@ -1,5 +1,5 @@
 ﻿<#
-  智赋乡水 · 智慧水处理平台 —— 原生安卓客户端手工构建脚本
+  清渠 · 智慧水处理平台 —— 原生安卓客户端手工构建脚本
   ------------------------------------------------------------------
   不依赖 Gradle / AndroidX / 第三方库，直接调用本机 Android SDK 构建链：
     aapt2 compile → aapt2 link（生成 R.java + 资源包）
@@ -18,6 +18,15 @@ $root = $PSScriptRoot
 if (-not $root) { $root = (Get-Location).Path }
 $root = (Resolve-Path $root).Path
 Set-Location $root
+
+[xml]$manifestXml = Get-Content -Raw 'AndroidManifest.xml'
+$androidNamespace = 'http://schemas.android.com/apk/res/android'
+$androidVersionCode = $manifestXml.DocumentElement.GetAttribute('versionCode', $androidNamespace)
+$androidVersionName = $manifestXml.DocumentElement.GetAttribute('versionName', $androidNamespace)
+if ($androidVersionCode -notmatch '^\d+$' -or $androidVersionName -notmatch '^\d+\.\d+\.\d+$') {
+    Write-Error 'AndroidManifest.xml 的 versionCode/versionName 无效'
+    exit 1
+}
 
 function Write-Step([string]$text) {
     Write-Host ''
@@ -106,8 +115,8 @@ Invoke-Tool $aapt2 @(
     '--java', 'build\gen',
     '--min-sdk-version', '24',
     '--target-sdk-version', '34',
-    '--version-code', '4',
-    '--version-name', '2.1.0',
+    '--version-code', $androidVersionCode,
+    '--version-name', $androidVersionName,
     '-A', 'assets',
     '--auto-add-overlay',
     'build\res.zip'
@@ -322,7 +331,7 @@ Write-Host ("  产物   : {0}" -f $apkItem.FullName)
 Write-Host ("  大小   : {0:N0} 字节（{1:N2} MB）" -f $apkItem.Length, ($apkItem.Length / 1MB))
 Write-Host ("  SHA256 : {0}" -f $sha)
 Write-Host  '  包名   : com.ln334.zhifuwater'
-Write-Host  '  版本   : 2.1.0 (versionCode 4)'
+Write-Host ("  版本   : {0} (versionCode {1})" -f $androidVersionName, $androidVersionCode)
 Write-Host  '  签名   : keystore\debug.jks / androiddebugkey'
 Write-Host '==========================================='
 exit 0

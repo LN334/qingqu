@@ -33,7 +33,7 @@ public class OverviewPage extends BasePage {
 
     @Override
     protected String pageSubtitle() {
-        return "站点运行状态、关键指标与最新告警";
+        return "";
     }
 
     @Override
@@ -99,24 +99,6 @@ public class OverviewPage extends BasePage {
         String name = site == null ? "站点" : site.optString("name", "站点");
         hero.addView(U.tv(ctx, name, 20, U.WHITE, true),
                 U.lpWith(ctx, U.MATCH, U.WRAP, 0, 9, 0, 0));
-
-        String region = site == null ? "" : site.optString("region", "");
-        String area = site == null ? "" : site.optString("area", "");
-        StringBuilder sub = new StringBuilder();
-        if (region.length() > 0) sub.append(region);
-        if (area.length() > 0) {
-            if (sub.length() > 0) sub.append(" · ");
-            sub.append(area);
-        }
-        if (sub.length() == 0) sub.append("智慧水处理站点");
-        hero.addView(U.tv(ctx, sub.toString(), 11, 0xCCFFFFFF, false),
-                U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
-
-        String process = site == null ? "" : site.optString("process", "");
-        if (process.length() > 0) {
-            hero.addView(U.tv(ctx, "工艺：" + process, 10.5f, 0xB3FFFFFF, false),
-                    U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
-        }
 
         View line = new View(ctx);
         line.setBackgroundColor(0x33FFFFFF);
@@ -219,18 +201,21 @@ public class OverviewPage extends BasePage {
         if ("risk".equals(status)) color = U.DANGER;
         else if ("attention".equals(status)) color = U.WARN;
         else if ("pending".equals(status)) color = U.MUTED;
-        TextView value = U.tv(ctx, U.num(kpi.optDouble("value", 0), kpi.optInt("digits", 2)), 23, color, true);
+        String display = kpi.optString("display", "");
+        String shownValue = display.length() > 0
+                ? display : U.num(kpi.optDouble("value", 0), kpi.optInt("digits", 2));
+        TextView value = U.tv(ctx, shownValue, 23, color, true);
         value.setSingleLine(true);
         valueRow.addView(value);
         String unit = kpi.optString("unit", "");
-        if (unit.length() > 0) {
+        if (display.length() == 0 && unit.length() > 0) {
             TextView unitView = U.tv(ctx, unit, 10.5f, U.MUTED, false);
             unitView.setPadding(U.dp(ctx, 3), 0, 0, U.dp(ctx, 3));
             valueRow.addView(unitView);
         }
         card.addView(valueRow, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 2, 0, 0));
 
-        String hint = kpi.optString("hint", "");
+        String hint = "manual".equals(kpi.optString("source")) && display.length() == 0 ? "人工化验" : "";
         if (hint.length() > 0) {
             TextView h = U.tv(ctx, hint, 10, U.MUTED2, false);
             h.setSingleLine(true);

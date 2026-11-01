@@ -16,7 +16,6 @@ import org.json.JSONObject;
 public class ProfilePage extends BasePage {
 
     private JSONObject meUser;
-    private JSONObject settings;
     private JSONArray sites;
 
     ProfilePage(MainActivity host) {
@@ -30,7 +29,7 @@ public class ProfilePage extends BasePage {
 
     @Override
     protected String pageSubtitle() {
-        return "账号信息、站点切换与连接设置";
+        return "";
     }
 
     @Override
@@ -58,7 +57,6 @@ public class ProfilePage extends BasePage {
                 }
                 JSONObject data = root == null ? null : root.optJSONObject("data");
                 if (data != null) {
-                    settings = data.optJSONObject("settings");
                     JSONObject user = data.optJSONObject("user");
                     if (user != null) {
                         meUser = user;
@@ -98,7 +96,7 @@ public class ProfilePage extends BasePage {
         info.addView(U.tv(ctx, name, 17, U.INK, true));
         StringBuilder sub = new StringBuilder();
         if (roleName.length() > 0) sub.append(roleName);
-        if (title.length() > 0) {
+        if (title.length() > 0 && !title.equals(roleName)) {
             if (sub.length() > 0) sub.append(" · ");
             sub.append(title);
         }
@@ -111,26 +109,6 @@ public class ProfilePage extends BasePage {
         row.addView(info, U.lp(0, U.WRAP, 1f));
         profile.addView(row);
 
-        LinearLayout chips = U.linear(ctx, LinearLayout.HORIZONTAL);
-        chips.setPadding(0, U.dp(ctx, 10), 0, 0);
-        if (roleName.length() > 0) {
-            chips.addView(U.chip(ctx, roleName, U.BRAND, R.drawable.bg_chip_brand));
-        }
-        JSONArray perms = u == null ? null : u.optJSONArray("perms");
-        if (perms != null) {
-            TextView p = U.chip(ctx, "权限 " + perms.length() + " 项", U.NEUTRAL, R.drawable.bg_chip_neutral);
-            LinearLayout.LayoutParams pp = U.lp(U.WRAP, U.WRAP);
-            pp.setMargins(U.dp(ctx, 8), 0, 0, 0);
-            chips.addView(p, pp);
-        }
-        if (u != null) {
-            TextView accountChip = U.chip(ctx, "账号 " + u.optString("username", "--"), U.NEUTRAL,
-                    R.drawable.bg_chip_neutral);
-            LinearLayout.LayoutParams ap = U.lp(U.WRAP, U.WRAP);
-            ap.setMargins(U.dp(ctx, 8), 0, 0, 0);
-            chips.addView(accountChip, ap);
-        }
-        profile.addView(chips);
         addCard(profile);
 
         // 站点切换
@@ -145,23 +123,10 @@ public class ProfilePage extends BasePage {
         }
 
         // 账号与平台
-        addSection("账号与平台", null, null);
+        addSection("账号", null, null);
         LinearLayout account = U.card(ctx);
         account.addView(U.kv(ctx, "登录账号", session.username().length() == 0 ? "--" : session.username()));
-        if (u != null) {
-            account.addView(U.kv(ctx, "姓名", u.optString("name", "--")));
-            account.addView(U.kv(ctx, "角色", u.optString("roleName", u.optString("role", "--"))));
-        }
-        if (settings != null) {
-            account.addView(U.kv(ctx, "平台名称", settings.optString("platformName", "智赋乡水")));
-            account.addView(U.kv(ctx, "版本", settings.optString("version", "--")));
-            String notice = settings.optString("notice", "");
-            if (notice.length() > 0) {
-                TextView n = U.tv(ctx, notice, 11, U.MUTED, false);
-                n.setLineSpacing(U.dp(ctx, 2), 1f);
-                account.addView(n, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 8, 0, 0));
-            }
-        }
+        account.addView(U.kv(ctx, "应用版本", U.appVersion(ctx)));
         addCard(account);
 
         // 连接设置
@@ -186,10 +151,6 @@ public class ProfilePage extends BasePage {
             }
         });
         server.addView(change, U.lpWith(ctx, U.MATCH, U.dp(ctx, 44), 0, 12, 0, 0));
-        TextView tip = U.tv(ctx, local ? "本机模式不连服务器，数据保存在手机本地；连接服务器需重新输入账号密码。"
-                        : "修改服务器后需要重新登录，令牌会失效。",
-                10.5f, U.MUTED2, false);
-        server.addView(tip, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 8, 0, 0));
         addCard(server);
 
         // 退出登录
@@ -212,7 +173,7 @@ public class ProfilePage extends BasePage {
         });
         body.addView(logout, U.lpWith(ctx, U.MATCH, U.dp(ctx, 48), 0, 8, 0, 0));
 
-        TextView footer = U.tv(ctx, "智赋乡水 · 原生安卓客户端 v2.1.0", 10.5f, U.MUTED2, false);
+        TextView footer = U.tv(ctx, "清渠 · 原生安卓客户端 v" + U.appVersion(ctx), 10.5f, U.MUTED2, false);
         footer.setGravity(Gravity.CENTER);
         body.addView(footer, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 14, 0, 0));
     }
@@ -237,17 +198,9 @@ public class ProfilePage extends BasePage {
         if (current) top.addView(U.chip(ctx, "当前站点", U.BRAND, R.drawable.bg_chip_brand));
         card.addView(top);
 
-        String region = site.optString("region", "");
-        String area = site.optString("area", "");
-        StringBuilder sub = new StringBuilder();
-        if (region.length() > 0) sub.append(region);
-        if (area.length() > 0) {
-            if (sub.length() > 0) sub.append(" · ");
-            sub.append(area);
-        }
         JSONObject counts = site.optJSONObject("counts");
+        StringBuilder sub = new StringBuilder();
         if (counts != null) {
-            if (sub.length() > 0) sub.append(" · ");
             sub.append("活动告警 ").append(counts.optInt("activeAlarms"));
             sub.append(" · 待办工单 ").append(counts.optInt("openWorkorders"));
         }
@@ -255,12 +208,6 @@ public class ProfilePage extends BasePage {
             card.addView(U.tv(ctx, sub.toString(), 10.5f, U.MUTED, false),
                     U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
         }
-        String capacity = site.optString("capacity", "");
-        if (capacity.length() > 0) {
-            card.addView(U.tv(ctx, "处理规模 " + capacity, 10.5f, U.MUTED2, false),
-                    U.lpWith(ctx, U.MATCH, U.WRAP, 0, 3, 0, 0));
-        }
-
         card.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

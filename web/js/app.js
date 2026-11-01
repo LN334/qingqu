@@ -62,6 +62,7 @@ async function boot() {
   document.getElementById('boot').hidden = false;
   try {
     const me = await api.me();
+    setAppVersion(me && me.version);
     if (me && me.user) {
       await enterShell(me);
     } else {
@@ -86,6 +87,13 @@ async function boot() {
   } finally {
     document.getElementById('boot').hidden = true;
   }
+}
+
+function setAppVersion(version) {
+  if (!version) return;
+  document.querySelectorAll('[data-app-version]').forEach((element) => {
+    element.textContent = `v${version}`;
+  });
 }
 
 /* ---------------- 登录 ---------------- */

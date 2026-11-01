@@ -32,11 +32,12 @@ function register(router, app) {
 
   router.get('/api/auth/me', async (ctx) => {
     if (!ctx.user) {
-      ok(ctx.res, { user: null, demo: null, settings: null });
+      ok(ctx.res, { user: null, demo: null, settings: null, version: app.version });
       return;
     }
     ok(ctx.res, {
       user: app.auth.sanitize(ctx.user),
+      version: app.version,
       demo: { password: demoPassword, accounts: ctx.db.users.map(u => ({ username: u.username, name: u.name, role: u.role, title: u.title })) },
       settings: { platformName: ctx.db.settings.platformName, shortName: ctx.db.settings.shortName, notice: ctx.db.settings.notice, demoMode: ctx.db.settings.demoMode, version: ctx.db.settings.version, docVersion: ctx.db.settings.docVersion, autoRefreshSec: ctx.db.settings.autoRefreshSec },
     });

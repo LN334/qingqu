@@ -60,6 +60,15 @@ public final class U {
     public static final int MATCH = LinearLayout.LayoutParams.MATCH_PARENT;
     public static final int WRAP = LinearLayout.LayoutParams.WRAP_CONTENT;
 
+    public static String appVersion(Context context) {
+        try {
+            return context.getPackageManager()
+                    .getPackageInfo(context.getPackageName(), 0).versionName;
+        } catch (android.content.pm.PackageManager.NameNotFoundException e) {
+            return "未知";
+        }
+    }
+
     private U() {
     }
 
@@ -154,10 +163,12 @@ public final class U {
         LinearLayout box = linear(c, LinearLayout.VERTICAL);
         TextView t = tv(c, title, 21, INK, true);
         box.addView(t);
-        TextView s = tv(c, sub, 12, MUTED, false);
-        s.setLineSpacing(dp(c, 1), 1f);
-        box.addView(s, lpWith(c, MATCH, WRAP, 0, 3, 0, 0));
-        box.setTag(s);
+        if (sub != null && sub.trim().length() > 0) {
+            TextView s = tv(c, sub, 12, MUTED, false);
+            s.setLineSpacing(dp(c, 1), 1f);
+            box.addView(s, lpWith(c, MATCH, WRAP, 0, 3, 0, 0));
+            box.setTag(s);
+        }
         return box;
     }
 

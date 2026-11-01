@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
-import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -37,7 +36,7 @@ public class WorkordersPage extends BasePage {
 
     @Override
     protected String pageSubtitle() {
-        return "按状态推进：接单 → 开始处理 → 完成报送 → 验收";
+        return "";
     }
 
     @Override
@@ -81,21 +80,7 @@ public class WorkordersPage extends BasePage {
         addHead();
 
         int open = openCounts == null ? (openItems == null ? 0 : openItems.length()) : openCounts.optInt("open");
-        int pending = openCounts == null ? 0 : openCounts.optInt("pending");
-        int processing = openCounts == null ? 0 : openCounts.optInt("accepted") + openCounts.optInt("processing");
-        int overdue = openCounts == null ? 0 : openCounts.optInt("overdue");
         int done = doneItems == null ? 0 : doneItems.length();
-
-        HorizontalScrollView hs = new HorizontalScrollView(ctx);
-        hs.setHorizontalScrollBarEnabled(false);
-        LinearLayout chips = U.linear(ctx, LinearLayout.HORIZONTAL);
-        chips.addView(summaryChip("进行中 " + open, U.BRAND, R.drawable.bg_chip_brand));
-        chips.addView(summaryChip("待接单 " + pending, U.INFO, R.drawable.bg_chip_info));
-        chips.addView(summaryChip("处理中 " + processing, U.WARN, R.drawable.bg_chip_warn));
-        chips.addView(summaryChip("待验收 " + done, U.OK, R.drawable.bg_chip_ok));
-        chips.addView(summaryChip("超时 " + overdue, U.DANGER, R.drawable.bg_chip_danger));
-        hs.addView(chips, new HorizontalScrollView.LayoutParams(U.WRAP, U.WRAP));
-        body.addView(hs, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 0, 0, 10));
 
         body.addView(U.segmented(ctx, new String[]{"进行中 " + open, "待验收 " + done}, seg, new U.SegmentCb() {
             @Override
@@ -122,14 +107,6 @@ public class WorkordersPage extends BasePage {
         }
     }
 
-    private View summaryChip(String text, int fg, int bg) {
-        TextView t = U.chip(ctx, text, fg, bg);
-        LinearLayout.LayoutParams p = U.lp(U.WRAP, U.WRAP);
-        p.setMargins(0, 0, U.dp(ctx, 8), 0);
-        t.setLayoutParams(p);
-        return t;
-    }
-
     private View woCard(final JSONObject wo) {
         LinearLayout card = U.linear(ctx, LinearLayout.VERTICAL);
         card.setBackgroundResource(R.drawable.bg_card);
@@ -152,14 +129,13 @@ public class WorkordersPage extends BasePage {
         title.setMaxLines(2);
         card.addView(title, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 7, 0, 0));
 
-        String id = wo.optString("id", "");
         String device = wo.optString("deviceName", "");
         String unit = wo.optString("unitName", "");
-        StringBuilder meta = new StringBuilder(id);
-        if (unit.length() > 0) meta.append(" · ").append(unit);
-        if (device.length() > 0) meta.append(" · ").append(device);
-        card.addView(U.tv(ctx, meta.toString(), 10.5f, U.MUTED2, false),
-                U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
+        String meta = unit.length() > 0 ? unit : device;
+        if (meta.length() > 0) {
+            card.addView(U.tv(ctx, meta, 10.5f, U.MUTED2, false),
+                    U.lpWith(ctx, U.MATCH, U.WRAP, 0, 4, 0, 0));
+        }
 
         LinearLayout info = U.linear(ctx, LinearLayout.HORIZONTAL);
         info.setGravity(Gravity.CENTER_VERTICAL);
@@ -173,14 +149,6 @@ public class WorkordersPage extends BasePage {
                     overdue ? U.DANGER : U.MUTED, false));
         }
         card.addView(info, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 7, 0, 0));
-
-        String description = wo.optString("description", "");
-        if (description.length() > 0) {
-            TextView desc = U.tv(ctx, description, 11.5f, U.INK2, false);
-            desc.setMaxLines(2);
-            desc.setLineSpacing(U.dp(ctx, 1.5f), 1f);
-            card.addView(desc, U.lpWith(ctx, U.MATCH, U.WRAP, 0, 6, 0, 0));
-        }
 
         LinearLayout actions = U.linear(ctx, LinearLayout.HORIZONTAL);
         actions.setGravity(Gravity.CENTER_VERTICAL);

@@ -62,6 +62,7 @@ if (!Number.isInteger(args.port) || args.port < 1 || args.port > 65535) {
 const ROOT = path.join(__dirname, '..');
 const DATA_DIR = path.isAbsolute(args.data) ? args.data : path.join(ROOT, args.data);
 const WEB_ROOT = path.join(ROOT, 'web');
+const RELEASE_VERSION = JSON.parse(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8')).version;
 
 const logger = {
   info: (...a) => { if (!args.quiet) console.log(`[${iso().slice(11, 19)}]`, ...a); },
@@ -81,7 +82,7 @@ const app = {
   telemetry,
   hub,
   log: logger,
-  version: '2.0.7',
+  version: RELEASE_VERSION,
 };
 Object.defineProperty(app, 'db', { get: () => store.data, enumerable: true });
 

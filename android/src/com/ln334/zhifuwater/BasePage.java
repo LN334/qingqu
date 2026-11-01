@@ -106,8 +106,9 @@ abstract class BasePage {
     }
 
     protected void addHead() {
+        int bottom = pageSubtitle() == null || pageSubtitle().trim().length() == 0 ? 8 : 12;
         body.addView(U.pageHead(ctx, pageTitle(), pageSubtitle()),
-                U.lpWith(ctx, U.MATCH, U.WRAP, 0, 2, 0, 12));
+                U.lpWith(ctx, U.MATCH, U.WRAP, 0, 2, 0, bottom));
     }
 
     protected LinearLayout card() {
