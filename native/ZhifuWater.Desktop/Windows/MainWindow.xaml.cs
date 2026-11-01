@@ -266,7 +266,7 @@ public partial class MainWindow : Window
         try
         {
             var alarms = _services.Data.Alarms("active").Count;
-            var workorders = _services.Data.WorkOrders("all").Count(w => w.Status != "closed" && w.Status != "done");
+            var workorders = _services.Data.WorkOrders("all").Count(w => w.Status is "pending" or "accepted" or "processing" or "done");
             SetNavBadge("alarms", alarms);
             SetNavBadge("workorders", workorders);
             var unread = _services.Data.UnreadNotifications;

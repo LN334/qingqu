@@ -231,6 +231,7 @@ public class MainActivity extends Activity {
             tabLabels[i].setTypeface(selected ? Typeface.DEFAULT_BOLD : Typeface.DEFAULT);
         }
         BasePage p = page(idx);
+        if (idx == 0) p.invalidateData(); // 总览计数需在切回时重新拉取
         content.removeAllViews();
         content.addView(p.view(), new FrameLayout.LayoutParams(U.MATCH, U.MATCH));
         p.ensureLoaded();
