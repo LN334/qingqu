@@ -161,12 +161,13 @@ public class MainActivity extends Activity {
         wrap.addView(U.divider(this, U.LINE), U.lp(U.MATCH, Math.max(1, U.dp(this, 0.7f))));
 
         LinearLayout bar = U.linear(this, LinearLayout.HORIZONTAL);
+        bar.setWeightSum(TAB_COUNT);
+        bar.setBaselineAligned(false);
         for (int i = 0; i < TAB_COUNT; i++) {
             final int idx = i;
             LinearLayout item = U.linear(this, LinearLayout.VERTICAL);
-            item.setGravity(Gravity.CENTER);
+            item.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
             item.setPadding(0, U.dp(this, 7), 0, U.dp(this, 5));
-            item.setMinimumHeight(U.dp(this, 56));
             item.setClickable(true);
             item.setFocusable(true);
             item.setOnClickListener(new View.OnClickListener() {
@@ -179,13 +180,16 @@ public class MainActivity extends Activity {
             GlyphView g = U.glyph(this, TAB_GLYPHS[i], 23, U.MUTED2);
             item.addView(g, U.lp(U.dp(this, 23), U.dp(this, 23)));
             TextView label = U.tv(this, getString(TAB_TEXT[i]), 10.5f, U.MUTED2, false);
-            label.setPadding(0, U.dp(this, 3), 0, 0);
+            label.setPadding(0, U.dp(this, 2), 0, 0);
+            label.setGravity(Gravity.CENTER);
+            label.setIncludeFontPadding(false);
+            label.setMaxLines(1);
             item.addView(label);
 
             tabItems[i] = item;
             tabGlyphs[i] = g;
             tabLabels[i] = label;
-            bar.addView(item, U.lp(0, U.WRAP, 1f));
+            bar.addView(item, U.lp(0, U.dp(this, 58), 1f));
         }
         wrap.addView(bar, U.lp(U.MATCH, U.WRAP));
         return wrap;
