@@ -79,6 +79,7 @@ public interface IDesktopData
     IReadOnlyList<LabRecord> Labs { get; }
     LabStats LabStatistics(int days);
     OpResult ReviewLab(string id, bool approve);
+    OpResult CreateLab(string samplePoint, IReadOnlyDictionary<string, double> metrics, string? method = null);
 
     // ---------- 诊断 / 分析 / 报表 ----------
     IReadOnlyList<DiagnosisInfo> Diagnoses { get; }
@@ -91,6 +92,7 @@ public interface IDesktopData
     IReadOnlyList<WorkOrderInfo> WorkOrders(string status = "all");
     OpResult AdvanceWorkOrder(string id, string action, string note);
     OpResult AssignWorkOrder(string id, string userId, string note);
+    OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description);
     IReadOnlyList<InspectionInfo> Inspections { get; }
     OpResult GenerateInspection();
     OpResult SubmitInspection(string id, string summary, int abnormal);

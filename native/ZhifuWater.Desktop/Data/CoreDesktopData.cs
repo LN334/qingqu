@@ -1052,6 +1052,24 @@ public sealed class CoreDesktopData : IDesktopData
         return stats;
     }
 
+    public OpResult CreateLab(string samplePoint, IReadOnlyDictionary<string, double> metrics, string? method = null)
+    {
+        try
+        {
+            var m = new JsonObject();
+            foreach (var kv in metrics) m[kv.Key] = kv.Value;
+            _core.Ops.CreateLab(_user, new JsonObject
+            {
+                ["samplePoint"] = samplePoint,
+                ["metrics"] = m,
+                ["method"] = method ?? "",
+            }, "desktop");
+            Refresh();
+            return OpResult.Done("化验记录已提交，等待复核");
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
     public OpResult ReviewLab(string id, bool approve)
     {
         try
@@ -1373,6 +1391,26 @@ public sealed class CoreDesktopData : IDesktopData
             _core.Ops.AssignWorkorder(_user, id, new JsonObject { ["assigneeId"] = userId, ["note"] = note }, "desktop");
             Refresh();
             return OpResult.Done("工单已派发");
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
+    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description)
+    {
+        try
+        {
+            _core.Ops.CreateWorkorder(_user, new JsonObject
+            {
+                ["siteId"] = _siteId,
+                ["title"] = title,
+                ["type"] = type,
+                ["priority"] = priority,
+                ["unitCode"] = unitCode,
+                ["assigneeId"] = assigneeId,
+                ["description"] = description,
+            }, "desktop");
+            Refresh();
+            return OpResult.Done("工单已创建");
         }
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }

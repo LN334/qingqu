@@ -20,6 +20,8 @@ public sealed class AlarmsPage : PageBase
     private TextBox _keyword = null!;
     private TextBlock _listInfo = null!;
     private AlarmInfo? _selected;
+    private DataGrid _ruleTable = null!;
+    private AlarmRuleInfo? _ruleSelected;
 
     public override string Id => "alarms";
     public override string Title => "告警中心";
@@ -90,6 +92,20 @@ public sealed class AlarmsPage : PageBase
         root.Children.Add(new Border { Height = 10 });
         root.Children.Add(Kit.Card("告警列表", listBody, null, null, new Thickness(10, 8, 10, 8)));
 
+        _ruleTable = Table(new[] { "规则", "级别", "条件", "状态" }, new double[] { 0, 56, 220, 64 }, row =>
+        {
+            _ruleSelected = row.Data as AlarmRuleInfo;
+        });
+        var ruleBody = new DockPanel { LastChildFill = true };
+        var ruleBar = Kit.Row(8, Kit.T("停用后规则不再触发新告警；已有告警不受影响。", 10, Pal.Muted2),
+            Kit.Btn("启用 / 停用", ToggleRule, small: true));
+        ruleBar.Margin = new Thickness(0, 6, 0, 6);
+        DockPanel.SetDock(ruleBar, Dock.Bottom);
+        ruleBody.Children.Add(ruleBar);
+        ruleBody.Children.Add(_ruleTable);
+        root.Children.Add(new Border { Height = 10 });
+        root.Children.Add(Kit.Card("告警规则", ruleBody, null, null, new Thickness(10, 8, 10, 8)));
+
         Install(Kit.Scroll(root));
     }
 
@@ -133,6 +149,34 @@ public sealed class AlarmsPage : PageBase
     protected override void RefreshData()
     {
         Query();
+        _ruleTable.ItemsSource = Svc.Data.AlarmRules.Select(r => new UiRow
+        {
+            Texts = new[]
+            {
+                r.Name,
+                Pal.AlarmLevelText(r.Level),
+                r.Condition,
+                r.Enabled ? "启用" : "停用",
+            },
+            Fgs = new[]
+            {
+                Pal.Ink2,
+                Pal.ToneFg(Pal.AlarmLevelTone(r.Level)),
+                Pal.Muted,
+                r.Enabled ? Pal.ToneFg("good") : Pal.Muted2,
+            },
+            Data = r,
+            Key = r.Id,
+        }).ToList();
+    }
+
+    private void ToggleRule()
+    {
+        if (_ruleSelected == null) { Toast("请先选择规则", false); return; }
+        var r = _ruleSelected;
+        var result = Svc.Data.ToggleAlarmRule(r.Id);
+        Toast(result.Message, result.Ok);
+        RefreshData();
     }
 
     private void RefreshStats()

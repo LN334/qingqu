@@ -70,15 +70,12 @@ public sealed class QualityPage : PageBase
             if (_records.SelectedItem is UiRow row) _selected = row.Data as LabRecord;
         };
         var buttons = Kit.Row(6,
-            Kit.Btn("复核通过", () => Review(true), primary: true, small: true),
-            Kit.Btn("退回重检", () => Review(false), small: true),
-            Kit.T("仅待复核记录可操作", 10, Pal.Muted2));
-        buttons.Margin = new Thickness(0, 6, 0, 0);
+            Kit.Btn("录入化验", CreateLab, primary: true, small: true),
+            Kit.Btn("复核通过", () => Review(true), small: true),
+            Kit.Btn("退回重检", () => Review(false), small: true));
         var recBody = new DockPanel { LastChildFill = true };
-        DockPanel.SetDock(buttons, Dock.Bottom);
-        recBody.Children.Add(buttons);
         recBody.Children.Add(_records);
-        var recCard = Kit.Card("化验记录", recBody, Kit.T("人工化验 · 待复核", 10, Pal.Muted2), null, new Thickness(10, 8, 10, 8));
+        var recCard = Kit.Card("化验记录", recBody, buttons, "人工化验 · 待复核", new Thickness(10, 8, 10, 8));
         right.Children.Add(recCard);
 
         Grid.SetColumn(left, 0);
@@ -163,6 +160,44 @@ public sealed class QualityPage : PageBase
     };
     private static string Metric(LabRecord record, string metric) =>
         record.Metrics.TryGetValue(metric, out var v) && v.HasValue ? v.Value.ToString("F2") : "—";
+
+    private void CreateLab()
+    {
+        if (!Svc.Can("inspection.execute")) { Toast("当前账号无化验录入权限", false); return; }
+        var dlg = new FormDialog(Host, "录入化验", "至少填写一项指标；提交后进入待复核。");
+        var point = dlg.AddCombo("取样点", new[] { "进水（原料罐）", "BAF 出水", "硫自养池出水", "总出水（清水池）" }, 3);
+        var cod = dlg.AddText("COD（mg/L）", "", "选填");
+        var nh3 = dlg.AddText("氨氮（mg/L）", "", "选填");
+        var tn = dlg.AddText("总氮（mg/L）", "", "选填");
+        var tp = dlg.AddText("总磷（mg/L）", "", "选填");
+        var ss = dlg.AddText("悬浮物（mg/L）", "", "选填");
+        var method = dlg.AddText("检测方法", "", "留空使用标准方法");
+        if (!dlg.Ask("提交", validate: () =>
+            {
+                var boxes = new[] { cod, nh3, tn, tp, ss };
+                var filled = 0;
+                foreach (var b in boxes)
+                {
+                    if (string.IsNullOrWhiteSpace(b.Text)) continue;
+                    if (!double.TryParse(b.Text, out var v) || v < 0) return "指标必须是非负数字";
+                    filled++;
+                }
+                if (filled == 0) return "至少填写一项指标";
+                return null;
+            })) return;
+
+        var map = new Dictionary<string, double>();
+        void Put(string key, TextBox box)
+        {
+            if (string.IsNullOrWhiteSpace(box.Text)) return;
+            map[key] = double.Parse(box.Text.Trim());
+        }
+        Put("COD", cod); Put("NH3N", nh3); Put("TN", tn); Put("TP", tp); Put("SS", ss);
+        var keys = new[] { "inlet", "baf_out", "sulfur_out", "outlet" };
+        var result = Svc.Data.CreateLab(keys[Math.Max(0, point.SelectedIndex)], map, string.IsNullOrWhiteSpace(method.Text) ? null : method.Text.Trim());
+        Toast(result.Message, result.Ok);
+        RefreshData();
+    }
 
     private void Review(bool approve)
     {

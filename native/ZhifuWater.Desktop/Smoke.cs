@@ -39,6 +39,7 @@ public static class Smoke
             var user = services.Data.CurrentUser ?? throw new InvalidOperationException("登录后 CurrentUser 为空");
 
             var main = new MainWindow(services, user);
+            if (shots) { services.Data.Tick(); services.Data.Tick(); }
             mainMs = sw.ElapsedMilliseconds;
             if (mainMs > 3000) throw new TimeoutException("主窗构造耗时 " + mainMs + " ms，超过 3 秒阈值");
             SmokeConsole.WriteLine($"  [2/4] 主窗构造 OK ({mainMs} ms) · 导航 15 项 · 默认 {main.Width}×{main.Height}");

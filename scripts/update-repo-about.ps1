@@ -8,7 +8,7 @@ $headers = @{ Authorization = "Bearer $token"; 'User-Agent' = 'qingqu-readme'; A
 
 $desc = '面向村镇水处理站的原生智能运维平台：11 单元工艺监控、四级告警、工单派发与闭环、设备台账、人工化验与报表。Windows 桌面 + 安卓双端，装完即用，数据在本机。'
 $patch = @{ description = $desc; homepage = 'https://github.com/LN334/qingqu/releases/latest'; has_issues = $true; has_wiki = $false } | ConvertTo-Json
-Invoke-RestMethod -Proxy $proxy -Method Patch -Uri 'https://api.github.com/repos/LN334/qingqu' -Headers $headers -ContentType 'application/json' -Body $patch | Out-Null
+Invoke-RestMethod -Proxy $proxy -Method Patch -Uri 'https://api.github.com/repos/LN334/qingqu' -Headers $headers -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($patch)) | Out-Null
 Write-Host '简介已更新'
 
 $topics = @{ names = @('water-treatment','wastewater','scada','wpf','dotnet','csharp','android','java','monitoring','rural') } | ConvertTo-Json

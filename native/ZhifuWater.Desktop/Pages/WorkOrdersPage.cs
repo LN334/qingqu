@@ -85,7 +85,8 @@ public sealed class WorkOrdersPage : PageBase
         };
         _emptyPanel.Children.Add(Kit.T("没有符合条件的工单", 13, Pal.Muted));
         tableHost.Children.Add(_emptyPanel);
-        var tableCard = Kit.Card("工单列表", tableHost, null, null, new Thickness(10, 8, 10, 8));
+        var tableCard = Kit.Card("工单列表", tableHost,
+            Kit.Btn("新建工单", CreateOrder, primary: true, small: true), null, new Thickness(10, 8, 10, 8));
 
         _detail = new StackPanel();
         var detailCard = Kit.Card("工单详情", Kit.Scroll(_detail, 0), null, null, new Thickness(10, 8, 10, 8));
@@ -183,6 +184,39 @@ public sealed class WorkOrdersPage : PageBase
     {
         var b = Kit.Btn(text, click, primary: text is "接单" or "完成", small: true);
         return b;
+    }
+
+    private void CreateOrder()
+    {
+        var types = new[] { ("repair", "维修"), ("maintain", "保养"), ("calibrate", "校准"), ("inspect", "巡检异常") };
+        var prios = new[] { ("normal", "普通"), ("high", "高"), ("urgent", "紧急"), ("low", "低") };
+        var units = Svc.Data.Units.ToList();
+        var people = Svc.Data.Users.Where(u => u.IsActive).ToList();
+        var dlg = new FormDialog(Host, "新建工单", "创建后为待接单；指定负责人则直接进入已接单。");
+        var title = dlg.AddText("标题", "", "例如：提升泵异响排查");
+        var type = dlg.AddCombo("类型", types.Select(t => t.Item2).ToList());
+        var prio = dlg.AddCombo("优先级", prios.Select(p => p.Item2).ToList());
+        var unit = dlg.AddCombo("单元", units.Select(u => u.Name).ToList());
+        var assign = dlg.AddCombo("负责人", new[] { "暂不指派" }.Concat(people.Select(u => u.User.Name + (string.IsNullOrWhiteSpace(u.User.Title) ? "" : " · " + u.User.Title))).ToList());
+        var desc = dlg.AddText("说明（可选）");
+        if (!dlg.Ask("创建", validate: () =>
+            {
+                if (string.IsNullOrWhiteSpace(title.Text)) return "请填写工单标题";
+                if (title.Text.Trim().Length < 4) return "标题至少 4 个字";
+                return null;
+            })) return;
+        var unitRow = units[Math.Max(0, unit.SelectedIndex)];
+        var assignee = assign.SelectedIndex <= 0 ? null : people[assign.SelectedIndex - 1].User.Id;
+        var r = Svc.Data.CreateWorkOrder(
+            title.Text.Trim(),
+            types[Math.Max(0, type.SelectedIndex)].Item1,
+            prios[Math.Max(0, prio.SelectedIndex)].Item1,
+            unitRow.Code,
+            assignee,
+            desc.Text.Trim());
+        Toast(r.Message, r.Ok);
+        RefreshData();
+        Host.RefreshShell();
     }
 
     private void Assign(WorkOrderInfo wo)

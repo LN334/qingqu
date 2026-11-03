@@ -71,7 +71,7 @@ public sealed class ParamsPage : PageBase
                 ShowDetail();
             }
         };
-        left.Children.Add(Kit.Card("参数分组表", _table, Kit.T("云端 / 就地", 10, Pal.Muted2), null, new Thickness(0)));
+        left.Children.Add(Kit.Card("参数分组表", _table, Kit.T("写入方式", 10, Pal.Muted2), null, new Thickness(0)));
 
         _requests = Table(new[] { "参数", "申请值", "原因", "申请人", "时间", "状态" },
             new double[] { 0, 76, 148, 62, 96, 70 }, row => _selectedRequest = row.Data as ParamRequest);
@@ -121,7 +121,7 @@ public sealed class ParamsPage : PageBase
                 p.Current.ToString("F" + Math.Min(p.Step < 1 ? 2 : 1, 3)) + " " + p.Unit,
                 p.Min + " – " + p.Max,
                 p.Unit,
-                p.WriteMode == "cloud" ? "云端" : "就地",
+                WriteModeText(p.WriteMode),
                 "v" + p.Version,
                 p.UpdatedAt,
             },
@@ -192,7 +192,7 @@ public sealed class ParamsPage : PageBase
         }
         var p = _selected;
         _detail.Children.Add(Kit.T(p.Name, 13, Pal.Ink, bold: true));
-        _detail.Children.Add(Kit.T($"键 {p.Key} · 分组 {p.Group} · 写入方式 {(p.WriteMode == "cloud" ? "云端下发" : "就地设置")}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.T($"键 {p.Key} · 分组 {p.Group} · 写入方式 {WriteModeText(p.WriteMode)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.T(p.Desc, 11, Pal.Muted, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(6, 4));
 
@@ -203,7 +203,7 @@ public sealed class ParamsPage : PageBase
         _detail.Children.Add(Kit.T($"版本 v{p.Version} · 最近修改 {p.UpdatedAt} · 操作人 {p.UpdatedBy}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 
         var buttons = Kit.Row(6,
-            Kit.Btn("编辑参数", EditSelected, primary: true, small: true),
+            Kit.Btn(p.WriteMode == "approval" ? "提交审批" : "编辑参数", EditSelected, primary: true, small: true),
             Kit.Btn("回滚版本", RollbackSelected, small: true));
         buttons.Margin = new Thickness(0, 8, 0, 6);
         _detail.Children.Add(buttons);
@@ -235,10 +235,12 @@ public sealed class ParamsPage : PageBase
             return;
         }
         var p = _selected;
-        var dlg = new FormDialog(Host, "编辑参数 · " + p.Name, $"{p.Desc}\n范围 {p.Min} – {p.Max} {p.Unit}");
+        var approval = p.WriteMode == "approval";
+        var dlg = new FormDialog(Host, (approval ? "提交参数变更 · " : "编辑参数 · ") + p.Name,
+            $"{p.Desc}\n范围 {p.Min} – {p.Max} {p.Unit}" + (approval ? "\n该参数需审批后生效，提交后进入审批申请。" : ""));
         var valueBox = dlg.AddText("新值", p.Current.ToString("F2"), "输入数值");
         var reasonBox = dlg.AddText("修改原因（必填）", "", "例如：根据化验结果调整 PAC 投加");
-        if (!dlg.Ask("保存并生效", validate: () =>
+        if (!dlg.Ask(approval ? "提交审批" : "保存并生效", validate: () =>
             {
                 if (!double.TryParse(valueBox.Text, out var v)) return "请输入有效数字";
                 if (v < p.Min || v > p.Max) return $"超出范围（{p.Min} – {p.Max}）";
@@ -250,6 +252,14 @@ public sealed class ParamsPage : PageBase
         RefreshData();
         Host.RefreshShell();
     }
+
+    private static string WriteModeText(string mode) => mode switch
+    {
+        "cloud" => "直接写入",
+        "approval" => "审批后生效",
+        "local" => "现场设定",
+        _ => mode,
+    };
 
     private void RollbackSelected()
     {

@@ -612,6 +612,36 @@ public sealed partial class DemoDesktopData
         return stats;
     }
 
+    public OpResult CreateLab(string samplePoint, IReadOnlyDictionary<string, double> metrics, string? method = null)
+    {
+        if (_user?.Can("inspection.execute") != true) return OpResult.Fail("当前账号无化验录入权限");
+        var names = new Dictionary<string, string>
+        {
+            ["inlet"] = "进水（原料罐）",
+            ["baf_out"] = "BAF 出水",
+            ["sulfur_out"] = "硫自养池出水",
+            ["outlet"] = "总出水（清水池）",
+        };
+        if (!names.ContainsKey(samplePoint)) return OpResult.Fail("取样点不合法");
+        if (metrics.Count == 0) return OpResult.Fail("请至少填写一项检测指标");
+        var rec = new LabRecord
+        {
+            Id = "LAB-DEMO-" + DateTime.Now.ToString("yyyyMMddHHmmss"),
+            SiteId = _siteId,
+            SamplePoint = samplePoint,
+            SamplePointName = names[samplePoint],
+            SampledAt = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
+            Status = "pending_review",
+            Recorder = _user.Name,
+            Remark = method ?? "",
+        };
+        foreach (var kv in metrics) rec.Metrics[kv.Key] = kv.Value;
+        Rt.Labs.Insert(0, rec);
+        RecordAudit("lab.create", "lab", rec.Id, "录入化验：" + rec.SamplePointName);
+        Touch();
+        return OpResult.Done("化验记录已提交，等待复核");
+    }
+
     public OpResult ReviewLab(string id, bool approve)
     {
         if (_user?.Can("lab.review") != true) return OpResult.Fail("当前账号无化验复核权限");
@@ -845,6 +875,37 @@ public sealed partial class DemoDesktopData
         RecordAudit("workorder.assign", "workorder", id, wo.Title);
         Touch();
         return OpResult.Done("工单已派发");
+    }
+
+    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description)
+    {
+        if (_user?.Can("workorder.handle") != true) return OpResult.Fail("当前账号无工单权限");
+        if (string.IsNullOrWhiteSpace(title)) return OpResult.Fail("请填写工单标题");
+        var unit = DemoCatalog.Units().FirstOrDefault(u => u.Code == unitCode);
+        var person = string.IsNullOrEmpty(assigneeId) ? null : Users.FirstOrDefault(u => u.User.Id == assigneeId)?.User;
+        var now = DateTime.Now;
+        var wo = new WorkOrderInfo
+        {
+            Id = "WO-" + now.ToString("yyyyMMdd-HHmmss"),
+            SiteId = Rt.Info.Id,
+            Title = title.Trim(),
+            Type = type,
+            Priority = priority,
+            Status = person is null ? "pending" : "accepted",
+            UnitCode = unitCode,
+            UnitName = unit?.Name ?? unitCode,
+            Assignee = person?.Name ?? "",
+            Creator = _user.Name,
+            Source = "manual",
+            CreatedAt = Ms(now),
+            DueAt = Ms(now.AddHours(24)),
+            Desc = description,
+        };
+        wo.Timeline.Add(new TimelineEntry { At = Ms(now), Actor = _user.Name, Text = person is null ? "创建工单" : "创建工单并派发给 " + person.Name });
+        Rt.WorkOrders.Insert(0, wo);
+        RecordAudit("workorder.create", "workorder", wo.Id, wo.Title);
+        Touch();
+        return OpResult.Done("工单已创建");
     }
 
     public IReadOnlyList<InspectionInfo> Inspections => Rt.Inspections.OrderBy(i => i.DueAt).ToList();
