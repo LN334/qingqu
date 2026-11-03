@@ -305,7 +305,7 @@ public sealed class DashboardPage : PageBase
             Kit.C(Pal.AlarmStatusText(a.Status), Pal.AlarmStatusTone(a.Status)))));
         _alarmSummary.Text = $"未关闭 {openAlarms.Count} 条 · 未确认 {Svc.Data.Alarms("active").Count} 条";
 
-        var works = Svc.Data.WorkOrders("all").Where(w => w.Status is not ("closed" or "done")).OrderByDescending(w => w.CreatedAt).ToList();
+        var works = Svc.Data.WorkOrders("all").Where(w => w.Status is "pending" or "accepted" or "processing").OrderByDescending(w => w.CreatedAt).ToList();
         Bind(_workTable, works.Take(6).Select(w => Kit.R(
             Kit.C(w.Title, "normal"),
             Kit.C(w.UnitName, "muted"),
