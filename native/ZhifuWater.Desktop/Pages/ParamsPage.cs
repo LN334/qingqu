@@ -51,8 +51,6 @@ public sealed class ParamsPage : PageBase
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(tabs);
-        head.Children.Add(Kit.T("参数修改即时生效并记录版本；审批流中的申请需管理员通过后写入。回滚可选择历史版本。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -71,7 +69,7 @@ public sealed class ParamsPage : PageBase
                 ShowDetail();
             }
         };
-        left.Children.Add(Kit.Card("参数分组表", _table, Kit.T("写入方式", 10, Pal.Muted2), null, new Thickness(0)));
+        left.Children.Add(Kit.Card("参数分组表", _table, null, null, new Thickness(0)));
 
         _requests = Table(new[] { "参数", "申请值", "原因", "申请人", "时间", "状态" },
             new double[] { 0, 76, 148, 62, 96, 70 }, row => _selectedRequest = row.Data as ParamRequest);
@@ -102,8 +100,7 @@ public sealed class ParamsPage : PageBase
     {
         if (_info == null) return;
         var canEdit = Svc.Data.CurrentUser?.Can("param.edit") ?? false;
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 参数 {Svc.Data.Params.Count} 个 · 待审批 {Svc.Data.ParamRequests.Count} 条 · " +
-                     $"当前账号参数权限：{(canEdit ? "可编辑" : "只读")} · 最新写入 {Svc.Data.LastUpdated:HH:mm:ss}";
+        _info.Text = $"{Svc.Data.Params.Count} 个参数 · 待审批 {Svc.Data.ParamRequests.Count} 条 · {(canEdit ? "可编辑" : "只读")}";
 
         foreach (var child in FindTabButtons())
         {
@@ -118,8 +115,8 @@ public sealed class ParamsPage : PageBase
             {
                 p.Name,
                 p.Group,
-                p.Current.ToString("F" + Math.Min(p.Step < 1 ? 2 : 1, 3)) + " " + p.Unit,
-                p.Min + " – " + p.Max,
+                ParamValueText(p),
+                ParamRangeText(p),
                 p.Unit,
                 WriteModeText(p.WriteMode),
                 "v" + p.Version,
@@ -138,7 +135,7 @@ public sealed class ParamsPage : PageBase
             Texts = new[]
             {
                 r.ParamName,
-                r.Value.ToString("F2") + " " + r.Unit,
+                Fmt(r.Value, 2) + (r.Unit.Length == 0 ? "" : " " + r.Unit),
                 r.Reason,
                 r.Applicant,
                 Kit.FormatTime(r.At),
@@ -196,9 +193,13 @@ public sealed class ParamsPage : PageBase
         _detail.Children.Add(Kit.T(p.Desc, 11, Pal.Muted, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(6, 4));
 
+        var meta = new List<string>();
+        if (p.Unit.Length > 0) meta.Add(p.Unit);
+        meta.Add("范围 " + ParamRangeText(p));
+        meta.Add("步长 " + Fmt(p.Step, p.Step >= 1 ? 0 : 2));
         var valueRow = Kit.Row(8,
-            Kit.KpiValueText(p.Current.ToString("F2")),
-            Kit.T(p.Unit + "  ·  范围 " + p.Min + " – " + p.Max + " · 步长 " + p.Step, 11, Pal.Muted));
+            Kit.KpiValueText(IsModeParam(p) ? ParamValueText(p) : Fmt(p.Current, ParamDigits(p))),
+            Kit.T(string.Join("  ·  ", meta), 11, Pal.Muted));
         _detail.Children.Add(valueRow);
         _detail.Children.Add(Kit.T($"版本 v{p.Version} · 最近修改 {p.UpdatedAt} · 操作人 {p.UpdatedBy}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 
@@ -214,7 +215,7 @@ public sealed class ParamsPage : PageBase
         versions.RowHeight = 26;
         versions.ItemsSource = p.Versions.Select(v => Kit.R(
             Kit.C("v" + v.Version, "muted"),
-            Kit.C(v.Value.ToString("F2"), "normal"),
+            Kit.C(IsModeParam(p) ? ParamValueText(p) : Fmt(v.Value, ParamDigits(p)), "normal"),
             Kit.C(v.At, "muted"),
             Kit.C(v.By, "muted"),
             Kit.C(v.Reason, "muted"))).ToList();
@@ -238,7 +239,7 @@ public sealed class ParamsPage : PageBase
         var approval = p.WriteMode == "approval";
         var dlg = new FormDialog(Host, (approval ? "提交参数变更 · " : "编辑参数 · ") + p.Name,
             $"{p.Desc}\n范围 {p.Min} – {p.Max} {p.Unit}" + (approval ? "\n该参数需审批后生效，提交后进入审批申请。" : ""));
-        var valueBox = dlg.AddText("新值", p.Current.ToString("F2"), "输入数值");
+        var valueBox = dlg.AddText("新值", Fmt(p.Current, ParamDigits(p)), "输入数值");
         var reasonBox = dlg.AddText("修改原因（必填）", "", "例如：根据化验结果调整 PAC 投加");
         if (!dlg.Ask(approval ? "提交审批" : "保存并生效", validate: () =>
             {
@@ -260,6 +261,23 @@ public sealed class ParamsPage : PageBase
         "local" => "现场设定",
         _ => mode,
     };
+
+    /// <summary>运行模式这类取值只有 0/1 的参数写数字没人看得懂，直接落在业务词上。</summary>
+    private static bool IsModeParam(ParamInfo p) => p.Key == "raw.pump.mode";
+
+    private static string ParamValueText(ParamInfo p)
+    {
+        if (IsModeParam(p)) return p.Current >= 0.5 ? "手动" : "自动";
+        return Fmt(p.Current, ParamDigits(p)) + (p.Unit.Length == 0 ? "" : " " + p.Unit);
+    }
+
+    private static int ParamDigits(ParamInfo p) => p.Step >= 1 ? 0 : p.Step >= 0.1 ? 1 : 2;
+
+    private static string ParamRangeText(ParamInfo p)
+    {
+        if (IsModeParam(p)) return "自动 / 手动";
+        return Fmt(p.Min, ParamDigits(p)) + " – " + Fmt(p.Max, ParamDigits(p));
+    }
 
     private void RollbackSelected()
     {

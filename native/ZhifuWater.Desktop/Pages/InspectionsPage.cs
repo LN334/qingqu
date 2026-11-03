@@ -34,8 +34,6 @@ public sealed class InspectionsPage : PageBase
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(actions);
-        head.Children.Add(Kit.T("巡检任务覆盖泵、风机、阀门、仪表、控制柜、药箱、反冲洗与现场安全 8 项；提交后记录巡检人与时间。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -43,8 +41,9 @@ public sealed class InspectionsPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        _table = Table(new[] { "巡检计划", "状态", "负责人", "截止时间", "完成时间", "异常项", "结果" },
-            new double[] { 0, 56, 52, 90, 88, 46, 158 });
+        _table = Table(new[] { "巡检计划", "状态", "负责人", "截止时间", "完成时间", "异常项" },
+            new double[] { 0, 60, 56, 96, 96, 56 });
+        _table.MinHeight = 420;
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is InspectionInfo ins)
@@ -72,7 +71,7 @@ public sealed class InspectionsPage : PageBase
         if (_table == null) return;
         var list = Svc.Data.Inspections;
         var pending = list.Count(i => i.Status != "done");
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 巡检任务 {list.Count} 条 · 待执行 {pending} 条 · 已完成 {list.Count - pending} 条 · 最近同步 {Svc.Data.LastUpdated:HH:mm:ss}";
+        _info.Text = $"巡检任务 {list.Count} 条 · 待执行 {pending} 条 · 已完成 {list.Count - pending} 条";
         var keep = _selected?.Id;
         var rows = list.Select(i => new UiRow
         {
@@ -80,12 +79,12 @@ public sealed class InspectionsPage : PageBase
             {
                 i.Plan, Pal.InspectionStatusText(i.Status), i.Assignee,
                 Kit.FormatTime(i.DueAt), i.DoneAt.HasValue ? Kit.FormatTime(i.DoneAt.Value) : "—",
-                i.Abnormal + " 项", i.Summary,
+                i.Abnormal + " 项",
             },
             Fgs = new[]
             {
                 Pal.Ink2, Pal.ToneFg(Pal.InspectionStatusTone(i.Status)), Pal.Muted2,
-                Pal.Muted, Pal.Muted2, i.Abnormal > 0 ? Pal.Bad : Pal.Muted, Pal.Muted,
+                Pal.Muted, Pal.Muted2, i.Abnormal > 0 ? Pal.Bad : Pal.Muted,
             },
             Data = i,
             Key = i.Id,

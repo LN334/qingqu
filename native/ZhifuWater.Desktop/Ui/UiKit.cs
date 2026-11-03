@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -66,18 +67,26 @@ public static class Kit
 
     public static TextBlock KpiValueText(string value) => new() { Text = value, Style = St("KpiValue") };
 
-    public static StackPanel Row(double gap, params UIElement[] items)
+    /// <summary>横向排布一行元素；中间夹 <see cref="Spacer"/> 时它会吃掉剩余宽度，把后面的元素推到右边。</summary>
+    public static Grid Row(double gap, params UIElement[] items)
     {
-        var panel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        var grid = new Grid { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Stretch };
         for (var i = 0; i < items.Length; i++)
         {
-            if (items[i] is FrameworkElement fe) fe.Margin = new Thickness(0, 0, i == items.Length - 1 ? 0 : gap, 0);
-            panel.Children.Add(items[i]);
+            var isSpacer = items[i] is FrameworkElement { Tag: "spacer" };
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = isSpacer ? new GridLength(1, GridUnitType.Star) : GridLength.Auto });
+            Grid.SetColumn(items[i], i);
+            if (items[i] is FrameworkElement fe)
+            {
+                fe.Margin = new Thickness(0, 0, i == items.Length - 1 ? 0 : gap, 0);
+                fe.VerticalAlignment = VerticalAlignment.Center;
+            }
+            grid.Children.Add(items[i]);
         }
-        return panel;
+        return grid;
     }
 
-    public static StackPanel Row(params UIElement[] items) => Row(8, items);
+    public static Grid Row(params UIElement[] items) => Row(8, items);
 
     public static StackPanel Col(double gap, params UIElement[] items)
     {
@@ -193,8 +202,8 @@ public static class Kit
 
     public static Grid KvGrid(IEnumerable<KeyValuePair<string, string>> items, double labelWidth = 62)
     {
-        var grid = new Grid { Margin = new Thickness(0, 2, 0, 0), HorizontalAlignment = HorizontalAlignment.Stretch };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(labelWidth) });
+        var grid = new Grid { Margin = new Thickness(0, 1, 0, 0), HorizontalAlignment = HorizontalAlignment.Stretch };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         var row = 0;
         foreach (var pair in items)
@@ -203,19 +212,22 @@ public static class Kit
             var label = new TextBlock
             {
                 Text = pair.Key,
-                FontSize = 11,
-                Foreground = Pal.Muted2,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                Margin = new Thickness(0, 0, 8, 5),
+                FontSize = 11.5,
+                Foreground = Pal.Muted,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 1, 14, 7),
                 TextTrimming = TextTrimming.CharacterEllipsis,
             };
+            var hasValue = !string.IsNullOrWhiteSpace(pair.Value);
             var value = new TextBlock
             {
-                Text = string.IsNullOrWhiteSpace(pair.Value) ? "待接入" : pair.Value,
+                Text = hasValue ? pair.Value : "待接入",
                 FontSize = 12,
-                Foreground = Pal.Ink2,
+                Foreground = hasValue ? Pal.Ink : Pal.Muted2,
+                TextAlignment = TextAlignment.Right,
                 TextWrapping = TextWrapping.Wrap,
-                Margin = new Thickness(0, 0, 0, 5),
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 1, 0, 7),
             };
             Grid.SetRow(label, row);
             Grid.SetColumn(label, 0);
@@ -226,6 +238,24 @@ public static class Kit
             row++;
         }
         return grid;
+    }
+
+    /// <summary>表格空态：居中一行灰字，避免只剩表头的破损观感。</summary>
+    public static Border EmptyState(string text, double height = 92)
+    {
+        return new Border
+        {
+            MinHeight = height,
+            Background = Pal.Surface,
+            Child = new TextBlock
+            {
+                Text = text,
+                FontSize = 12,
+                Foreground = Pal.Muted2,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+            },
+        };
     }
 
     public static Border Kpi(KpiInfo kpi, double minWidth = 0)
@@ -336,7 +366,7 @@ public static class Kit
         return new Border { Height = 1, Background = Pal.LineSoft, Margin = new Thickness(0, top, 0, bottom) };
     }
 
-    public static FrameworkElement Spacer() => new Border { Width = 1, Height = 1 };
+    public static FrameworkElement Spacer() => new Border { Width = 1, Height = 1, Tag = "spacer" };
 
     public static Border InfoBar(string text, string tone = "info")
     {
@@ -350,10 +380,34 @@ public static class Kit
         };
     }
 
+    /// <summary>表格列宽测量用：按界面字体算一行文字的像素宽度。</summary>
+    private static double TextWidth(string text, double size, bool semiBold, Visual visual)
+    {
+        if (string.IsNullOrEmpty(text)) return 0;
+        var dpi = VisualTreeHelper.GetDpi(visual).PixelsPerDip;
+        var typeface = new Typeface(new FontFamily("Microsoft YaHei UI"), FontStyles.Normal,
+            semiBold ? FontWeights.SemiBold : FontWeights.Normal, FontStretches.Normal);
+        var formatted = new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
+            typeface, size, Brushes.Black, dpi);
+        return formatted.WidthIncludingTrailingWhitespace;
+    }
+
+    /// <summary>换了数据源就要重新量列宽：DataGrid 自己不会因为 ItemsSource 变化触发 SizeChanged。</summary>
+    private sealed class FittingGrid : DataGrid
+    {
+        public Action? FitRequested;
+
+        protected override void OnItemsSourceChanged(System.Collections.IEnumerable oldValue, System.Collections.IEnumerable newValue)
+        {
+            base.OnItemsSourceChanged(oldValue, newValue);
+            FitRequested?.Invoke();
+        }
+    }
+
     public static DataGrid Table(string[] headers, IEnumerable<UiRow> rows, double[] widths,
         Action<UiRow>? onSelect = null, double rowHeight = 30)
     {
-        var grid = new DataGrid
+        var grid = new FittingGrid
         {
             AutoGenerateColumns = false,
             CanUserAddRows = false,
@@ -361,6 +415,7 @@ public static class Kit
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Single,
             HeadersVisibility = DataGridHeadersVisibility.Column,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             RowHeight = rowHeight,
             ItemsSource = rows.ToList(),
         };
@@ -383,8 +438,9 @@ public static class Kit
             });
         }
 
-        // DataGrid 的星号列在内部滚动容器里会塌成最小宽度：加载后按实际宽度重新分配，
-        // 让表格始终填满卡片；窄卡片自动等比压缩，避免只露出前几列。
+        // DataGrid 的星号列在内部滚动容器里会塌成最小宽度：加载后按实际宽度重新分配。
+        // 先量出每列内容真正需要的宽度——够放就整列给足（不再出现「151...」这种截断），
+        // 真放不下才按比例收窄，保证表格始终填满卡片。
         var lastAvail = -1.0;
         void Fit()
         {
@@ -394,21 +450,84 @@ public static class Kit
             var avail = grid.ActualWidth - 2 - chrome;
             if (avail < 80 || headers.Length == 0 || Math.Abs(avail - lastAvail) < 0.5) return;
             lastAvail = avail;
+
+            var need = new double[headers.Length];
+            for (var i = 0; i < headers.Length; i++)
+            {
+                need[i] = TextWidth(headers[i], 11, true, grid) + 24;
+                if (i < widths.Length && widths[i] > need[i]) need[i] = widths[i];
+            }
+            foreach (var item in grid.Items)
+            {
+                if (item is not UiRow row) continue;
+                for (var i = 0; i < Math.Min(headers.Length, row.Texts.Length); i++)
+                {
+                    var text = row.Texts[i];
+                    if (string.IsNullOrEmpty(text)) continue;
+                    var w = TextWidth(text, 12, false, grid) + 24;
+                    if (w > need[i]) need[i] = w;
+                }
+            }
+
             var flex = Enumerable.Range(0, headers.Length)
                 .Where(i => i >= widths.Length || widths[i] <= 0).ToArray();
-            var fixedSum = Enumerable.Range(0, headers.Length)
-                .Where(i => i < widths.Length && widths[i] > 0).Sum(i => widths[i]);
-            var flexEach = flex.Length > 0 ? Math.Max(64, (avail - fixedSum) / flex.Length) : 0;
-            var total = flex.Length > 0 ? fixedSum + flexEach * flex.Length : Math.Max(fixedSum, avail);
-            var scale = total > avail ? avail / total : 1;
-            for (var i = 0; i < grid.Columns.Count; i++)
+            var sum = need.Sum();
+            double[] final;
+            if (flex.Length > 0 && sum > avail)
             {
-                var baseW = i < widths.Length && widths[i] > 0 ? widths[i] : (flexEach > 0 ? flexEach : 100);
-                grid.Columns[i].Width = new DataGridLength(Math.Max(38, baseW * scale));
+                // 有弹性列时先让弹性列让位：固定列按内容给足，剩下的全给弹性列。
+                // 否则一张表里只要有一列长文本，Fit 会按比例把所有列一起压窄，出现「10-26 14:...」。
+                const double flexMin = 84;
+                var fixedNeed = need.Sum() - flex.Sum(i => need[i]);
+                if (fixedNeed + flexMin <= avail)
+                {
+                    final = (double[])need.Clone();
+                    var share = (avail - fixedNeed) / flex.Length;
+                    foreach (var i in flex) final[i] = share;
+                }
+                else
+                {
+                    var budget = Math.Max(avail - flexMin * flex.Length, avail * 0.4);
+                    var scale = budget / Math.Max(1, fixedNeed);
+                    final = new double[headers.Length];
+                    for (var i = 0; i < headers.Length; i++)
+                        final[i] = flex.Contains(i) ? flexMin : Math.Max(44, need[i] * scale);
+                }
             }
+            else if (sum <= avail)
+            {
+                final = (double[])need.Clone();
+                var extra = avail - sum;
+                if (flex.Length > 0)
+                {
+                    foreach (var i in flex) final[i] += extra / flex.Length;
+                }
+                else
+                {
+                    var weights = final.Sum();
+                    for (var i = 0; i < final.Length; i++) final[i] += extra * final[i] / weights;
+                }
+            }
+            else
+            {
+                var scale = avail / sum;
+                final = need.Select(w => Math.Max(44, w * scale)).ToArray();
+                var total = final.Sum();
+                if (total < avail) final[final.Length - 1] += avail - total;
+            }
+
+            for (var i = 0; i < grid.Columns.Count; i++)
+                grid.Columns[i].Width = new DataGridLength(Math.Max(40, final[i]));
         }
+        grid.FitRequested = () => { lastAvail = double.NaN; Fit(); };
         grid.Loaded += (_, _) => Fit();
         grid.SizeChanged += (_, _) => Fit();
+        // ItemsSource 换一批数据后不会触发 SizeChanged，这里主动重排一次，否则列宽永远停在首次（空表）测量上。
+        ((System.Collections.Specialized.INotifyCollectionChanged)grid.Items).CollectionChanged += (_, _) =>
+        {
+            lastAvail = double.NaN;
+            grid.Dispatcher.BeginInvoke(new Action(Fit), System.Windows.Threading.DispatcherPriority.Loaded);
+        };
         if (onSelect != null)
         {
             grid.SelectionChanged += (_, _) =>

@@ -53,8 +53,6 @@ public sealed class AdminPage : PageBase
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(_tabs);
-        head.Children.Add(Kit.T("系统管理操作受角色权限约束：用户管理需 admin.users，设置/通道/备份需 admin.config，审计查看需 admin.audit。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _body = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -75,8 +73,7 @@ public sealed class AdminPage : PageBase
         var canConfig = Svc.Data.CurrentUser?.Can("admin.config") ?? false;
         var canAudit = Svc.Data.CurrentUser?.Can("admin.audit") ?? false;
         _info.Text = $"站点 {Svc.Data.Site.Name} · 用户 {Svc.Data.Users.Count} 个 · 角色 {Svc.Data.Roles.Count} 个 · " +
-                     $"通道 {Svc.Data.Channels.Count} 个 · 审计 {Svc.Data.AuditLogs(200).Count} 条 · 备份 {Svc.Data.Backups.Count} 份 · " +
-                     $"权限：用户 {(canUsers ? "√" : "—")} / 配置 {(canConfig ? "√" : "—")} / 审计 {(canAudit ? "√" : "—")}";
+                     $"通道 {Svc.Data.Channels.Count} 个 · 审计 {Svc.Data.AuditLogs(200).Count} 条 · 备份 {Svc.Data.Backups.Count} 份";
         switch (_tab)
         {
             case "users": BuildUsers(canUsers); break;

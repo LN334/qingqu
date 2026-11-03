@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -34,7 +34,7 @@ public sealed class DiagnosisPage : PageBase
             {
                 _level = k;
                 foreach (var child in tabs.Children.OfType<Button>())
-                    child.Tag = (string)child.Content == (k == "all" ? "全部" : text) && true ? TagFor(k, (string)child.Content) : null;
+                    child.Tag = TagFor(_level, (string)child.Content);
                 RefreshData();
             };
             tabs.Children.Add(b);
@@ -42,8 +42,6 @@ public sealed class DiagnosisPage : PageBase
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(tabs);
-        head.Children.Add(Kit.T("诊断基于当前实时点位、阈值规则与人工化验结果生成，每条结论都附带现象、原因、检查项与依据。结论仅供参考，处置前请现场确认。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _list = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -73,8 +71,7 @@ public sealed class DiagnosisPage : PageBase
             ["attention"] = all.Count(d => d.Level == "attention"),
             ["ok"] = all.Count(d => d.Level == "ok"),
         };
-        _info.Text = $"基于 {Svc.Data.Readings.Count} 个点位、{Svc.Data.Labs.Count} 条化验记录分析 · " +
-                     $"需处理 {count["warning"]} 条 · 需关注 {count["attention"]} 条 · 正常 {count["ok"]} 条 · 站点 {Svc.Data.Site.Name}";
+        _info.Text = $"{all.Count} 项结论 · 需处理 {count["warning"]} · 需关注 {count["attention"]} · 正常 {count["ok"]}";
 
         _list.Children.Clear();
         var items = all.Where(d => _level == "all" || d.Level == _level).ToList();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -28,9 +28,7 @@ public sealed class AnalysisPage : PageBase
     {
         var root = new StackPanel();
         var head = new StackPanel { Orientation = Orientation.Horizontal };
-        head.Children.Add(Kit.T("运行数据分析", 12, Pal.Muted));
-        _info = Kit.T("", 11, Pal.Muted2);
-        _info.Margin = new Thickness(12, 1, 0, 0);
+        _info = Kit.T("", 12, Pal.Muted);
         head.Children.Add(_info);
         head.Children.Add(Kit.Spacer());
         var range = Kit.Select(new[] { "近 7 天", "近 30 天" }, 0, 98);
@@ -52,18 +50,18 @@ public sealed class AnalysisPage : PageBase
 
         var left = new StackPanel();
         _daily = new LineChart { Height = 240, ShowLegend = true, NormalizePerSeries = true, EmptyText = "暂无逐日数据" };
-        left.Children.Add(Kit.Card("逐日运行指标", _daily, Kit.T("多指标按各自量程归一化", 9.5, Pal.Muted2), "分析引擎", new Thickness(10, 6, 10, 8)));
+        left.Children.Add(Kit.Card("逐日运行指标", _daily, null, null, new Thickness(10, 6, 10, 8)));
 
-        _cost = new BarChart { Height = 174, Unit = "元", ShowValues = true, BarWidth = 0.5 };
-        var costCard = Kit.Card("吨水成本构成", _cost, null, "药剂 / 电耗 / 维护 / 人工", new Thickness(10, 8, 10, 10));
+        _cost = new BarChart { Height = 174, Unit = "元/m³", ShowValues = true, BarWidth = 0.5 };
+        var costCard = Kit.Card("吨水成本构成", _cost, null, null, new Thickness(10, 8, 10, 10));
         costCard.Margin = new Thickness(0, 10, 0, 0);
         left.Children.Add(costCard);
 
 
-        _units = Table(new[] { "单元", "关键读数", "告警", "健康", "说明" },
-            new double[] { 96, 0, 42, 44, 150 });
+        _units = Table(new[] { "单元", "关键读数", "告警", "健康" },
+            new double[] { 108, 0, 48, 48 });
         _units.RowHeight = 29;
-        var right = Kit.Card("单元效率与健康", _units, null, "11 个工艺单元", new Thickness(10, 8, 10, 8));
+        var right = Kit.Card("单元效率与健康", _units, null, null, new Thickness(10, 8, 10, 8));
 
         Grid.SetColumn(left, 0);
         Grid.SetColumn(right, 2);
@@ -78,7 +76,7 @@ public sealed class AnalysisPage : PageBase
     {
         if (_kpiHost == null) return;
         var data = Svc.Data.Analysis(_days);
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 统计周期 {_days} 天 · 单元 {data.Units.Count} 个 · 生成于 {Svc.Data.LastUpdated:HH:mm:ss}";
+        _info.Text = $"{_days} 天 · 单元 {data.Units.Count} 个 · 生成于 {Svc.Data.LastUpdated:HH:mm}";
 
         _kpiHost.Children.Clear();
         foreach (var kpi in data.Kpis)
@@ -99,10 +97,10 @@ public sealed class AnalysisPage : PageBase
 
         _units.ItemsSource = data.Units.Select(u => new UiRow
         {
-            Texts = new[] { u.UnitName, FirstReading(u.Readings), u.Alarms + " 条", u.Health + " 分", u.Note },
+            Texts = new[] { u.UnitName, FirstReading(u.Readings), u.Alarms + " 条", u.Health + " 分" },
             Fgs = new[]
             {
-                Pal.Ink2, Pal.Ink, u.Alarms > 0 ? Pal.Warn : Pal.Muted, u.Health >= 85 ? Pal.Good : u.Health >= 60 ? Pal.Warn : Pal.Bad, Pal.Muted2,
+                Pal.Ink2, Pal.Ink, u.Alarms > 0 ? Pal.Warn : Pal.Muted, u.Health >= 85 ? Pal.Good : u.Health >= 60 ? Pal.Warn : Pal.Bad,
             },
             Key = u.UnitCode,
         }).ToList();

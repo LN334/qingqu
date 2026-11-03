@@ -17,6 +17,7 @@ public sealed class MonitorPage : PageBase
     private TextBlock _pointMeta = null!;
     private TextBlock _liveInfo = null!;
     private ComboBox _hours = null!;
+    private StackPanel _stats = null!;
     private string _selected = "BAF.DO";
     private int _hoursValue = 24;
 
@@ -33,8 +34,6 @@ public sealed class MonitorPage : PageBase
         _liveInfo = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_liveInfo);
-        head.Children.Add(Kit.T("点选点位叠加曲线，最多 4 个。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -52,7 +51,7 @@ public sealed class MonitorPage : PageBase
                 ShowSelected();
             }
         };
-        var tableCard = Kit.Card("点位实时值", _table, Kit.Badge("3 秒刷新", "accent"), null, new Thickness(0));
+        var tableCard = Kit.Card("点位实时值", _table, Kit.Badge("实时", "accent"), null, new Thickness(0));
         Grid.SetColumn(tableCard, 0);
 
         var chartHead = new StackPanel { Orientation = Orientation.Horizontal };
@@ -70,17 +69,25 @@ public sealed class MonitorPage : PageBase
         };
         chartHead.Children.Add(_hours);
 
-        _chart = new LineChart { Height = 268, NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
+        _chart = new LineChart { Height = 320, NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         _pointMeta = Kit.T("", 11, Pal.Muted2, wrap: TextWrapping.Wrap);
         var chartBody = new StackPanel();
         chartBody.Children.Add(_chart);
         chartBody.Children.Add(Kit.Divider(4, 3));
         chartBody.Children.Add(_pointMeta);
         var chartCard = Kit.Card("点位曲线", chartBody, chartHead, null, new Thickness(8, 6, 8, 8));
-        Grid.SetColumn(chartCard, 2);
+
+        _stats = new StackPanel();
+        var statsCard = Kit.Card("区间统计", _stats, null, null, new Thickness(8, 6, 8, 8));
+        statsCard.Margin = new Thickness(0, 10, 0, 0);
+
+        var rightCol = new StackPanel();
+        rightCol.Children.Add(chartCard);
+        rightCol.Children.Add(statsCard);
+        Grid.SetColumn(rightCol, 2);
 
         columns.Children.Add(tableCard);
-        columns.Children.Add(chartCard);
+        columns.Children.Add(rightCol);
         root.Children.Add(columns);
 
         Install(Kit.Scroll(root));
@@ -90,17 +97,17 @@ public sealed class MonitorPage : PageBase
     {
         var readings = Svc.Data.Readings;
         var online = readings.Count(r => r.Quality == "good");
-        _liveInfo.Text = $"站点 {Svc.Data.Site.Name} · 点位 {readings.Count} 个（正常 {online}） · " +
-                         $"最新采集 {Svc.Data.LastUpdated:HH:mm:ss} · 自动刷新 3 秒";
+        _liveInfo.Text = $"点位 {readings.Count} 个 · 正常 {online} 个 · 采集于 {Svc.Data.LastUpdated:HH:mm:ss}";
 
         var selectedCode = _selected;
+        var unitNames = Svc.Data.Units.GroupBy(u => u.Code).ToDictionary(g => g.Key, g => g.First().Short.Length > 0 ? g.First().Short : g.First().Name);
         var rows = readings.Select(r => new UiRow
         {
             Texts = new[]
             {
                 r.Code,
                 r.Name,
-                r.UnitCode,
+                unitNames.TryGetValue(r.UnitCode, out var unitName) ? unitName : r.UnitCode,
                 ValueOf(r),
                 r.Stale ? "超时" : r.Quality == "good" ? "正常" : r.Quality,
                 Kit.FormatClock(r.T),
@@ -140,7 +147,30 @@ public sealed class MonitorPage : PageBase
             return;
         }
         var def = reading.Point;
-        _pointMeta.Text = $"单元 {def.UnitCode} · 量程 {def.Range} · 精度 {def.Accuracy} · 采集间隔 {def.IntervalSec}s · " +
-                          $"来源 {def.Provenance} · {def.Desc}";
+        _pointMeta.Text = $"量程 {def.Range} · 精度 {def.Accuracy} · 采集间隔 {def.IntervalSec}s";
+
+        _stats.Children.Clear();
+        var points = trend.SelectMany(t => t.Points).ToList();
+        if (points.Count == 0)
+        {
+            _stats.Children.Add(Kit.T("当前时段没有历史样本", 11, Pal.Muted2));
+            return;
+        }
+        var unit = reading.Point.Unit.Length > 0 ? " " + reading.Point.Unit : "";
+        var digits = Math.Max(0, reading.Point.Digits);
+        var items = new (string Label, string Value)[]
+        {
+            ("当前值", ReadingText(reading)),
+            ("最小值", Fmt(points.Min(p => p.V), digits) + unit),
+            ("最大值", Fmt(points.Max(p => p.V), digits) + unit),
+            ("平均值", Fmt(points.Average(p => p.V), digits) + unit),
+            ("样本数", points.Count + " 个"),
+        };
+        foreach (var (label, value) in items)
+        {
+            var row = Kit.Row(8, Kit.T(label, 11, Pal.Muted), Kit.Spacer(), Kit.T(value, 12, Pal.Ink));
+            row.Margin = new Thickness(0, 2, 0, 2);
+            _stats.Children.Add(row);
+        }
     }
 }

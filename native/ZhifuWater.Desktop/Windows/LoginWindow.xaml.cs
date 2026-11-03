@@ -19,6 +19,9 @@ public partial class LoginWindow : Window
         _services = services;
         Loaded += (_, _) => AccountBox.Focus();
         AccountBox.Text = "admin";
+        AccountBox.TextChanged += (_, _) => AccountHint.Visibility = AccountBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        PasswordBox.PasswordChanged += (_, _) => PasswordHint.Visibility = PasswordBox.Password.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
+        AccountHint.Visibility = Visibility.Collapsed;
     }
 
     private void OnLoginClick(object sender, RoutedEventArgs e) => TryLogin();

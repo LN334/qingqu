@@ -1116,7 +1116,14 @@ public sealed class CoreDesktopData : IDesktopData
         return new DiagnosisInfo
         {
             Id = J.Str(d, "id"),
-            Level = J.Str(d, "level") switch { "high" or "critical" => "warning", "low" => "ok", _ => "attention" },
+            // 服务端 level：high=需处理，medium/low=需关注（low 是提醒级，不是「正常」），none=正常
+            Level = J.Str(d, "level") switch
+            {
+                "high" or "critical" => "warning",
+                "medium" or "low" => "attention",
+                "none" or "ok" => "ok",
+                _ => "attention",
+            },
             Title = J.Str(d, "title"),
             Phenomenon = J.Str(d, "phenomenon"),
             Causes = J.Get(d, "causes") is JsonArray c2 ? J.Objs(c2).Select(x => J.AsString(x) ?? "").ToList() : new List<string>(),
@@ -1182,8 +1189,14 @@ public sealed class CoreDesktopData : IDesktopData
             data.Daily.Add(waterSeries);
             data.Daily.Add(energySeries);
             data.Daily.Add(costSeries);
-            data.CostBreakdown.Add(new KeyValuePair<string, double>("电费", J.NumOr(cost, "electricity", 0)));
-            data.CostBreakdown.Add(new KeyValuePair<string, double>("药剂费", J.NumOr(cost, "chemicals", 0)));
+            // 成本构成只给吨水口径：累计电费/药剂费按处理水量折算，与「吨水成本」KPI 同口径
+            var periodVolume = J.Num(water, "total") ?? 0;
+            var elec = J.NumOr(cost, "electricity", 0);
+            var chem = J.NumOr(cost, "chemicals", 0);
+            data.CostBreakdown.Add(new KeyValuePair<string, double>("电费",
+                periodVolume > 0 ? Math.Round(elec / periodVolume, 2) : 0));
+            data.CostBreakdown.Add(new KeyValuePair<string, double>("药剂费",
+                periodVolume > 0 ? Math.Round(chem / periodVolume, 2) : 0));
 
             var alarmDaily = J.O(s, "alarmDaily", false);
             foreach (var kv in alarmDaily.OrderBy(k => k.Key))
@@ -1884,11 +1897,6 @@ public sealed class CoreDesktopData : IDesktopData
         if (_user is null) return k;
         var kpis = DashboardKpis();
         k.StatusCards = kpis.Take(5).ToList();
-        k.StatusCards.Add(new KpiInfo
-        {
-            Key = "updated", Label = "数据更新", Value = _lastUpdated.ToString("HH:mm:ss"),
-            Unit = "", Tone = "good", Hint = "", Source = "system",
-        });
         k.Units = UnitSnapshots().ToList();
         k.RecentAlarms = Alarms("open").Take(5).ToList();
         var actions = Actions;

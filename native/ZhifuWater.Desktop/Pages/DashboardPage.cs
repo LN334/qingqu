@@ -19,6 +19,7 @@ public sealed class DashboardPage : PageBase
     private StackPanel _diagPanel = null!;
     private DataGrid _alarmTable = null!;
     private DataGrid _workTable = null!;
+    private TextBlock _workEmpty = null!;
     private DataGrid _deviceTable = null!;
     private TextBlock _healthText = null!;
     private TextBlock _deviceSummary = null!;
@@ -132,7 +133,7 @@ public sealed class DashboardPage : PageBase
 
     private UIElement BuildTrendCard()
     {
-        _trend = new LineChart { Height = 208, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
+        _trend = new LineChart { Height = 190, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         foreach (var (code, label, hex) in TrendDefs)
         {
@@ -201,7 +202,14 @@ public sealed class DashboardPage : PageBase
         _workTable = Table(new[] { "工单", "单元", "类型", "状态" }, new double[] { 0, 96, 52, 62 },
             row => Host.ShowPage("workorders"));
         _workSummary = Kit.T("", 10, Pal.Muted2);
-        return Kit.Card("待处理工单", _workTable,
+        _workEmpty = Kit.T("暂无待处理工单", 12, Pal.Muted2);
+        _workEmpty.HorizontalAlignment = HorizontalAlignment.Center;
+        _workEmpty.Margin = new Thickness(0, 18, 0, 18);
+        _workEmpty.Visibility = Visibility.Collapsed;
+        var host = new Grid();
+        host.Children.Add(_workTable);
+        host.Children.Add(_workEmpty);
+        return Kit.Card("待处理工单", host,
             Kit.Row(8, _workSummary, Kit.Link("工单管理", () => Host.ShowPage("workorders"))),
             null, new Thickness(8, 6, 8, 8));
     }
@@ -275,7 +283,7 @@ public sealed class DashboardPage : PageBase
                             .OrderBy(r => Rank(r.Point.Code))
                             .FirstOrDefault()
                         ?? snap?.Readings.FirstOrDefault();
-            stack.Children.Add(Kit.T(first is null ? "未布点" : (first.Value is double dv ? dv.ToString("0.###") : first.Text), 9, Pal.Muted));
+            stack.Children.Add(Kit.T(first is null ? "—" : (first.Value is double dv ? Fmt(dv, Math.Max(0, first.Point.Digits)) : first.Text), 9, Pal.Muted));
             var stateRow = Kit.Row(3,
                 new Border { Width = 5, Height = 5, CornerRadius = new CornerRadius(2.5), Background = Pal.ToneFg(Pal.UnitStateTone(state)) },
                 Kit.T(Pal.UnitStateText(state), 9, Pal.ToneFg(Pal.UnitStateTone(state))));
@@ -312,10 +320,13 @@ public sealed class DashboardPage : PageBase
             Kit.C(Pal.WorkOrderTypeText(w.Type), "normal"),
             Kit.C(Pal.WorkOrderStatusText(w.Status), Pal.WorkOrderStatusTone(w.Status)))));
         _workSummary.Text = $"待处理 {works.Count} 单";
+        _workTable.Visibility = works.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        _workEmpty.Visibility = works.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
         var devices = Svc.Data.Devices;
-        var risky = devices.Where(d => !d.Online || d.Health < 85).OrderBy(d => d.Health).Take(6).ToList();
-        Bind(_deviceTable, risky.Select(d => Kit.R(
+        var risky = devices.Where(d => !d.Online || d.Health < 85).OrderBy(d => d.Health).ToList();
+        var ranked = devices.OrderBy(d => d.Online ? 1 : 0).ThenBy(d => d.Health).Take(5).ToList();
+        Bind(_deviceTable, ranked.Select(d => Kit.R(
             Kit.C(d.Code + " " + d.Name, "normal"),
             Kit.C(d.UnitName, "muted"),
             Kit.C(d.Health + " · " + d.HealthText, d.Health >= 85 ? "good" : d.Health >= 60 ? "warn" : "bad"),

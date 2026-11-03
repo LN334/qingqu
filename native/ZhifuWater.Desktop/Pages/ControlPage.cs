@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -28,8 +28,6 @@ public sealed class ControlPage : PageBase
         _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_info);
-        head.Children.Add(Kit.T("所有动作通过原生命令引擎下发：写操作 → 二次确认 → 联锁检查 → 生成命令记录 → 现场执行。危险动作需填写原因。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _actions = new WrapPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -37,7 +35,7 @@ public sealed class ControlPage : PageBase
         root.Children.Add(_actions);
 
         _commands = Table(new[] { "时间", "动作", "设备", "状态", "操作人", "原因" },
-            new double[] { 104, 0, 96, 74, 62, 150 }, row => _selected = row.Data as CommandRecord);
+            new double[] { 96, 132, 168, 74, 62, 0 }, row => _selected = row.Data as CommandRecord);
         var cmdInfo = Kit.Row(8,
             Kit.Btn("确认执行", ConfirmSelected, primary: true, small: true),
             Kit.Btn("取消命令", CancelSelected, small: true),
@@ -140,9 +138,11 @@ public sealed class ControlPage : PageBase
                 Kit.FormatTime(c.At),
                 c.Label,
                 c.Device,
-                Pal.CommandStatusText(c.Status) + (string.IsNullOrEmpty(c.FailReason) ? "" : "：" + c.FailReason),
+                Pal.CommandStatusText(c.Status),
                 c.By,
-                c.Reason,
+                string.IsNullOrEmpty(c.FailReason) ? c.Reason
+                    : string.IsNullOrEmpty(c.Reason) ? "失败：" + c.FailReason
+                    : c.Reason + "／失败：" + c.FailReason,
             },
             Fgs = new[]
             {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -53,7 +53,7 @@ public sealed class ProcessPage : PageBase
             _selected = code;
             RefreshSelection();
         };
-        var pidRight = Kit.Row(8, Kit.Badge("实时状态", "accent"), Kit.T("3 秒刷新", 10, Pal.Muted2));
+        var pidRight = Kit.Badge("实时", "accent");
         var canvasHost = new Viewbox { Child = _canvas, Stretch = Stretch.Uniform, MaxHeight = 300 };
         root.Children.Add(Kit.Card("P&ID 工艺流程图", canvasHost, pidRight, null, new Thickness(8, 4, 8, 8)));
 
@@ -98,8 +98,8 @@ public sealed class ProcessPage : PageBase
 
         var counts = new Dictionary<string, int>();
         foreach (var s in snapshots) counts[s.State] = counts.GetValueOrDefault(s.State) + 1;
-        _summary.Text = $"站点 {Svc.Data.Site.Name} · 11 单元 / {Svc.Data.Devices.Count} 台设备 · " +
-                        $"正常 {counts.GetValueOrDefault("normal")} · 关注 {counts.GetValueOrDefault("attention")} · 告警 {counts.GetValueOrDefault("alarm")} · 离线 {counts.GetValueOrDefault("offline")}";
+        _summary.Text = $"{Svc.Data.Units.Count} 个单元 · {Svc.Data.Devices.Count} 台设备 · " +
+                        $"告警 {counts.GetValueOrDefault("alarm")} · 离线 {counts.GetValueOrDefault("offline")}";
 
         var rows = snapshots.Select(s => new UiRow
         {
@@ -107,7 +107,7 @@ public sealed class ProcessPage : PageBase
             {
                 s.Unit.Name,
                 s.StateText,
-                s.Readings.Count == 0 ? "未布点" : string.Join(" / ", s.Readings.Take(3).Select(r => ValueOf(r))),
+                s.Readings.Count == 0 ? "—" : string.Join(" / ", s.Readings.Take(3).Select(r => ValueOf(r))),
                 s.OnlineDevices + "/" + s.DeviceCount,
                 string.IsNullOrEmpty(s.BwPhase) ? "—" : s.BwText,
             },
@@ -140,32 +140,36 @@ public sealed class ProcessPage : PageBase
         }
         _canvas.SelectedCode = _selected;
 
-        var head = Kit.Row(8,
+        var head = new Grid();
+        head.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        head.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var title = Kit.Row(8,
             Kit.T(snap.Unit.Name, 13, Pal.Ink, bold: true),
             Kit.Badge(snap.StateText, Pal.UnitStateTone(snap.State)));
+        var online = Kit.T($"设备 {snap.OnlineDevices}/{snap.DeviceCount}", 10.5, Pal.Muted2);
+        online.VerticalAlignment = VerticalAlignment.Center;
+        Grid.SetColumn(title, 0);
+        Grid.SetColumn(online, 1);
+        head.Children.Add(title);
+        head.Children.Add(online);
         _detail.Children.Add(head);
-        _detail.Children.Add(Kit.T(snap.Unit.Note, 11, Pal.Muted2, wrap: TextWrapping.Wrap));
-        _detail.Children.Add(Kit.Divider(6, 4));
+        _detail.Children.Add(Kit.Divider(8, 5));
 
         if (snap.Readings.Count == 0)
         {
             _detail.Children.Add(Kit.T("该单元暂未配置点位", 11, Pal.Muted));
         }
         var pairs = snap.Readings.Take(8).Select(r => new KeyValuePair<string, string>(r.Name, ValueOf(r)));
-        _detail.Children.Add(Kit.KvGrid(pairs, 104));
-
-        _detail.Children.Add(Kit.Divider(6, 4));
-        _detail.Children.Add(Kit.T($"设备在线：{snap.OnlineDevices}/{snap.DeviceCount} 台", 11, Pal.Muted));
-        _detail.Children.Add(Kit.T($"最新采集 {Svc.Data.LastUpdated:HH:mm:ss}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.KvGrid(pairs));
 
         var buttons = Kit.Row(6,
             Kit.Btn("去实时监测", () => Host.ShowPage("monitor"), small: true),
             Kit.Btn("去诊断", () => Host.ShowPage("diagnosis"), small: true));
-        buttons.Margin = new Thickness(0, 8, 0, 0);
+        buttons.Margin = new Thickness(0, 10, 0, 0);
         _detail.Children.Add(buttons);
 
         _bwInfo.Text = string.IsNullOrEmpty(snap.BwPhase)
-            ? "当前无进行中的反冲洗。"
-            : $"反冲洗进行中：{snap.BwText}，剩余约 {snap.BwRemain}；累计 {snap.Readings.FirstOrDefault(r => r.Code.EndsWith("BW.COUNT"))?.Value?.ToString("F0") ?? "待接入"} 次。";
+            ? "反冲洗：当前无进行中"
+            : $"反冲洗：{snap.BwText}，剩余约 {snap.BwRemain}（累计 {snap.Readings.FirstOrDefault(r => r.Code.EndsWith("BW.COUNT"))?.Value?.ToString("F0") ?? "待接入"} 次）";
     }
 }

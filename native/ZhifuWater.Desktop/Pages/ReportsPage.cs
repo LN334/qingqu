@@ -37,8 +37,6 @@ public sealed class ReportsPage : PageBase
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(actions);
-        head.Children.Add(Kit.T("报表由运行数据、化验记录与告警统计自动汇总生成；导出为 UTF-8 CSV（带 BOM），可用 Excel 直接打开。",
-            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };

@@ -15,7 +15,7 @@ public sealed class WorkOrdersPage : PageBase
     private StackPanel _detail = null!;
     private TextBlock _info = null!;
     private WorkOrderInfo? _selected;
-    private string _filter = "open";
+    private string _filter = "all";
     private string _keyword = "";
 
     public override string Id => "workorders";
@@ -32,7 +32,7 @@ public sealed class WorkOrdersPage : PageBase
         var filters = new[] { ("open", "待处理"), ("all", "全部"), ("pending", "待接单"), ("processing", "处理中"),
             ("done", "已完成"), ("verified", "已验收"), ("closed", "已关闭") };
         var bar = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
-        var segment = Kit.Segments(filters.Select(f => f.Item2).ToArray(), 0, index =>
+        var segment = Kit.Segments(filters.Select(f => f.Item2).ToArray(), 1, index =>
         {
             _filter = filters[index].Item1;
             RefreshData();
@@ -63,9 +63,9 @@ public sealed class WorkOrdersPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "单元", "负责人", "创建时间" },
-            new double[] { 150, 0, 52, 58, 66, 112, 62, 92 });
-        _table.MinHeight = 420;
+        _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "负责人", "创建时间" },
+            new double[] { 150, 0, 54, 58, 66, 64, 94 });
+        _table.MinHeight = 520;
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is WorkOrderInfo wo)
@@ -89,7 +89,9 @@ public sealed class WorkOrdersPage : PageBase
             Kit.Btn("新建工单", CreateOrder, primary: true, small: true), null, new Thickness(10, 8, 10, 8));
 
         _detail = new StackPanel();
-        var detailCard = Kit.Card("工单详情", Kit.Scroll(_detail, 0), null, null, new Thickness(10, 8, 10, 8));
+        var detailScroll = Kit.Scroll(_detail, 12);
+        detailScroll.MinHeight = 540;
+        var detailCard = Kit.Card("工单详情", detailScroll, null, null, new Thickness(10, 8, 10, 8));
 
         Grid.SetColumn(tableCard, 0);
         Grid.SetColumn(detailCard, 2);
@@ -110,27 +112,31 @@ public sealed class WorkOrdersPage : PageBase
                                  w.DeviceName.Contains(_keyword, StringComparison.OrdinalIgnoreCase)).ToList();
         }
         var open = Svc.Data.WorkOrders("open");
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 全部 {Svc.Data.WorkOrders("all").Count} 条 · 待处理 {open.Count} 条 · " +
-                     $"超时 {open.Count(w => w.DueAt.HasValue && w.DueAt < DateTimeOffset.Now.ToUnixTimeMilliseconds())} 条 · 当前筛选 {all.Count} 条";
+        _info.Text = $"全部 {Svc.Data.WorkOrders("all").Count} 条 · 待处理 {open.Count} 条 · 超时 " +
+                     $"{open.Count(w => w.DueAt.HasValue && w.DueAt < DateTimeOffset.Now.ToUnixTimeMilliseconds())} 条";
         var keep = _selected?.Id;
         var rows = all.Select(w => new UiRow
         {
             Texts = new[]
             {
                 w.Id, w.Title, Pal.WorkOrderTypeText(w.Type), Pal.WorkOrderPriorityText(w.Priority),
-                Pal.WorkOrderStatusText(w.Status), w.UnitName, w.Assignee, Kit.FormatTime(w.CreatedAt),
+                Pal.WorkOrderStatusText(w.Status), w.Assignee, Kit.FormatTime(w.CreatedAt),
             },
             Fgs = new[]
             {
                 Pal.Muted2, Pal.Ink2, Pal.Muted, Pal.ToneFg(w.Priority is "high" or "urgent" ? "bad" : w.Priority == "low" ? "muted" : "normal"),
-                Pal.ToneFg(Pal.WorkOrderStatusTone(w.Status)), Pal.Muted, Pal.Muted2, Pal.Muted2,
+                Pal.ToneFg(Pal.WorkOrderStatusTone(w.Status)), Pal.Muted2, Pal.Muted2,
             },
             Data = w,
             Key = w.Id,
         }).ToList();
         _table.ItemsSource = rows;
         if (_emptyPanel != null)
+        {
             _emptyPanel.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+            if (_emptyPanel.Children.Count > 0 && _emptyPanel.Children[0] is TextBlock emptyText)
+                emptyText.Text = _filter == "open" ? "暂无待处理工单" : "没有符合条件的工单";
+        }
         _selected = all.FirstOrDefault(w => w.Id == keep) ?? all.FirstOrDefault();
         _table.SelectedItem = rows.FirstOrDefault(r => r.Data == _selected) ?? rows.FirstOrDefault();
         ShowDetail();
@@ -142,7 +148,7 @@ public sealed class WorkOrdersPage : PageBase
         _detail.Children.Clear();
         if (_selected == null)
         {
-            _detail.Children.Add(Kit.T("请选择一条工单", 11, Pal.Muted));
+            _detail.Children.Add(Kit.T("选择左侧工单查看详情", 11, Pal.Muted2));
             return;
         }
         var w = _selected;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -17,6 +17,7 @@ public sealed class QualityPage : PageBase
     private StackPanel _removal = null!;
     private TextBlock _info = null!;
     private int _days = 30;
+    private string _metric = "COD";
     private LabRecord? _selected;
 
     public override string Id => "quality";
@@ -29,9 +30,7 @@ public sealed class QualityPage : PageBase
     {
         var root = new StackPanel();
         var head = new StackPanel { Orientation = Orientation.Horizontal };
-        head.Children.Add(Kit.T("进出水水质、化验记录与去除率", 12, Pal.Muted));
-        _info = Kit.T("", 11, Pal.Muted2);
-        _info.Margin = new Thickness(14, 1, 0, 0);
+        _info = Kit.T("", 12, Pal.Muted);
         head.Children.Add(_info);
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 8, 12, 8)));
 
@@ -45,16 +44,24 @@ public sealed class QualityPage : PageBase
 
         var left = new StackPanel();
         var trendHead = new StackPanel { Orientation = Orientation.Horizontal };
-        trendHead.Children.Add(Kit.T("化验指标趋势（进水 / 出水 COD、氨氮，mg/L）", 11, Pal.Muted));
         trendHead.Children.Add(Kit.Spacer());
+        // 一条曲线只看一个指标：COD 与总磷差两个数量级，同图只能压成一条平线，读数也没法带纵轴
+        var metricPick = Kit.Select(new[] { "COD", "氨氮", "总氮", "总磷", "悬浮物" }, 0, 96);
+        metricPick.SelectionChanged += (_, _) =>
+        {
+            _metric = metricPick.SelectedIndex switch { 1 => "NH3N", 2 => "TN", 3 => "TP", 4 => "SS", _ => "COD" };
+            RefreshData();
+        };
+        trendHead.Children.Add(metricPick);
         var range = Kit.Select(new[] { "近 7 天", "近 30 天", "近 90 天" }, 1, 104);
         range.SelectionChanged += (_, _) =>
         {
             _days = range.SelectedIndex switch { 0 => 7, 2 => 90, _ => 30 };
             RefreshData();
         };
+        range.Margin = new Thickness(8, 0, 0, 0);
         trendHead.Children.Add(range);
-        _trend = new LineChart { Height = 236, YUnit = "mg/L", ShowLegend = true, EmptyText = "所选周期内没有化验数据" };
+        _trend = new LineChart { Height = 236, YUnit = "mg/L", ShowLegend = true, NormalizePerSeries = false, EmptyText = "所选周期内没有化验数据" };
         var trendCard = Kit.Card("水质趋势", new StackPanel { Children = { trendHead, _trend } }, null, "化验数据", new Thickness(10, 6, 10, 8));
         left.Children.Add(trendCard);
 
@@ -91,7 +98,7 @@ public sealed class QualityPage : PageBase
     {
         if (_kpiHost == null) return;
         var stats = Svc.Data.LabStatistics(_days);
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 近 {_days} 天 · 化验 {stats.Total} 条 / 已复核 {stats.Reviewed} 条 · 达标率 {stats.Compliance}%";
+        _info.Text = $"近 {_days} 天 · 化验 {stats.Total} 条 · 已复核 {stats.Reviewed} 条 · 达标率 {stats.Compliance}%";
 
         _kpiHost.Children.Clear();
         double? Outlet(string metric) =>
@@ -113,7 +120,22 @@ public sealed class QualityPage : PageBase
         }
 
         _trend.Series.Clear();
-        foreach (var series in stats.Series) _trend.Series.Add(series);
+        var cutoff = DateTimeOffset.Now.AddDays(-_days).ToUnixTimeMilliseconds();
+        var labs = Svc.Data.Labs.Where(r => r.SampledAt >= cutoff).OrderBy(r => r.SampledAt).ToList();
+        TrendSeries BuildTrend(string point, string name, string color)
+        {
+            var series = new TrendSeries { Code = point + "." + _metric, Name = name, Unit = "mg/L", Color = color };
+            foreach (var record in labs.Where(r => string.Equals(r.SamplePoint, point, StringComparison.OrdinalIgnoreCase)))
+            {
+                if (!record.Metrics.TryGetValue(_metric, out var value) || !value.HasValue) continue;
+                series.Points.Add(new MetricPoint { T = record.SampledAt, V = value.Value });
+            }
+            return series;
+        }
+        var inletTrend = BuildTrend("inlet", "进水", "#2A5F8A");
+        if (inletTrend.Points.Count > 0) _trend.Series.Add(inletTrend);
+        var outletTrend = BuildTrend("outlet", "总出水", "#0E7C74");
+        if (outletTrend.Points.Count > 0) _trend.Series.Add(outletTrend);
         _trend.InvalidateVisual();
 
         _removal.Children.Clear();
@@ -124,11 +146,12 @@ public sealed class QualityPage : PageBase
             var inlet = stats.LatestByPoint.TryGetValue("inlet." + metric, out var iv) ? iv : null;
             var outlet = stats.LatestByPoint.TryGetValue("outlet." + metric, out var ov) ? ov : null;
             var rate = stats.RemovalRates.TryGetValue(metric, out var rv) ? rv : (double?)null;
+            var digits = metric == "TP" ? 2 : 1;
             return Kit.R(
                 Kit.C(MetricText(metric), "normal"),
-                Kit.C(inlet.HasValue ? inlet.Value.ToString("F1") : "待接入", inlet.HasValue ? "normal" : "muted"),
-                Kit.C(outlet.HasValue ? outlet.Value.ToString("F1") : "待接入", outlet.HasValue ? "normal" : "muted"),
-                Kit.C(rate.HasValue ? rate.Value.ToString("F1") + "%" : "待接入", rate >= 80 ? "good" : rate.HasValue ? "warn" : "muted"));
+                Kit.C(inlet.HasValue ? Fmt(inlet.Value, digits) : "—", inlet.HasValue ? "normal" : "muted"),
+                Kit.C(outlet.HasValue ? Fmt(outlet.Value, digits) : "—", outlet.HasValue ? "normal" : "muted"),
+                Kit.C(rate.HasValue ? Fmt(rate.Value, 1) + "%" : "—", rate >= 80 ? "good" : rate.HasValue ? "warn" : "muted"));
         }).ToList();
         _removal.Children.Add(removalTable);
 

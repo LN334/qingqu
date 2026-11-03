@@ -165,42 +165,36 @@ public sealed class KioskWindow : Window
         body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(16) });
         body.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(372) });
 
-        var left = new StackPanel();
-        if (!string.IsNullOrEmpty(_services.Data.Notice()))
-        {
-            var notice = new Border
-            {
-                Background = Hex("#16323C"),
-                BorderBrush = Hex("#275060"),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(2),
-                Padding = new Thickness(14, 8, 14, 8),
-                Margin = new Thickness(0, 0, 0, 12),
-                Child = new TextBlock { Text = _services.Data.Notice(), FontSize = 13, Foreground = Hex("#BFD6E0"), TextWrapping = TextWrapping.Wrap },
-            };
-            left.Children.Add(notice);
-            _notice = (TextBlock)notice.Child;
-        }
+        var left = new Grid();
+        left.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        left.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        left.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
 
         var cardsTitle = new TextBlock { Text = "实时状态", FontSize = 15, Foreground = KioskMuted, Margin = new Thickness(2, 0, 0, 8) };
         left.Children.Add(cardsTitle);
         _cards.Orientation = Orientation.Horizontal;
+        Grid.SetRow(_cards, 1);
         left.Children.Add(_cards);
 
-        var unitTitle = new TextBlock { Text = "工艺单元（11 个）", FontSize = 15, Foreground = KioskMuted, Margin = new Thickness(2, 18, 0, 8) };
-        left.Children.Add(unitTitle);
+        var lower = new Grid { Margin = new Thickness(0, 18, 0, 0) };
+        lower.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+        lower.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+        var unitTitle = new TextBlock { Text = "工艺单元", FontSize = 15, Foreground = KioskMuted, Margin = new Thickness(2, 0, 0, 8) };
+        lower.Children.Add(unitTitle);
         _units.Margin = new Thickness(-4, 0, -4, 0);
-        _units.Height = 540;
-        left.Children.Add(_units);
+        Grid.SetRow(_units, 1);
+        lower.Children.Add(_units);
+        Grid.SetRow(lower, 2);
+        left.Children.Add(lower);
         Grid.SetColumn(left, 0);
         body.Children.Add(left);
 
         var right = new StackPanel();
-        right.Children.Add(Panel("最近告警", _alarms, 280));
-        var actionCard = Panel("快捷操作", _actions, 0);
+        right.Children.Add(Panel("最近告警", _alarms));
+        var actionCard = Panel("快捷操作", _actions);
         actionCard.Margin = new Thickness(0, 14, 0, 0);
         right.Children.Add(actionCard);
-        var stationCard = Panel("站点信息", _station, 0);
+        var stationCard = Panel("站点信息", _station);
         stationCard.Margin = new Thickness(0, 14, 0, 0);
         right.Children.Add(stationCard);
         Grid.SetColumn(right, 2);
@@ -208,9 +202,7 @@ public sealed class KioskWindow : Window
         return body;
     }
 
-    private TextBlock? _notice;
-
-    private Border Panel(string title, UIElement content, double height)
+    private Border Panel(string title, UIElement content, double height = 0)
     {
         var stack = new StackPanel();
         stack.Children.Add(new TextBlock
@@ -236,10 +228,14 @@ public sealed class KioskWindow : Window
         var footer = new Grid { Background = KioskBgSoft };
         footer.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var notice = _services.Data.Notice();
         var left = new TextBlock
         {
-            Text = "数据来源：" + _services.BackendName + " · 每 3 秒自动刷新 · 全屏现场视图",
-            FontSize = 12, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(20, 0, 0, 0),
+            Text = string.IsNullOrEmpty(notice)
+                ? "数据来源：" + _services.BackendName + " · 每 3 秒自动刷新"
+                : notice,
+            FontSize = 12, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(20, 0, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis,
         };
         footer.Children.Add(left);
         var right = new TextBlock
@@ -341,9 +337,7 @@ public sealed class KioskWindow : Window
         AddKioskInfo("投运", site.CommissionedAt);
         AddKioskInfo("地址", site.Address);
         AddKioskInfo("在线点位", _services.Data.Readings.Count(r => r.Quality == "good") + " / " + _services.Data.Readings.Count);
-        AddKioskInfo("数据更新", DateTime.Now.ToString("HH:mm:ss"));
 
-        if (_notice != null) _notice.Text = _services.Data.Notice();
     }
 
     private void AddKioskInfo(string key, string value)
@@ -400,18 +394,30 @@ public sealed class KioskWindow : Window
         var tone = Pal.UnitStateTone(unit.State);
         var stack = new StackPanel { VerticalAlignment = VerticalAlignment.Center };
         var title = new StackPanel { Orientation = Orientation.Horizontal };
-        title.Children.Add(new Border { Width = 10, Height = 10, CornerRadius = new CornerRadius(5), Background = KioskToneFg(tone), Margin = new Thickness(0, 4, 8, 0), VerticalAlignment = VerticalAlignment.Top });
-        title.Children.Add(new TextBlock { Text = unit.Unit?.Name ?? unit.Unit?.Code ?? "单元", FontSize = 14, Foreground = KioskText, TextWrapping = TextWrapping.Wrap, MaxWidth = 160 });
+        title.Children.Add(new Border { Width = 10, Height = 10, CornerRadius = new CornerRadius(5), Background = KioskToneFg(tone), Margin = new Thickness(0, 6, 9, 0), VerticalAlignment = VerticalAlignment.Top });
+        title.Children.Add(new TextBlock { Text = unit.Unit?.Name ?? unit.Unit?.Code ?? "单元", FontSize = 17, Foreground = KioskText, TextWrapping = TextWrapping.Wrap, MaxWidth = 210 });
         stack.Children.Add(title);
-        stack.Children.Add(new TextBlock { Text = Pal.UnitStateText(unit.State), FontSize = 12, Foreground = KioskToneFg(tone), Margin = new Thickness(18, 2, 0, 0) });
+        stack.Children.Add(new TextBlock { Text = Pal.UnitStateText(unit.State), FontSize = 12, Foreground = KioskToneFg(tone), Margin = new Thickness(19, 3, 0, 0) });
+
         var reading = unit.Readings.FirstOrDefault();
-        stack.Children.Add(new TextBlock
+        if (reading == null)
         {
-            Text = reading == null ? "待接入" : reading.Name + " " + reading.Text,
-            FontSize = 13, Foreground = KioskMuted, Margin = new Thickness(18, 5, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis,
-        });
+            stack.Children.Add(new TextBlock { Text = "待接入", FontSize = 15, Foreground = KioskMuted, Margin = new Thickness(19, 16, 0, 0) });
+        }
+        else
+        {
+            stack.Children.Add(new TextBlock { Text = reading.Name, FontSize = 12, Foreground = KioskMuted, Margin = new Thickness(19, 16, 0, 2) });
+            var valueRow = new StackPanel { Orientation = Orientation.Horizontal };
+            var parts = reading.Text.Trim().Split(' ');
+            var number = parts.Length > 0 ? parts[0] : reading.Text;
+            var unitText = parts.Length > 1 ? string.Join(" ", parts.Skip(1)) : "";
+            valueRow.Children.Add(new TextBlock { Text = number, FontSize = 30, FontWeight = FontWeights.SemiBold, Foreground = KioskText });
+            if (!string.IsNullOrEmpty(unitText))
+                valueRow.Children.Add(new TextBlock { Text = unitText, FontSize = 13, Foreground = KioskMuted, Margin = new Thickness(6, 13, 0, 0) });
+            stack.Children.Add(valueRow);
+        }
         if (!string.IsNullOrEmpty(unit.BwText))
-            stack.Children.Add(new TextBlock { Text = unit.BwText, FontSize = 11, Foreground = Hex("#E3B15E"), Margin = new Thickness(18, 2, 0, 0) });
+            stack.Children.Add(new TextBlock { Text = unit.BwText, FontSize = 12, Foreground = Hex("#E3B15E"), Margin = new Thickness(19, 6, 0, 0) });
         return new Border
         {
             Background = KioskPanel,

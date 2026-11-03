@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -82,7 +82,7 @@ public sealed class AlarmsPage : PageBase
         var listBody = new DockPanel { LastChildFill = true };
         DockPanel.SetDock(filter, Dock.Top);
         listBody.Children.Add(filter);
-        var infoRow = Kit.Row(8, _listInfo,
+        var infoRow = Kit.Row(8, _listInfo, Kit.Spacer(),
             Kit.Btn("确认告警", AckSelected, primary: true, small: true),
             Kit.Btn("标记恢复", ResolveSelected, small: true));
         infoRow.Margin = new Thickness(0, 6, 0, 6);
@@ -97,7 +97,7 @@ public sealed class AlarmsPage : PageBase
             _ruleSelected = row.Data as AlarmRuleInfo;
         });
         var ruleBody = new DockPanel { LastChildFill = true };
-        var ruleBar = Kit.Row(8, Kit.T("停用后规则不再触发新告警；已有告警不受影响。", 10, Pal.Muted2),
+        var ruleBar = Kit.Row(8, Kit.Spacer(),
             Kit.Btn("启用 / 停用", ToggleRule, small: true));
         ruleBar.Margin = new Thickness(0, 6, 0, 6);
         DockPanel.SetDock(ruleBar, Dock.Bottom);

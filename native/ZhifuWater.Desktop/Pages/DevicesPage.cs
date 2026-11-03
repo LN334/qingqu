@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -93,8 +93,7 @@ public sealed class DevicesPage : PageBase
             _ => true,
         });
         var list = query.ToList();
-        _info.Text = $"站点 {Svc.Data.Site.Name} · 设备 {all.Count} 台 · 在线 {all.Count(d => d.Online)} 台 · 离线 {all.Count(d => !d.Online)} 台 · " +
-                     $"需关注 {all.Count(d => d.Health < 85 || !d.Online)} 台 · 当前筛选 {list.Count} 台";
+        _info.Text = $"{all.Count} 台设备 · 在线 {all.Count(d => d.Online)} · 需关注 {all.Count(d => d.Health < 85 || !d.Online)}";
         var keep = _selected?.Id;
         var rows = list.Select(d => new UiRow
         {
@@ -145,14 +144,11 @@ public sealed class DevicesPage : PageBase
         };
         _detail.Children.Add(Kit.KvGrid(info));
 
-        var btn = Kit.Btn("登记维护", () => Maintain(d), primary: true, small: true);
-        btn.Margin = new Thickness(0, 9, 0, 0);
-        btn.HorizontalAlignment = HorizontalAlignment.Left;
-        _detail.Children.Add(btn);
-        var schedule = Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true);
-        schedule.Margin = new Thickness(0, 5, 0, 0);
-        schedule.HorizontalAlignment = HorizontalAlignment.Left;
-        _detail.Children.Add(schedule);
+        var actions = Kit.Row(6,
+            Kit.Btn("登记维护", () => Maintain(d), primary: true, small: true),
+            Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true));
+        actions.Margin = new Thickness(0, 10, 0, 0);
+        _detail.Children.Add(actions);
     }
 
     private void Maintain(DeviceInfo d)

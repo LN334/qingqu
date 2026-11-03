@@ -47,6 +47,32 @@ internal static class ChartDraw
         }
         return SeriesPalette[index % SeriesPalette.Length];
     }
+
+    /// <summary>把数据范围整理成 1/2/2.5/5/10 的整齐刻度，读数不再是 65.4% / 3.36 这类怪刻度。</summary>
+    public static (double Lo, double Hi, double Step) NiceRange(double min, double max, int intervals = 4, bool integer = false)
+    {
+        intervals = Math.Max(1, intervals);
+        if (double.IsNaN(min) || double.IsNaN(max) || double.IsInfinity(min) || double.IsInfinity(max)) { min = 0; max = 1; }
+        if (max - min < 1e-12) max = min + (Math.Abs(min) > 1 ? Math.Abs(min) * 0.1 : 1);
+        var raw = (max - min) / intervals;
+        var mag = Math.Pow(10, Math.Floor(Math.Log10(raw)));
+        var norm = raw / mag;
+        double nice = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
+        var step = nice * mag;
+        if (integer) step = Math.Max(1, Math.Ceiling(step));
+        var lo = Math.Floor(min / step) * step;
+        var hi = Math.Ceiling(max / step) * step;
+        if (hi - lo < step * intervals - 1e-9) hi = lo + step * intervals;
+        return (lo, hi, step);
+    }
+
+    /// <summary>刻度文本：按步长决定小数位，整步长不带小数点。</summary>
+    public static string Number(double v, double step = 0)
+    {
+        var decimals = step >= 1 ? 0 : step >= 0.1 ? 1 : step >= 0.01 ? 2 : 3;
+        if (Math.Abs(v) < Math.Pow(10, -(decimals + 1))) v = 0;
+        return v.ToString("0." + new string('#', decimals), CultureInfo.InvariantCulture);
+    }
 }
 
 /// <summary>24h / 逐日趋势折线图，纯 OnRender 绘制。</summary>
@@ -67,6 +93,7 @@ public sealed class LineChart : FrameworkElement
     /// <summary>是否跟随最新数据自动右移。</summary>
     public bool FollowLatest { get; set; } = true;
 
+    private double _plotLeft;
     private bool _dragging;
     private double _dragX;
     private double _viewEndMs;
@@ -86,7 +113,7 @@ public sealed class LineChart : FrameworkElement
         return (pts.Min(p => p.T), pts.Max(p => p.T));
     }
 
-    private double PlotWidth() => Math.Max(10, ActualWidth - (ShowYLabels ? 54.0 : 20.0));
+    private double PlotWidth() => Math.Max(10, ActualWidth - (_plotLeft > 0 ? _plotLeft : ShowYLabels ? 54.0 : 20.0) - 10);
 
     protected override System.Windows.Media.HitTestResult HitTestCore(System.Windows.Media.PointHitTestParameters hitTestParameters)
         => new System.Windows.Media.PointHitTestResult(this, hitTestParameters.HitPoint);
@@ -209,19 +236,44 @@ public sealed class LineChart : FrameworkElement
             return;
         }
 
-        var legendHeight = ShowLegend ? 22.0 : 0;
-        var left = ShowYLabels ? 44.0 : 10.0;
+        var units = Series.Select(s => s.Unit).Distinct().ToList();
+        var perSeries = NormalizePerSeries || units.Count > 1;
+        // 单位很短（%、℃、元）时并入每个刻度，避免左上角单位与最高刻度挤成「% 65.4」这种读不出来的组合
+        var inlineUnit = !perSeries && YUnit.Length is > 0 and <= 3 ? YUnit : "";
+        // 长单位（mg/L、元/m³）只跟最高刻度写一次，并据此把左侧刻度槽放宽；单独画在画布角上会和最高刻度叠字
+        var unitSuffix = !perSeries && inlineUnit.Length == 0 && !string.IsNullOrEmpty(YUnit) ? " " + YUnit : "";
+
+        // 图例先排版：序列多时换行，行数决定绘图区起始高度（原来单行越界会绕回 8px 盖住第一行）
+        var legendItems = new List<(int Series, double X, double Y, FormattedText Text)>();
+        var legendRows = 0;
+        if (ShowLegend)
+        {
+            double x = 8, row = 0;
+            for (var si = 0; si < Series.Count; si++)
+            {
+                var s = Series[si];
+                if (s.Points.Count == 0) continue;
+                var lastPoint = s.Points[^1];
+                var suffix = string.IsNullOrEmpty(s.Unit) || s.Name.EndsWith(s.Unit, StringComparison.Ordinal) ? "" : s.Unit;
+                var ft = ChartDraw.Text($"{s.Name} {lastPoint.V:0.##}{suffix}", 10, Pal.Ink2, this, Math.Max(120, w - 40));
+                var itemWidth = ft.Width + 20;
+                if (x + itemWidth > w - 6 && x > 8) { x = 8; row += 17; }
+                legendItems.Add((si, x, 4 + row, ft));
+                x += itemWidth + 12;
+            }
+            legendRows = legendItems.Count == 0 ? 0 : (int)(row / 17) + 1;
+        }
+
+        var legendHeight = legendRows * 17.0;
+        var unitReserve = ShowYLabels && unitSuffix.Length > 0 ? ChartDraw.Text(YUnit, 10, Pal.Muted2, this).Width + 26 : 0;
+        var left = ShowYLabels ? Math.Max(44.0, unitReserve) : 10.0;
         var right = 10.0;
         var top = legendHeight + 8;
         var bottom = 20.0;
         var plotW = Math.Max(10, w - left - right);
         var plotH = Math.Max(10, h - top - bottom);
         var plot = new Rect(left, top, plotW, plotH);
-
-        var units = Series.Select(s => s.Unit).Distinct().ToList();
-        var perSeries = NormalizePerSeries || units.Count > 1;
-        // 单位很短（%、℃、元）时并入每个刻度，避免左上角单位与最高刻度挤成「% 65.4」这种读不出来的组合
-        var inlineUnit = !perSeries && YUnit.Length is > 0 and <= 3 ? YUnit : "";
+        _plotLeft = left;
 
         var dataMinT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Min();
         var dataMaxT = Series.SelectMany(s => s.Points).Where(p => p.T > 0).Select(p => p.T).DefaultIfEmpty(0).Max();
@@ -244,23 +296,22 @@ public sealed class LineChart : FrameworkElement
         double globalMin = Series.SelectMany(s => s.Points).Select(p => p.V).DefaultIfEmpty(0).Min();
         double globalMax = Series.SelectMany(s => s.Points).Select(p => p.V).DefaultIfEmpty(1).Max();
         if (Math.Abs(globalMax - globalMin) < 1e-9) { globalMax += 1; globalMin -= 1; }
-        for (var i = 0; i <= steps; i++)
+        var axisLo = globalMin;
+        var axisHi = globalMax;
+        var axisStep = 0.0;
+        if (!perSeries) (axisLo, axisHi, axisStep) = ChartDraw.NiceRange(globalMin, globalMax, steps);
+        var tickCount = perSeries ? steps : Math.Max(1, (int)Math.Round((axisHi - axisLo) / axisStep));
+        for (var i = 0; i <= tickCount; i++)
         {
-            var y = plot.Top + plotH * i / steps;
-            dc.DrawLine(i == steps ? axisPen : gridPen, new Point(plot.Left, y), new Point(plot.Right, y));
+            var y = plot.Top + plotH * i / tickCount;
+            dc.DrawLine(i == tickCount ? axisPen : gridPen, new Point(plot.Left, y), new Point(plot.Right, y));
             if (ShowYLabels && !perSeries)
             {
-                var value = globalMax - (globalMax - globalMin) * i / steps;
-                var tickText = value.ToString(value >= 100 ? "F0" : value >= 10 ? "F1" : "F2") + inlineUnit;
+                var value = axisHi - (axisHi - axisLo) * i / tickCount;
+                var tickText = ChartDraw.Number(value, axisStep) + (i == 0 ? unitSuffix : "") + inlineUnit;
                 ChartDraw.Draw(this, dc, tickText, new Point(plot.Left - 6, y - 7), 10, Pal.Muted2, TextAlignment.Right);
             }
-            else if (ShowYLabels && i == 0 && perSeries)
-            {
-                ChartDraw.Draw(this, dc, "各量程", new Point(plot.Left - 6, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
-            }
         }
-        if (ShowYLabels && !perSeries && !string.IsNullOrEmpty(YUnit) && inlineUnit.Length == 0)
-            ChartDraw.Draw(this, dc, YUnit, new Point(6, plot.Top - 2), 9.5, Pal.Muted2);
 
         // 横轴时间刻度：步长取「好看的」整点/整天，并对齐到本地零点，读得出 0 点、6 点、换班时间
         if (byTime)
@@ -352,12 +403,17 @@ public sealed class LineChart : FrameworkElement
             {
                 lo = s.Points.Min(p => p.V);
                 hi = s.Points.Max(p => p.V);
+                if (Math.Abs(hi - lo) < 1e-9) { hi += 0.5; lo -= 0.5; }
+                var pad = (hi - lo) * 0.08;
+                lo -= pad;
+                hi += pad;
             }
-            else { lo = globalMin; hi = globalMax; }
-            if (Math.Abs(hi - lo) < 1e-9) { hi += 0.5; lo -= 0.5; }
-            var pad = (hi - lo) * 0.08;
-            lo -= pad;
-            hi += pad;
+            else
+            {
+                // 非归一化时曲线必须落在与刻度完全相同的轴上，否则读数会对不上
+                lo = axisLo;
+                hi = axisHi;
+            }
 
             double X(MetricPoint p)
             {
@@ -399,26 +455,12 @@ public sealed class LineChart : FrameworkElement
         }
         dc.Pop();
 
-        // 图例
-        if (ShowLegend)
+        // 图例（几何在上面的排版阶段算好，这里只落笔）
+        for (var i = 0; i < legendItems.Count; i++)
         {
-            var legendX = 8.0;
-            for (var si = 0; si < Series.Count; si++)
-            {
-                var s = Series[si];
-                if (s.Points.Count == 0) continue;
-                var brush = ChartDraw.Color(s.Color, si);
-                var last = s.Points[^1];
-                var suffix = string.IsNullOrEmpty(s.Unit) || s.Name.EndsWith(s.Unit, StringComparison.Ordinal) ? "" : s.Unit;
-                var text = $"{s.Name} {last.V:0.##}{suffix}";
-                var maxItem = Math.Max(110, (w - 16) / Math.Max(1, Series.Count) - 14);
-                var ft = ChartDraw.Text(text, 10, Pal.Ink2, this, maxItem);
-                var itemWidth = ft.Width + 20;
-                if (legendX + itemWidth > w) legendX = 8;
-                dc.DrawRectangle(brush, null, new Rect(legendX, 7, 7, 7));
-                dc.DrawText(ft, new Point(legendX + 11, 3));
-                legendX += itemWidth + 12;
-            }
+            var (si, x, y, ft) = legendItems[i];
+            dc.DrawRectangle(ChartDraw.Color(Series[si].Color, si), null, new Rect(x, y + 3, 7, 7));
+            dc.DrawText(ft, new Point(x + 11, y));
         }
     }
 }
@@ -462,21 +504,25 @@ public sealed class BarChart : FrameworkElement
         var plotH = Math.Max(10, h - top - bottom);
         var max = Bars.Max(b => b.Value);
         if (max <= 0) max = 1;
+        var (axisLo, axisHi, axisStep) = ChartDraw.NiceRange(0, max, 3, integer: true);
+        var span = axisHi - axisLo;
+        if (span <= 0) span = 1;
+        var intervals = Math.Max(1, (int)Math.Round(span / axisStep));
         var gridPen = new Pen(Pal.LineSoft, 1);
         var axisPen = new Pen(Pal.Line, 1);
-        for (var i = 0; i <= 3; i++)
+        for (var i = 0; i <= intervals; i++)
         {
-            var y = top + plotH * i / 3;
-            dc.DrawLine(i == 3 ? axisPen : gridPen, new Point(left, y), new Point(w - right, y));
-            var v = max - max * i / 3;
-            ChartDraw.Draw(this, dc, v.ToString(v >= 10 ? "F0" : "F1") + inlineUnit, new Point(left - 5, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
+            var y = top + plotH * i / intervals;
+            dc.DrawLine(i == intervals ? axisPen : gridPen, new Point(left, y), new Point(w - right, y));
+            var v = axisHi - span * i / intervals;
+            ChartDraw.Draw(this, dc, ChartDraw.Number(v, axisStep) + inlineUnit, new Point(left - 5, y - 7), 9.5, Pal.Muted2, TextAlignment.Right);
         }
         var slot = plotW / Bars.Count;
         var bw = Math.Max(3, Math.Min(52, slot * BarWidth));
         for (var i = 0; i < Bars.Count; i++)
         {
             var bar = Bars[i];
-            var bh = Math.Max(0, plotH * bar.Value / max);
+            var bh = Math.Max(0, plotH * (bar.Value - axisLo) / span);
             var x = left + slot * i + (slot - bw) / 2;
             var rect = new Rect(x, top + plotH - bh, bw, bh);
             var brush = BarBrush;
