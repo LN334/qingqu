@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -184,7 +185,9 @@ public class MainActivity extends Activity {
             label.setGravity(Gravity.CENTER);
             label.setIncludeFontPadding(false);
             label.setMaxLines(1);
-            item.addView(label);
+            label.setSingleLine(true);
+            label.setEllipsize(TextUtils.TruncateAt.END);
+            item.addView(label, U.lp(U.MATCH, U.WRAP));
 
             tabItems[i] = item;
             tabGlyphs[i] = g;
