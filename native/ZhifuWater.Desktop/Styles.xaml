@@ -12,13 +12,13 @@
     <FontFamily x:Key="MonoFont">Consolas, Microsoft YaHei UI</FontFamily>
 
     <!-- ========== 颜色 ========== -->
-    <Color x:Key="InkColor">#FF111A1F</Color>
-    <Color x:Key="Ink2Color">#FF26343D</Color>
-    <Color x:Key="MutedColor">#FF5C6B75</Color>
-    <Color x:Key="Muted2Color">#FF8A979F</Color>
-    <Color x:Key="LineColor">#FFD3DBE0</Color>
-    <Color x:Key="LineSoftColor">#FFE8EDF0</Color>
-    <Color x:Key="BgColor">#FFECEFF2</Color>
+    <Color x:Key="InkColor">#FF16232B</Color>
+    <Color x:Key="Ink2Color">#FF33454F</Color>
+    <Color x:Key="MutedColor">#FF647680</Color>
+    <Color x:Key="Muted2Color">#FF8798A2</Color>
+    <Color x:Key="LineColor">#FFDCE5E9</Color>
+    <Color x:Key="LineSoftColor">#FFEDF2F4</Color>
+    <Color x:Key="BgColor">#FFF3F6F7</Color>
     <Color x:Key="SurfaceColor">#FFFFFFFF</Color>
     <Color x:Key="Surface2Color">#FFF6F8F9</Color>
     <Color x:Key="AccentColor">#FF0E7C74</Color>
@@ -116,7 +116,7 @@
         <Setter Property="Background" Value="{StaticResource Surface}" />
         <Setter Property="BorderBrush" Value="{StaticResource Line}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="2" />
+        <Setter Property="CornerRadius" Value="3" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
     </Style>
     <Style x:Key="CardHead" TargetType="Border">
@@ -202,6 +202,14 @@
         <Setter Property="Padding" Value="7,0" />
         <Setter Property="FontSize" Value="11" />
     </Style>
+    <Style x:Key="IconButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{StaticResource Ink2}" />
+    </Style>
     <Style x:Key="LinkButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
@@ -214,9 +222,9 @@
     <!-- ========== 侧栏导航按钮：Tag=active 表示当前页 ========== -->
     <Style x:Key="NavButton" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Height" Value="31" />
-        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Padding" Value="10,0" />
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{StaticResource SidebarText}" />
@@ -230,7 +238,7 @@
                         <Border x:Name="Tint" Background="#FFFFFF" Opacity="0" CornerRadius="2"
                                 IsHitTestVisible="False" />
                         <Border x:Name="Bar" Width="2" HorizontalAlignment="Left" Margin="0,5"
-                                Background="#3D8FD0" Visibility="Collapsed" />
+                                Background="#2FB3A6" Visibility="Collapsed" />
                         <ContentPresenter Margin="{TemplateBinding Padding}"
                                           VerticalAlignment="Center"
                                           HorizontalAlignment="Stretch"

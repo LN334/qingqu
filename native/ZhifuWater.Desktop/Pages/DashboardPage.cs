@@ -13,7 +13,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class DashboardPage : PageBase
 {
-    private UniformGrid _kpiHost = null!;
+    private Grid _kpiGrid = null!;
     private StackPanel _chainPanel = null!;
     private LineChart _trend = null!;
     private StackPanel _diagPanel = null!;
@@ -34,12 +34,12 @@ public sealed class DashboardPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        root.Children.Add(BuildSiteBar());
+        root.Children.Add(BuildHeader());
+        root.Children.Add(Gap(14));
+        root.Children.Add(BuildMetrics());
+        root.Children.Add(Gap(14));
 
-        _kpiHost = new UniformGrid { Columns = 4, Margin = new Thickness(0, 10, 0, 0) };
-        root.Children.Add(_kpiHost);
-
-        var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
+        var columns = new Grid { Margin = new Thickness(0, 0, 0, 0) };
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.62, GridUnitType.Star) });
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
@@ -67,50 +67,47 @@ public sealed class DashboardPage : PageBase
         Install(Kit.Scroll(root));
     }
 
-    private static Border Gap() => new() { Height = 10 };
-
-    private UIElement BuildSiteBar()
+    private UIElement BuildHeader()
     {
         var site = Svc.Data.Site;
         var text = new StackPanel();
-        text.Children.Add(Kit.Row(8,
-            Kit.T(site.Name, 15, Pal.Ink, bold: true),
+        text.Children.Add(Kit.Row(10,
+            Kit.T(site.Name, 19, Pal.Ink, bold: true),
             Kit.Badge(Pal.SiteStatusText(site.Status), "good"),
-            Kit.Badge(site.Id, "muted")));
+            Kit.T(site.Id, 11, Pal.Muted2)));
         text.Children.Add(Kit.T($"{site.Process} · 设计规模 {site.Capacity} · 投运 {site.CommissionedAt} · {site.Address}",
-            11, Pal.Muted, wrap: TextWrapping.Wrap));
-
-        var thumb = new Border
-        {
-            Width = 76,
-            Height = 48,
-            CornerRadius = new CornerRadius(2),
-            Margin = new Thickness(0, 0, 12, 0),
-            VerticalAlignment = VerticalAlignment.Center,
-            Background = new ImageBrush(new BitmapImage(new Uri("pack://application:,,,/Assets/tanks-aerial.jpg")))
-            {
-                Stretch = Stretch.UniformToFill,
-            },
-        };
-        var left = new StackPanel { Orientation = Orientation.Horizontal };
-        left.Children.Add(thumb);
-        left.Children.Add(text);
+            11.5, Pal.Muted, wrap: TextWrapping.Wrap));
 
         var health = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
-        _healthText = Kit.T("数据健康检查中…", 11, Pal.Ink2, bold: true);
+        _healthText = Kit.T("数据健康检查中…", 11.5, Pal.Ink2, bold: true);
         health.Children.Add(_healthText);
 
         var grid = new Grid();
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-        Grid.SetColumn(left, 0);
+        Grid.SetColumn(text, 0);
         Grid.SetColumn(health, 1);
-        grid.Children.Add(left);
+        grid.Children.Add(text);
         grid.Children.Add(health);
-
-        return Kit.Card(null, grid, null, null, new Thickness(12, 10, 12, 10));
+        return grid;
     }
 
+    private UIElement BuildMetrics()
+    {
+        _kpiGrid = new Grid();
+        for (var i = 0; i < 4; i++)
+            _kpiGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        _kpiGrid.RowDefinitions.Add(new RowDefinition());
+        _kpiGrid.RowDefinitions.Add(new RowDefinition());
+        return new Border
+        {
+            Style = Kit.St("Card"),
+            Padding = new Thickness(0),
+            Child = _kpiGrid,
+        };
+    }
+
+    private static Border Gap(double height = 10) => new() { Height = height };
     private readonly System.Collections.Generic.HashSet<string> _trendPicked = new() { "RAW.LVL" };
     private readonly List<(string Code, Button Btn, string Label, string Hex)> _trendChips = new();
     private static readonly (string Code, string Label, string Hex)[] TrendDefs =
@@ -221,9 +218,23 @@ public sealed class DashboardPage : PageBase
 
     protected override void RefreshData()
     {
-        _kpiHost.Children.Clear();
-        foreach (var kpi in Svc.Data.DashboardKpis())
-            _kpiHost.Children.Add(Kit.Kpi(kpi));
+        _kpiGrid.Children.Clear();
+        var kpis = Svc.Data.DashboardKpis();
+        for (var i = 0; i < kpis.Count; i++)
+        {
+            var row = i / 4;
+            var col = i % 4;
+            var cell = Kit.KpiCell(kpis[i]);
+            var box = new Border
+            {
+                BorderBrush = Pal.Line,
+                BorderThickness = new Thickness(col > 0 ? 1 : 0, row > 0 ? 1 : 0, 0, 0),
+                Child = cell,
+            };
+            Grid.SetRow(box, Math.Min(row, 1));
+            Grid.SetColumn(box, col);
+            _kpiGrid.Children.Add(box);
+        }
 
         var health = Svc.Data.DataHealth();
         var rate = health.PointsTotal == 0 ? 0 : health.PointsOnline * 100 / health.PointsTotal;
@@ -264,7 +275,7 @@ public sealed class DashboardPage : PageBase
                             .OrderBy(r => Rank(r.Point.Code))
                             .FirstOrDefault()
                         ?? snap?.Readings.FirstOrDefault();
-            stack.Children.Add(Kit.T(first is null ? "待接入" : (first.Value is double dv ? dv.ToString("0.###") : first.Text), 9, Pal.Muted));
+            stack.Children.Add(Kit.T(first is null ? "未布点" : (first.Value is double dv ? dv.ToString("0.###") : first.Text), 9, Pal.Muted));
             var stateRow = Kit.Row(3,
                 new Border { Width = 5, Height = 5, CornerRadius = new CornerRadius(2.5), Background = Pal.ToneFg(Pal.UnitStateTone(state)) },
                 Kit.T(Pal.UnitStateText(state), 9, Pal.ToneFg(Pal.UnitStateTone(state))));

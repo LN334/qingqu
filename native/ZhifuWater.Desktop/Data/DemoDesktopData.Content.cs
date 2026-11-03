@@ -831,6 +831,22 @@ public sealed partial class DemoDesktopData
         return OpResult.Done("工单已" + (action switch { "accept" => "接单", "process" => "进入处理中", "done" => "完成", _ => "关闭" }));
     }
 
+    public OpResult AssignWorkOrder(string id, string userId, string note)
+    {
+        if (_user?.Can("workorder.assign") != true) return OpResult.Fail("当前账号无派单权限");
+        var wo = Rt.WorkOrders.FirstOrDefault(w => w.Id == id);
+        if (wo == null) return OpResult.Fail("工单不存在");
+        if (wo.Status is not ("pending" or "accepted" or "processing")) return OpResult.Fail("当前状态无法派发");
+        var target = Accounts.FirstOrDefault(p => "U-" + p.Key == userId);
+        if (string.IsNullOrEmpty(target.Key)) return OpResult.Fail("指派对象不存在");
+        wo.Assignee = target.Value.Name;
+        if (wo.Status == "pending") wo.Status = "accepted";
+        wo.Timeline.Add(new TimelineEntry { At = Ms(DateTime.Now), Actor = _user.Name, Text = "派发给 " + target.Value.Name + (string.IsNullOrWhiteSpace(note) ? "" : "：" + note) });
+        RecordAudit("workorder.assign", "workorder", id, wo.Title);
+        Touch();
+        return OpResult.Done("工单已派发");
+    }
+
     public IReadOnlyList<InspectionInfo> Inspections => Rt.Inspections.OrderBy(i => i.DueAt).ToList();
 
     public OpResult GenerateInspection()

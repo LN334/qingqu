@@ -21,7 +21,7 @@ public interface IDesktopData
     /// <summary>最近一次成功取数时间（本地时钟）。</summary>
     DateTime LastUpdated { get; }
 
-    /// <summary>数据变化通知（5 秒节拍 / 写操作之后）。</summary>
+    /// <summary>数据变化通知（3 秒节拍 / 写操作之后）。</summary>
     event EventHandler? DataChanged;
 
     string CurrentSiteId { get; }
@@ -35,7 +35,7 @@ public interface IDesktopData
     void Logout();
     OpResult ChangePassword(string oldPassword, string newPassword);
 
-    // ---------- 5 秒节拍 ----------
+    // ---------- 3 秒节拍 ----------
     void Tick();
 
     // ---------- 单元 / 点位 / 读数 ----------
@@ -90,6 +90,7 @@ public interface IDesktopData
     // ---------- 工单 / 巡检 / 设备 ----------
     IReadOnlyList<WorkOrderInfo> WorkOrders(string status = "all");
     OpResult AdvanceWorkOrder(string id, string action, string note);
+    OpResult AssignWorkOrder(string id, string userId, string note);
     IReadOnlyList<InspectionInfo> Inspections { get; }
     OpResult GenerateInspection();
     OpResult SubmitInspection(string id, string summary, int abnormal);

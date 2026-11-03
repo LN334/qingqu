@@ -10,51 +10,53 @@
         UseLayoutRounding="True" SnapsToDevicePixels="True">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="212" />
+            <ColumnDefinition Width="224" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <!-- ========== 左侧导航 ========== -->
+        <!-- 左侧导航 -->
         <Border Grid.Column="0" Background="{DynamicResource Sidebar}">
             <DockPanel LastChildFill="True">
-                <Border DockPanel.Dock="Top" Padding="14,13,12,10">
+                <Border DockPanel.Dock="Top" Padding="16,15,14,12">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Grid Width="26" Height="27">
-                                <Border Background="{DynamicResource Accent}" CornerRadius="3" />
-                                <Path Data="M13,4 C13,4 22,14 22,20 A9,9 0 0 1 4,20 C4,14 13,4 13,4 Z"
-                                      Fill="#F2FFFD" Stretch="Fill" Margin="6,4.5,6,5.5" />
-                            </Grid>
-                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
-                                <TextBlock Text="清渠" Foreground="#F2F7F8" FontSize="14" FontWeight="SemiBold" />
-                                <TextBlock Text="村镇水处理站智能运维平台" Foreground="#7E939D" FontSize="9.5" />
+                            <Border Width="30" Height="30" CornerRadius="7" Background="#2FB3A6">
+                                <Path Data="M12,4 C12,4 20,12 20,17 A8,8 0 0 1 4,17 C4,12 12,4 12,4 Z"
+                                      Fill="#0B2427" Stretch="Uniform" Margin="7,6,7,7" />
+                            </Border>
+                            <StackPanel Margin="9,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="清渠" Foreground="#F2F7F8" FontSize="15" FontWeight="SemiBold" />
+                                <TextBlock Text="村镇水处理站智能运维平台" Foreground="#7E939D" FontSize="9" Margin="0,1,0,0" TextTrimming="CharacterEllipsis" />
                             </StackPanel>
                         </StackPanel>
-                        <Border Height="1" Background="#1E2B33" Margin="0,11,0,0" />
+                        <Border Height="1" Background="#1B2F33" Margin="0,13,0,0" />
                     </StackPanel>
                 </Border>
 
-                <Border DockPanel.Dock="Bottom" Padding="14,7,12,10">
-                    <TextBlock Text="v2.0.8" FontSize="10" Foreground="#6C9A93" />
+                <Border DockPanel.Dock="Bottom" Padding="16,8,14,12">
+                    <Grid>
+                        <TextBlock Text="v2.0.8" FontSize="10" Foreground="#5F8580" VerticalAlignment="Center" />
+                        <TextBlock Text="本机运行" FontSize="10" Foreground="#5F8580" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    </Grid>
                 </Border>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel x:Name="NavPanel" Margin="0,4,0,8" />
+                    <StackPanel x:Name="NavPanel" Margin="0,2,0,8" />
                 </ScrollViewer>
             </DockPanel>
         </Border>
 
-        <!-- ========== 右侧主区 ========== -->
+        <!-- 右侧主区 -->
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="48" />
+                <RowDefinition Height="56" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="25" />
+                <RowDefinition Height="26" />
             </Grid.RowDefinitions>
 
             <Border Grid.Row="0" Background="{DynamicResource Surface}"
                     BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1">
-                <Grid Margin="14,0,12,0">
+                <Grid Margin="20,0,14,0">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
@@ -62,44 +64,56 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="PageTitle" FontSize="14" FontWeight="SemiBold"
-                                   Foreground="{DynamicResource Ink}" Text="综合驾驶舱" />
-                    </StackPanel>
+                    <TextBlock x:Name="PageTitle" Grid.Column="0" FontSize="17" FontWeight="SemiBold"
+                               Foreground="{DynamicResource Ink}" VerticalAlignment="Center" Text="综合驾驶舱" />
 
-                    <ComboBox x:Name="SiteCombo" Grid.Column="1" Width="186" Height="27" Margin="10,0,0,0"
+                    <ComboBox x:Name="SiteCombo" Grid.Column="1" Width="196" Height="30" Margin="18,0,0,0"
                               VerticalAlignment="Center" ToolTip="切换站点" DisplayMemberPath="Name"
                               SelectionChanged="OnSiteChanged" />
 
-                    <TextBlock x:Name="ClockText" Grid.Column="2" FontFamily="{DynamicResource MonoFont}"
-                               FontSize="12" Foreground="{DynamicResource Ink2}" VerticalAlignment="Center"
-                               Margin="14,0,4,0" Text="--:--:--" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0,6,0">
+                        <Ellipse Width="6" Height="6" Fill="{DynamicResource Good}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="ClockText" FontFamily="{DynamicResource MonoFont}" FontSize="12"
+                                   Foreground="{DynamicResource Ink2}" VerticalAlignment="Center" Margin="6,0,0,0"
+                                   Text="--:--:--" />
+                    </StackPanel>
 
-                    <Button x:Name="RefreshButton" Grid.Column="3" Content="刷新" Width="52" Height="27"
-                            Style="{DynamicResource BaseButton}" VerticalAlignment="Center"
-                            ToolTip="立即刷新（平时每 5 秒自动刷新）" Click="OnRefreshClick" />
+                    <Button x:Name="RefreshButton" Grid.Column="3" Style="{DynamicResource IconButton}"
+                            VerticalAlignment="Center" ToolTip="立即刷新（平时每 3 秒自动刷新）" Click="OnRefreshClick">
+                        <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="13" />
+                    </Button>
 
-                    <Button x:Name="BellButton" Grid.Column="4" Height="27" Margin="8,0,0,0"
-                            Style="{DynamicResource BaseButton}" VerticalAlignment="Center"
-                            ToolTip="通知与未读消息" Click="OnBellClick">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="通知" />
+                    <Button x:Name="BellButton" Grid.Column="4" Style="{DynamicResource IconButton}"
+                            VerticalAlignment="Center" ToolTip="通知与未读消息" Click="OnBellClick">
+                        <Grid>
+                            <TextBlock Text="&#xEA8F;" FontFamily="Segoe MDL2 Assets" FontSize="14" />
                             <Border x:Name="BellBadge" Background="#B23A2E" CornerRadius="7" Height="14"
-                                    MinWidth="14" Padding="4,0" Margin="5,0,0,0" Visibility="Collapsed">
+                                    MinWidth="14" Padding="4,0" Margin="12,-12,-12,0" Visibility="Collapsed"
+                                    HorizontalAlignment="Right" VerticalAlignment="Top">
                                 <TextBlock x:Name="BellBadgeText" Text="0" FontSize="9" Foreground="White"
                                            HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
-                        </StackPanel>
+                        </Grid>
                     </Button>
 
-                    <Button x:Name="UserButton" Grid.Column="5" Height="27" Margin="8,0,0,0"
-                            Style="{DynamicResource BaseButton}" VerticalAlignment="Center"
-                            Click="OnUserClick" ToolTip="用户菜单">
+                    <Border Grid.Column="5" Width="1" Height="20" Background="{DynamicResource LineSoft}"
+                            VerticalAlignment="Center" Margin="8,0" />
+
+                    <Button x:Name="UserButton" Grid.Column="6" Style="{DynamicResource IconButton}"
+                            Width="Auto" Padding="4,0" VerticalAlignment="Center" Click="OnUserClick" ToolTip="用户菜单">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock x:Name="UserNameText" Text="用户" />
-                            <TextBlock Text="  ▾" FontSize="10" Foreground="{DynamicResource Muted}" />
+                            <Border Width="26" Height="26" CornerRadius="13" Background="{DynamicResource AccentSoft}">
+                                <TextBlock x:Name="AvatarText" Text="管" FontSize="11" FontWeight="SemiBold"
+                                           Foreground="{DynamicResource AccentStrong}"
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            </Border>
+                            <TextBlock x:Name="UserNameText" Text="用户" FontSize="12" Margin="7,0,2,0"
+                                       VerticalAlignment="Center" Foreground="{DynamicResource Ink2}" />
+                            <TextBlock Text="&#xE70D;" FontFamily="Segoe MDL2 Assets" FontSize="9"
+                                       Foreground="{DynamicResource Muted2}" VerticalAlignment="Center" Margin="2,1,0,0" />
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -107,27 +121,27 @@
 
             <ContentControl Grid.Row="1" x:Name="PageHost" />
 
-            <Border Grid.Row="2" Background="{DynamicResource Surface2}"
+            <Border Grid.Row="2" Background="{DynamicResource Surface}"
                     BorderBrush="{DynamicResource LineSoft}" BorderThickness="0,1,0,0">
-                <Grid Margin="16,0,14,0">
+                <Grid Margin="20,0,14,0">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <Ellipse Width="6" Height="6" Fill="{DynamicResource Good}" VerticalAlignment="Center" />
-                        <TextBlock x:Name="FooterSource" FontSize="10" Foreground="{DynamicResource Muted2}"
+                        <TextBlock x:Name="FooterSource" FontSize="10.5" Foreground="{DynamicResource Muted}"
                                    Margin="6,0,0,0" VerticalAlignment="Center" Text="运行正常" />
                     </StackPanel>
-                    <TextBlock x:Name="FooterRight" FontSize="10" Foreground="{DynamicResource Muted2}"
+                    <TextBlock x:Name="FooterRight" FontSize="10.5" Foreground="{DynamicResource Muted2}"
                                VerticalAlignment="Center" HorizontalAlignment="Right" Text="最后更新 —" />
                 </Grid>
             </Border>
         </Grid>
 
-        <!-- ========== 通知弹层 ========== -->
+        <!-- 通知弹层 -->
         <Popup x:Name="BellPopup" PlacementTarget="{Binding ElementName=BellButton}" Placement="Bottom"
                StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade" HorizontalOffset="-250">
             <Border Style="{DynamicResource MenuBorder}" Width="372">
                 <DockPanel LastChildFill="True">
                     <Border DockPanel.Dock="Top" BorderBrush="{DynamicResource LineSoft}" BorderThickness="0,0,0,1"
-                            Padding="10,7">
+                            Padding="12,8">
                         <DockPanel LastChildFill="False">
                             <TextBlock Text="通知中心" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Ink}" VerticalAlignment="Center" />
@@ -142,7 +156,7 @@
             </Border>
         </Popup>
 
-        <!-- ========== 用户菜单 ========== -->
+        <!-- 用户菜单 -->
         <Popup x:Name="UserPopup" PlacementTarget="{Binding ElementName=UserButton}" Placement="Bottom"
                StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade">
             <Border Style="{DynamicResource MenuBorder}" Width="212">
@@ -158,10 +172,10 @@
             </Border>
         </Popup>
 
-        <!-- ========== 轻提示 ========== -->
+        <!-- 轻提示 -->
         <Border x:Name="ToastPanel" Visibility="Collapsed" Background="#1E2A31" CornerRadius="3"
-                Padding="13,8" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                Margin="0,0,18,32" IsHitTestVisible="False" Panel.ZIndex="90">
+                Padding="14,9" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Margin="0,0,20,34" IsHitTestVisible="False" Panel.ZIndex="90">
             <TextBlock x:Name="ToastText" Foreground="White" FontSize="12" TextWrapping="Wrap" MaxWidth="420" />
         </Border>
     </Grid>

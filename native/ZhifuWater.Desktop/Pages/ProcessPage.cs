@@ -53,7 +53,7 @@ public sealed class ProcessPage : PageBase
             _selected = code;
             RefreshSelection();
         };
-        var pidRight = Kit.Row(8, Kit.Badge("实时状态", "accent"), Kit.T("5 秒刷新", 10, Pal.Muted2));
+        var pidRight = Kit.Row(8, Kit.Badge("实时状态", "accent"), Kit.T("3 秒刷新", 10, Pal.Muted2));
         root.Children.Add(Kit.Card("P&ID 工艺流程图", _canvas, pidRight, null, new Thickness(8, 4, 8, 8)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };

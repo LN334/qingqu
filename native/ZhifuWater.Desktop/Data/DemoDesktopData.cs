@@ -8,7 +8,7 @@ namespace ZhifuWater.Desktop.Data;
 
 /// <summary>
 /// 本地演示数据引擎：在 CoreServices 契约就绪前提供与 Web 演示版一致的数据形态。
-/// 全部方法在 UI 线程调用，5 秒由 DispatcherTimer 驱动 <see cref="Tick"/>。
+/// 全部方法在 UI 线程调用，3 秒由 DispatcherTimer 驱动 <see cref="Tick"/>。
 /// </summary>
 public sealed partial class DemoDesktopData : IDesktopData
 {

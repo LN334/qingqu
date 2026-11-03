@@ -1366,6 +1366,17 @@ public sealed class CoreDesktopData : IDesktopData
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }
 
+    public OpResult AssignWorkOrder(string id, string userId, string note)
+    {
+        try
+        {
+            _core.Ops.AssignWorkorder(_user, id, new JsonObject { ["assigneeId"] = userId, ["note"] = note }, "desktop");
+            Refresh();
+            return OpResult.Done("工单已派发");
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
     public IReadOnlyList<InspectionInfo> Inspections
     {
         get
@@ -1802,7 +1813,7 @@ public sealed class CoreDesktopData : IDesktopData
         k.StatusCards.Add(new KpiInfo
         {
             Key = "updated", Label = "数据更新", Value = _lastUpdated.ToString("HH:mm:ss"),
-            Unit = "", Tone = "good", Hint = "每 5 秒推进一次采集", Source = "system",
+            Unit = "", Tone = "good", Hint = "每 3 秒推进一次采集", Source = "system",
         });
         k.Units = UnitSnapshots().ToList();
         k.RecentAlarms = Alarms("open").Take(5).ToList();

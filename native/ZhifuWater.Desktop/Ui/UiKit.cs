@@ -271,7 +271,7 @@ public static class Kit
         };
     }
 
-    public static ScrollViewer Scroll(UIElement content, double padding = 14)
+    public static ScrollViewer Scroll(UIElement content, double padding = 20)
     {
         return new ScrollViewer
         {

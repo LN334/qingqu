@@ -24,7 +24,7 @@ public sealed class KioskWindow : Window
 
     private readonly AppServices _services;
     private readonly DispatcherTimer _clock = new() { Interval = TimeSpan.FromSeconds(1) };
-    private readonly DispatcherTimer _refresh = new() { Interval = TimeSpan.FromSeconds(5) };
+    private readonly DispatcherTimer _refresh = new() { Interval = TimeSpan.FromSeconds(3) };
     private readonly DispatcherTimer _toast = new() { Interval = TimeSpan.FromSeconds(3) };
     private readonly TextBlock _clockText;
     private readonly TextBlock _dateText;
@@ -238,7 +238,7 @@ public sealed class KioskWindow : Window
         footer.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var left = new TextBlock
         {
-            Text = "数据来源：" + _services.BackendName + " · 每 5 秒自动刷新 · 全屏现场视图",
+            Text = "数据来源：" + _services.BackendName + " · 每 3 秒自动刷新 · 全屏现场视图",
             FontSize = 12, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(20, 0, 0, 0),
         };
         footer.Children.Add(left);

@@ -64,7 +64,7 @@ public sealed class WorkOrdersPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "单元", "负责人", "创建时间" },
-            new double[] { 126, 0, 52, 58, 66, 112, 62, 92 });
+            new double[] { 150, 0, 52, 58, 66, 112, 62, 92 });
         _table.MinHeight = 420;
         _table.SelectionChanged += (_, _) =>
         {
@@ -161,6 +161,7 @@ public sealed class WorkOrdersPage : PageBase
         _detail.Children.Add(Kit.T($"时限 {Kit.FormatTimeFull(w.DueAt ?? 0)} · 完成 {Kit.FormatTimeFull(w.DoneAt ?? 0)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 4) };
+        if (w.Status is "pending" or "accepted" or "processing") actions.Children.Add(ActionButton("派发", () => Assign(w)));
         if (w.Status == "pending") actions.Children.Add(ActionButton("接单", () => Advance(w, "accept", null)));
         if (w.Status == "accepted") actions.Children.Add(ActionButton("开始处理", () => Advance(w, "process", false)));
         if (w.Status is "accepted" or "processing") actions.Children.Add(ActionButton("完成", () => Advance(w, "done", true)));
@@ -182,6 +183,22 @@ public sealed class WorkOrdersPage : PageBase
     {
         var b = Kit.Btn(text, click, primary: text is "接单" or "完成", small: true);
         return b;
+    }
+
+    private void Assign(WorkOrderInfo wo)
+    {
+        var people = Svc.Data.Users.Where(u => u.IsActive).ToList();
+        if (people.Count == 0) { Toast("没有可指派的人员", false); return; }
+        var dlg = new FormDialog(Host, "派发工单", wo.Title);
+        var labels = people.Select(u => u.User.Name + (string.IsNullOrWhiteSpace(u.User.Title) ? "" : " · " + u.User.Title)).ToList();
+        var combo = dlg.AddCombo("负责人", labels);
+        var note = dlg.AddText("派发说明（可选）");
+        if (!dlg.Ask("派发")) return;
+        var target = people[combo.SelectedIndex < 0 ? 0 : combo.SelectedIndex];
+        var r = Svc.Data.AssignWorkOrder(wo.Id, target.User.Id, note.Text.Trim());
+        Toast(r.Message, r.Ok);
+        RefreshData();
+        Host.RefreshShell();
     }
 
     private void Advance(WorkOrderInfo wo, string action, bool? requireNote)

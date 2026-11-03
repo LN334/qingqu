@@ -407,19 +407,36 @@ public sealed class Simulator
                 var v = CurrentValue(siteId, p);
                 if (v is null) continue;
                 var pid = J.Str(p, "id");
-                _telemetry.SetLatest(pid, JsonValue.Create(v.Value), now, "good", J.Str(p, "source"));
+                var shown = WithSensorNoise(J.Str(p, "code"), v.Value);
+                _telemetry.SetLatest(pid, JsonValue.Create(shown), now, "good", J.Str(p, "source"));
                 updates.Add(new JsonObject
                 {
                     ["pointId"] = pid,
                     ["siteId"] = siteId,
                     ["code"] = J.Str(p, "code"),
-                    ["v"] = v.Value,
+                    ["v"] = shown,
                     ["t"] = now,
                 });
-                _telemetry.Record(pid, JsonValue.Create(v.Value), "good", now);
+                _telemetry.Record(pid, JsonValue.Create(shown), "good", now);
             }
         }
         Emit(new JsonObject { ["type"] = "telemetry", ["t"] = now, ["updates"] = updates });
+    }
+
+    /// <summary>给在线仪表读数叠加小幅测量噪声，让 3 秒刷新时数值可见地跳动；不改变仿真状态与告警判定。</summary>
+    private static double WithSensorNoise(string code, double value)
+    {
+        double noise;
+        if (code.EndsWith(".LEVEL")) noise = 0.18;
+        else if (code.EndsWith(".PH")) noise = 0.02;
+        else if (code.EndsWith(".DO")) noise = 0.02;
+        else if (code.Contains("FLOW")) noise = Math.Max(0.0015, Math.Abs(value) * 0.012);
+        else if (code.EndsWith(".CURRENT")) noise = 0.02;
+        else if (code.EndsWith(".DP") || code.Contains("PRESS")) noise = 0.06;
+        else if (code.EndsWith(".HOURS") || code.EndsWith(".STARTS") || code.EndsWith(".COUNT")) noise = 0;
+        else noise = Math.Max(0.0005, Math.Abs(value) * 0.004);
+        if (noise <= 0) return value;
+        return Math.Round(value + (Random.Shared.NextDouble() - 0.5) * noise, 4);
     }
 
     public void StepSite(string siteId, SiteState s, double dt, long now)

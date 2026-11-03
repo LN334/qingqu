@@ -33,7 +33,7 @@ public sealed class MonitorPage : PageBase
         _liveInfo = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_liveInfo);
-        head.Children.Add(Kit.T("选择左侧点位查看实时曲线；数据每 5 秒刷新，写操作不会改变点位归属。",
+        head.Children.Add(Kit.T("选择左侧点位查看实时曲线；数据每 3 秒刷新，写操作不会改变点位归属。",
             11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
@@ -52,7 +52,7 @@ public sealed class MonitorPage : PageBase
                 ShowSelected();
             }
         };
-        var tableCard = Kit.Card("点位实时值", _table, Kit.Badge("5 秒刷新", "accent"), null, new Thickness(0));
+        var tableCard = Kit.Card("点位实时值", _table, Kit.Badge("3 秒刷新", "accent"), null, new Thickness(0));
         Grid.SetColumn(tableCard, 0);
 
         var chartHead = new StackPanel { Orientation = Orientation.Horizontal };
@@ -91,7 +91,7 @@ public sealed class MonitorPage : PageBase
         var readings = Svc.Data.Readings;
         var online = readings.Count(r => r.Quality == "good");
         _liveInfo.Text = $"站点 {Svc.Data.Site.Name} · 点位 {readings.Count} 个（正常 {online}） · " +
-                         $"最新采集 {Svc.Data.LastUpdated:HH:mm:ss} · 自动刷新 5 秒";
+                         $"最新采集 {Svc.Data.LastUpdated:HH:mm:ss} · 自动刷新 3 秒";
 
         var selectedCode = _selected;
         var rows = readings.Select(r => new UiRow

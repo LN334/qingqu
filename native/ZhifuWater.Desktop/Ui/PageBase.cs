@@ -60,7 +60,7 @@ public abstract class PageBase : UserControl
     {
         if (_footnote == null) return;
         _footnote.Text = $"数据来源：{Svc.BackendName} · {SourceLabel} · 站点：{Svc.Data.Site.Name}（{Svc.Data.Site.Id}） · " +
-                         $"最后更新：{Svc.Data.LastUpdated:yyyy-MM-dd HH:mm:ss} · 每 5 秒自动刷新";
+                         $"最后更新：{Svc.Data.LastUpdated:yyyy-MM-dd HH:mm:ss} · 每 3 秒自动刷新";
     }
 
     protected void Toast(string message, bool ok = true) => Host.Toast(message, ok);
