@@ -26,7 +26,8 @@ public sealed class InspectionsPage : PageBase
         var root = new StackPanel();
         _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var actions = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
-        actions.Children.Add(Kit.Btn("生成巡检任务", CreateInspection, primary: true, small: true));
+        actions.Children.Add(Kit.Btn("按计划生成", CreateFromPlan, primary: true, small: true));
+        actions.Children.Add(Kit.Btn("临时巡检", CreateInspection, small: true));
         actions.Children.Add(Kit.Btn("提交巡检结果", SubmitSelected, small: true));
         var head = new StackPanel();
         head.Children.Add(_info);
@@ -120,6 +121,27 @@ public sealed class InspectionsPage : PageBase
             row.Margin = new Thickness(0, 3, 0, 3);
             _items.Children.Add(row);
         }
+    }
+
+    private void CreateFromPlan()
+    {
+        var plans = Svc.Data.InspectionPlans;
+        if (plans.Count == 0)
+        {
+            Toast("当前没有可用的巡检计划，请使用「临时巡检」", false);
+            return;
+        }
+        var people = Svc.Data.Users.Where(u => u.IsActive).ToList();
+        var dlg = new FormDialog(Host, "按计划生成巡检", "从标准计划生成任务，可按需指定执行人。");
+        var plan = dlg.AddCombo("巡检计划", plans.Select(p => p.Name + "（" + p.Cycle + " · " + p.ItemCount + " 项）").ToList());
+        var assign = dlg.AddCombo("执行人", new[] { "默认（当前账号）" }.Concat(people.Select(u => u.User.Name)).ToList());
+        if (!dlg.Ask("生成")) return;
+        var target = plans[Math.Max(0, plan.SelectedIndex)];
+        var assignee = assign.SelectedIndex <= 0 ? null : people[assign.SelectedIndex - 1].User.Id;
+        var result = Svc.Data.CreateInspection(target.Id, assignee, DateTime.Now.AddHours(8));
+        Toast(result.Message, result.Ok);
+        RefreshData();
+        Host.RefreshShell();
     }
 
     private void CreateInspection()

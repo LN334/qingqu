@@ -908,6 +908,10 @@ public sealed partial class DemoDesktopData
         return OpResult.Done("工单已创建");
     }
 
+    public IReadOnlyList<InspectionPlanInfo> InspectionPlans => new List<InspectionPlanInfo>();
+
+    public OpResult CreateInspection(string planId, string? assigneeId, DateTime? dueAt) => GenerateInspection();
+
     public IReadOnlyList<InspectionInfo> Inspections => Rt.Inspections.OrderBy(i => i.DueAt).ToList();
 
     public OpResult GenerateInspection()

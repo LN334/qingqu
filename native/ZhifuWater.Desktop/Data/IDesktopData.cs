@@ -96,6 +96,8 @@ public interface IDesktopData
     IReadOnlyList<InspectionInfo> Inspections { get; }
     OpResult GenerateInspection();
     OpResult SubmitInspection(string id, string summary, IReadOnlyList<InspectionItemInput> items);
+    IReadOnlyList<InspectionPlanInfo> InspectionPlans { get; }
+    OpResult CreateInspection(string planId, string? assigneeId, DateTime? dueAt);
     IReadOnlyList<DeviceInfo> Devices { get; }
     OpResult RegisterMaintenance(string id, string note);
 

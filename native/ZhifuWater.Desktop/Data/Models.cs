@@ -393,6 +393,15 @@ public sealed class BackupInfo
     public bool IsAuto { get; set; }
 }
 
+public sealed class InspectionPlanInfo
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Cycle { get; set; } = "";
+    public int ItemCount { get; set; }
+    public string Desc { get; set; } = "";
+}
+
 public sealed class InspectionItemInput
 {
     public string Key { get; set; } = "";

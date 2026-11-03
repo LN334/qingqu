@@ -1422,6 +1422,40 @@ public sealed class CoreDesktopData : IDesktopData
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }
 
+    public IReadOnlyList<InspectionPlanInfo> InspectionPlans
+    {
+        get
+        {
+            if (_user is null) return new List<InspectionPlanInfo>();
+            try
+            {
+                return J.Objs(_core.Ops.InspectionPlans(_user, _siteId)).Select(p => new InspectionPlanInfo
+                {
+                    Id = J.Str(p, "id"),
+                    Name = J.Str(p, "name"),
+                    Cycle = J.Str(p, "cycle"),
+                    ItemCount = J.Objs(J.A(p, "items")).Count,
+                    Desc = J.Str(p, "desc"),
+                }).ToList();
+            }
+            catch (CoreException) { return new List<InspectionPlanInfo>(); }
+        }
+    }
+
+    public OpResult CreateInspection(string planId, string? assigneeId, DateTime? dueAt)
+    {
+        try
+        {
+            var body = new JsonObject { ["planId"] = planId };
+            if (!string.IsNullOrWhiteSpace(assigneeId)) body["assigneeId"] = assigneeId;
+            if (dueAt.HasValue) body["dueAt"] = dueAt.Value.ToString("yyyy-MM-ddTHH:mm:ss");
+            var task = _core.Ops.CreateInspection(_user, body, "desktop");
+            Refresh();
+            return OpResult.Done("巡检任务已生成：" + J.Str(task, "id"));
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
     public IReadOnlyList<InspectionInfo> Inspections
     {
         get
