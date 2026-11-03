@@ -47,14 +47,15 @@ public sealed class ProcessPage : PageBase
         top.Children.Add(legend);
         root.Children.Add(Kit.Card(null, top, null, null, new Thickness(12, 10, 12, 10)));
 
-        _canvas = new ProcessCanvas { Margin = new Thickness(0, 10, 0, 0) };
+        _canvas = new ProcessCanvas { Width = 1180, Height = 340, Margin = new Thickness(0, 10, 0, 0) };
         _canvas.UnitSelected += code =>
         {
             _selected = code;
             RefreshSelection();
         };
         var pidRight = Kit.Row(8, Kit.Badge("实时状态", "accent"), Kit.T("3 秒刷新", 10, Pal.Muted2));
-        root.Children.Add(Kit.Card("P&ID 工艺流程图", _canvas, pidRight, null, new Thickness(8, 4, 8, 8)));
+        var canvasHost = new Viewbox { Child = _canvas, Stretch = Stretch.Uniform, MaxHeight = 300 };
+        root.Children.Add(Kit.Card("P&ID 工艺流程图", canvasHost, pidRight, null, new Thickness(8, 4, 8, 8)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.35, GridUnitType.Star) });
@@ -106,7 +107,7 @@ public sealed class ProcessPage : PageBase
             {
                 s.Unit.Name,
                 s.StateText,
-                s.Readings.Count == 0 ? "待接入" : string.Join(" / ", s.Readings.Take(2).Select(r => r.Name + " " + ValueOf(r))),
+                s.Readings.Count == 0 ? "未布点" : string.Join(" / ", s.Readings.Take(3).Select(r => ValueOf(r))),
                 s.OnlineDevices + "/" + s.DeviceCount,
                 string.IsNullOrEmpty(s.BwPhase) ? "—" : s.BwText,
             },
@@ -150,19 +151,8 @@ public sealed class ProcessPage : PageBase
         {
             _detail.Children.Add(Kit.T("该单元暂未配置点位", 11, Pal.Muted));
         }
-        foreach (var reading in snap.Readings.Take(8))
-        {
-            var line = new Grid { Margin = new Thickness(0, 2, 0, 2) };
-            line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            line.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
-            var name = Kit.T(reading.Name, 11, Pal.Muted);
-            var value = Kit.T(ValueOf(reading), 12, reading.Quality == "good" ? Pal.Ink : Pal.Warn, bold: true);
-            Grid.SetColumn(name, 0);
-            Grid.SetColumn(value, 1);
-            line.Children.Add(name);
-            line.Children.Add(value);
-            _detail.Children.Add(line);
-        }
+        var pairs = snap.Readings.Take(8).Select(r => new KeyValuePair<string, string>(r.Name, ValueOf(r)));
+        _detail.Children.Add(Kit.KvGrid(pairs, 104));
 
         _detail.Children.Add(Kit.Divider(6, 4));
         _detail.Children.Add(Kit.T($"设备在线：{snap.OnlineDevices}/{snap.DeviceCount} 台", 11, Pal.Muted));
@@ -175,7 +165,7 @@ public sealed class ProcessPage : PageBase
         _detail.Children.Add(buttons);
 
         _bwInfo.Text = string.IsNullOrEmpty(snap.BwPhase)
-            ? "反冲洗：当前无进行中的反冲洗。BAF / 硫自养池按压差或周期触发（气冲 40s → 气水 60s → 漂洗 50s）。"
+            ? "当前无进行中的反冲洗。"
             : $"反冲洗进行中：{snap.BwText}，剩余约 {snap.BwRemain}；累计 {snap.Readings.FirstOrDefault(r => r.Code.EndsWith("BW.COUNT"))?.Value?.ToString("F0") ?? "待接入"} 次。";
     }
 }
