@@ -12,7 +12,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class DashboardPage : PageBase
 {
-    private UniformGrid _kpiHost = null!;
+    private Grid _kpiGrid = null!;
     private StackPanel _chainPanel = null!;
     private LineChart _trend = null!;
     private StackPanel _diagPanel = null!;
@@ -35,27 +35,33 @@ public sealed class DashboardPage : PageBase
         var root = new StackPanel();
         root.Children.Add(BuildSiteBar());
 
-        _kpiHost = new UniformGrid { Columns = 4, Margin = new Thickness(0, 10, 0, 0) };
-        root.Children.Add(_kpiHost);
+        _kpiGrid = new Grid();
+        root.Children.Add(new Border
+        {
+            Background = Pal.Surface,
+            BorderBrush = Pal.Line,
+            BorderThickness = new Thickness(0, 1, 0, 1),
+            Child = _kpiGrid,
+        });
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.62, GridUnitType.Star) });
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        var left = new StackPanel();
-        left.Children.Add(BuildProcessCard());
-        left.Children.Add(Gap());
-        left.Children.Add(BuildTrendCard());
-        left.Children.Add(Gap());
-        left.Children.Add(BuildDiagnosisCard());
+        var left = Kit.Panel(Kit.Col(0,
+            BuildProcessSection(),
+            Kit.Divider(0, 0),
+            BuildTrendSection(),
+            Kit.Divider(0, 0),
+            BuildDiagnosisSection()));
 
-        var right = new StackPanel();
-        right.Children.Add(BuildAlarmCard());
-        right.Children.Add(Gap());
-        right.Children.Add(BuildWorkOrderCard());
-        right.Children.Add(Gap());
-        right.Children.Add(BuildDeviceCard());
+        var right = Kit.Panel(Kit.Col(0,
+            BuildAlarmSection(),
+            Kit.Divider(0, 0),
+            BuildWorkOrderSection(),
+            Kit.Divider(0, 0),
+            BuildDeviceSection()));
 
         Grid.SetColumn(left, 0);
         Grid.SetColumn(right, 2);
@@ -66,7 +72,6 @@ public sealed class DashboardPage : PageBase
         Install(Kit.Scroll(root));
     }
 
-    private static Border Gap() => new() { Height = 10 };
 
     private UIElement BuildSiteBar()
     {
@@ -93,7 +98,14 @@ public sealed class DashboardPage : PageBase
         grid.Children.Add(left);
         grid.Children.Add(health);
 
-        return Kit.Card(null, grid, null, null, new Thickness(12, 10, 12, 10));
+        return new Border
+        {
+            Background = Pal.Surface,
+            BorderBrush = Pal.Line,
+            BorderThickness = new Thickness(0, 0, 0, 1),
+            Padding = new Thickness(12, 10, 12, 10),
+            Child = grid,
+        };
     }
 
     private readonly System.Collections.Generic.HashSet<string> _trendPicked = new() { "RAW.LVL" };
@@ -106,7 +118,7 @@ public sealed class DashboardPage : PageBase
         ("FLOW.IN", "进水流量", "#2A5F8A"),
     };
 
-    private UIElement BuildProcessCard()
+    private UIElement BuildProcessSection()
     {
         _chainPanel = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         var scroll = new ScrollViewer
@@ -115,10 +127,11 @@ public sealed class DashboardPage : PageBase
             VerticalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Content = _chainPanel,
         };
-        return Kit.Card("11 单元工艺链", scroll, null, null, new Thickness(10, 9, 10, 10));
+        return Kit.Col(0, Kit.SectionHead("11 单元工艺链"),
+            new Border { Padding = new Thickness(10, 0, 10, 10), Child = scroll });
     }
 
-    private UIElement BuildTrendCard()
+    private UIElement BuildTrendSection()
     {
         _trend = new LineChart { Height = 208, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
@@ -132,7 +145,8 @@ public sealed class DashboardPage : PageBase
             _trendChips.Add((code, button, label, hex));
             chips.Children.Add(button);
         }
-        return Kit.Card("24 小时关键趋势", _trend, chips, null, new Thickness(8, 4, 8, 4));
+        return Kit.Col(0, Kit.SectionHead("24 小时关键趋势", chips),
+            new Border { Padding = new Thickness(10, 0, 10, 6), Child = _trend });
     }
 
     private void ToggleTrend(string code)
@@ -166,48 +180,68 @@ public sealed class DashboardPage : PageBase
         }
     }
 
-    private UIElement BuildDiagnosisCard()
+    private UIElement BuildDiagnosisSection()
     {
         _diagPanel = new StackPanel();
-        return Kit.Card("诊断摘要", _diagPanel,
-            Kit.Btn("全部诊断", () => Host.ShowPage("diagnosis"), small: true), null, new Thickness(10, 8, 10, 10));
+        return Kit.Col(0, Kit.SectionHead("诊断摘要",
+                Kit.Btn("全部诊断", () => Host.ShowPage("diagnosis"), small: true)),
+            new Border { Padding = new Thickness(10, 0, 10, 10), Child = _diagPanel });
     }
 
-    private UIElement BuildAlarmCard()
+    private UIElement BuildAlarmSection()
     {
         _alarmTable = Table(new[] { "时间", "级别", "告警", "状态" }, new double[] { 82, 58, 0, 62 },
             row => Host.ShowPage("alarms"));
         _alarmSummary = Kit.T("", 10, Pal.Muted2);
-        return Kit.Card("活动告警", _alarmTable,
-            Kit.Row(8, _alarmSummary, Kit.Btn("告警中心", () => Host.ShowPage("alarms"), small: true)),
-            null, new Thickness(8, 6, 8, 8));
+        return Kit.Col(0, Kit.SectionHead("活动告警",
+                Kit.Row(8, _alarmSummary, Kit.Btn("告警中心", () => Host.ShowPage("alarms"), small: true))),
+            new Border { Padding = new Thickness(10, 0, 10, 8), Child = _alarmTable });
     }
 
-    private UIElement BuildWorkOrderCard()
+    private UIElement BuildWorkOrderSection()
     {
         _workTable = Table(new[] { "工单", "单元", "类型", "状态" }, new double[] { 0, 84, 56, 62 },
             row => Host.ShowPage("workorders"));
         _workSummary = Kit.T("", 10, Pal.Muted2);
-        return Kit.Card("待处理工单", _workTable,
-            Kit.Row(8, _workSummary, Kit.Btn("工单管理", () => Host.ShowPage("workorders"), small: true)),
-            null, new Thickness(8, 6, 8, 8));
+        return Kit.Col(0, Kit.SectionHead("待处理工单",
+                Kit.Row(8, _workSummary, Kit.Btn("工单管理", () => Host.ShowPage("workorders"), small: true))),
+            new Border { Padding = new Thickness(10, 0, 10, 8), Child = _workTable });
     }
 
-    private UIElement BuildDeviceCard()
+    private UIElement BuildDeviceSection()
     {
         _deviceTable = Table(new[] { "设备", "单元", "健康", "状态" }, new double[] { 0, 92, 52, 58 },
             row => Host.ShowPage("devices"));
         _deviceSummary = Kit.T("", 10, Pal.Muted2);
-        return Kit.Card("设备健康", _deviceTable,
-            Kit.Row(8, _deviceSummary, Kit.Btn("设备台账", () => Host.ShowPage("devices"), small: true)),
-            null, new Thickness(8, 6, 8, 8));
+        return Kit.Col(0, Kit.SectionHead("设备健康",
+                Kit.Row(8, _deviceSummary, Kit.Btn("设备台账", () => Host.ShowPage("devices"), small: true))),
+            new Border { Padding = new Thickness(10, 0, 10, 8), Child = _deviceTable });
+    }
+
+    private void FillKpiBand()
+    {
+        _kpiGrid.Children.Clear();
+        _kpiGrid.ColumnDefinitions.Clear();
+        var kpis = Svc.Data.DashboardKpis().ToList();
+        for (var i = 0; i < kpis.Count; i++)
+        {
+            _kpiGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            var cell = Kit.KpiCell(kpis[i]);
+            Grid.SetColumn(cell, _kpiGrid.ColumnDefinitions.Count - 1);
+            _kpiGrid.Children.Add(cell);
+            if (i < kpis.Count - 1)
+            {
+                _kpiGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                var sep = new Border { Width = 1, Background = Pal.LineSoft, Margin = new Thickness(0, 9, 0, 9) };
+                Grid.SetColumn(sep, _kpiGrid.ColumnDefinitions.Count - 1);
+                _kpiGrid.Children.Add(sep);
+            }
+        }
     }
 
     protected override void RefreshData()
     {
-        _kpiHost.Children.Clear();
-        foreach (var kpi in Svc.Data.DashboardKpis())
-            _kpiHost.Children.Add(Kit.Kpi(kpi));
+        FillKpiBand();
 
         var health = Svc.Data.DataHealth();
         var rate = health.PointsTotal == 0 ? 0 : health.PointsOnline * 100 / health.PointsTotal;

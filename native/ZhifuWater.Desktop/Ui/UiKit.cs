@@ -127,6 +127,47 @@ public static class Kit
         return outer;
     }
 
+    public static Grid SectionHead(string title, UIElement? right = null, string? subtitle = null)
+    {
+        var grid = new Grid { Margin = new Thickness(12, 9, 12, 7) };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var titles = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
+        titles.Children.Add(CardTitle(title));
+        if (!string.IsNullOrEmpty(subtitle)) titles.Children.Add(Tiny("  " + subtitle, Pal.Muted2));
+        Grid.SetColumn(titles, 0);
+        grid.Children.Add(titles);
+        if (right != null)
+        {
+            if (right is FrameworkElement fe) fe.VerticalAlignment = VerticalAlignment.Center;
+            Grid.SetColumn(right, 1);
+            grid.Children.Add(right);
+        }
+        return grid;
+    }
+
+    public static Border Panel(UIElement body) => new() { Style = St("Card"), Child = body };
+
+    public static Border KpiCell(KpiInfo kpi)
+    {
+        var tone = string.IsNullOrEmpty(kpi.Tone) ? "normal" : kpi.Tone;
+        var stack = new StackPanel { Orientation = Orientation.Vertical };
+        stack.Children.Add(Small(kpi.Label, Pal.Muted));
+        var valueRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
+        valueRow.Children.Add(KpiValueText(kpi.Value));
+        if (!string.IsNullOrEmpty(kpi.Unit))
+            valueRow.Children.Add(new TextBlock { Text = " " + kpi.Unit, FontSize = 11, Foreground = Pal.Muted, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 3) });
+        stack.Children.Add(valueRow);
+        if (!string.IsNullOrEmpty(kpi.Delta))
+            stack.Children.Add(new TextBlock { Text = kpi.Delta, FontSize = 10.5, Foreground = Pal.ToneFg(tone), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
+        return new Border
+        {
+            Padding = new Thickness(12, 9, 12, 9),
+            Child = stack,
+            ToolTip = string.IsNullOrEmpty(kpi.Hint) ? null : kpi.Hint + (string.IsNullOrEmpty(kpi.Source) ? "" : "\n来源：" + kpi.Source),
+        };
+    }
+
     public static Border Badge(string text, string tone = "normal")
     {
         return new Border
