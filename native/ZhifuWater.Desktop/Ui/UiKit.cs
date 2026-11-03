@@ -41,6 +41,17 @@ public static class Kit
     public static Brush Br(string key) => (Brush)Res[key];
     public static Style St(string key) => (Style)Res[key];
 
+    /// <summary>按单元格字号粗略估算文字宽度（不依赖已布局的 Visual），用于报表等动态列宽。</summary>
+    public static double Measure(string? text, double size, bool bold = false)
+    {
+        if (string.IsNullOrEmpty(text)) return 0;
+        var typeface = new Typeface(new FontFamily("Microsoft YaHei UI"), FontStyles.Normal,
+            bold ? FontWeights.SemiBold : FontWeights.Normal, FontStretches.Normal);
+        var formatted = new FormattedText(text, CultureInfo.CurrentUICulture, FlowDirection.LeftToRight,
+            typeface, size, Brushes.Black, 1.0);
+        return formatted.WidthIncludingTrailingWhitespace;
+    }
+
     public static TextBlock T(string text, double size = 13, Brush? fg = null, bool bold = false,
         TextWrapping wrap = TextWrapping.NoWrap, TextTrimming trim = TextTrimming.CharacterEllipsis)
     {

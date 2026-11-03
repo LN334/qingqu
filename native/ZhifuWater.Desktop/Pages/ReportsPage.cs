@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
+using System.Windows.Media;
 using Microsoft.Win32;
 using ZhifuWater.Desktop.Data;
 using ZhifuWater.Desktop.Ui;
@@ -116,15 +117,36 @@ public sealed class ReportsPage : PageBase
             block.Children.Add(Kit.T(section.Title, 11, Pal.AccentStrong, bold: true));
             if (section.Columns.Count > 1 && section.Cells.Count > 0)
             {
-                var head = new UniformGrid { Columns = section.Columns.Count, Margin = new Thickness(0, 2, 0, 2) };
-                foreach (var col in section.Columns) head.Children.Add(Kit.T(col, 10, Pal.Muted2, bold: true));
-                block.Children.Add(head);
+                var count = section.Columns.Count;
+                var widths = new double[count];
+                for (var i = 0; i < count; i++) widths[i] = Kit.Measure(section.Columns[i], 10, true) + 16;
                 foreach (var cells in section.Cells)
                 {
-                    var line = new UniformGrid { Columns = section.Columns.Count, Margin = new Thickness(0, 1, 0, 1) };
-                    foreach (var cell in cells) line.Children.Add(Kit.T(cell, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
-                    block.Children.Add(line);
+                    for (var i = 0; i < Math.Min(count, cells.Count); i++)
+                    {
+                        var need = Kit.Measure(cells[i], 11) + 16;
+                        if (need > widths[i]) widths[i] = need;
+                    }
                 }
+                const double total = 608;
+                var sum = widths.Sum();
+                if (sum < total)
+                {
+                    // 余量给最后一列（通常是说明列）
+                    widths[count - 1] += total - sum;
+                }
+                else
+                {
+                    for (var i = 0; i < count; i++)
+                    {
+                        var floor = i == 0 ? 108 : 56;
+                        widths[i] = Math.Max(floor, widths[i] * total / sum);
+                    }
+                }
+
+                block.Children.Add(ReportRow(section.Columns.ToArray(), widths, 10, Pal.Muted2, true, new Thickness(0, 2, 0, 3)));
+                foreach (var cells in section.Cells)
+                    block.Children.Add(ReportRow(cells.ToArray(), widths, 11, Pal.Ink2, false, new Thickness(0, 1, 0, 1)));
                 block.Children.Add(Kit.Divider(0, 0));
             }
             else
@@ -143,6 +165,21 @@ public sealed class ReportsPage : PageBase
             _preview.Children.Add(block);
         }
         if (r.Sections.Count == 0) _preview.Children.Add(Kit.T("该报表没有可展示的内容", 11, Pal.Muted));
+    }
+
+    private static Grid ReportRow(string[] cells, double[] widths, double size, Brush fg, bool bold, Thickness margin)
+    {
+        var line = new Grid { Margin = margin };
+        for (var i = 0; i < widths.Length; i++)
+        {
+            line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(widths[i]) });
+            if (i >= cells.Length) continue;
+            var cell = Kit.T(cells[i], size, fg, bold, TextWrapping.Wrap);
+            cell.Margin = new Thickness(0, 0, 8, 0);
+            Grid.SetColumn(cell, i);
+            line.Children.Add(cell);
+        }
+        return line;
     }
 
     private static readonly Regex YearPrefix = new(@"\d{4}-", RegexOptions.Compiled);
