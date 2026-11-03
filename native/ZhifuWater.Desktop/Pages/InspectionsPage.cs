@@ -14,6 +14,7 @@ public sealed class InspectionsPage : PageBase
     private StackPanel _summary = null!;
     private TextBlock _info = null!;
     private InspectionInfo? _selected;
+    private Button _submitBtn = null!;
 
     public override string Id => "inspections";
     public override string Title => "巡检管理";
@@ -28,7 +29,8 @@ public sealed class InspectionsPage : PageBase
         var actions = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
         actions.Children.Add(Kit.Btn("按计划生成", CreateFromPlan, primary: true, small: true));
         actions.Children.Add(Kit.Btn("临时巡检", CreateInspection, small: true));
-        actions.Children.Add(Kit.Btn("提交巡检结果", SubmitSelected, small: true));
+        _submitBtn = Kit.Btn("提交巡检结果", SubmitSelected, small: true);
+        actions.Children.Add(_submitBtn);
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(actions);
@@ -105,6 +107,7 @@ public sealed class InspectionsPage : PageBase
             return;
         }
         var ins = _selected;
+        _submitBtn.IsEnabled = ins.Status != "done";
         _summary.Children.Add(Kit.Row(7, Kit.T(ins.Plan, 13, Pal.Ink, bold: true), Kit.Badge(Pal.InspectionStatusText(ins.Status), Pal.InspectionStatusTone(ins.Status))));
         _summary.Children.Add(Kit.T($"{ins.Id} · 负责人 {ins.Assignee} · 截止 {Kit.FormatTimeFull(ins.DueAt)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
         if (!string.IsNullOrEmpty(ins.Summary)) _summary.Children.Add(Kit.T("结果：" + ins.Summary, 11, Pal.Ink2, wrap: TextWrapping.Wrap));

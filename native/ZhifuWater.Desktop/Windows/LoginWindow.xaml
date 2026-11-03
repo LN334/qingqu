@@ -67,7 +67,7 @@
                            Margin="0,14,0,0" />
             </StackPanel>
 
-            <TextBlock Text="v2.0.8" FontSize="10" Foreground="#5C8E88"
+            <TextBlock Text="v2.0.9" FontSize="10" Foreground="#5C8E88"
                        HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="64,0,0,24" />
         </Grid>
 
