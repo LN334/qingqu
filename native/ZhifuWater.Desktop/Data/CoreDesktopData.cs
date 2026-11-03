@@ -1239,12 +1239,15 @@ public sealed class CoreDesktopData : IDesktopData
                         {
                             var rs = new ReportSection { Title = J.Str(sec, "title") };
                             var columns = J.Strings(J.Get(sec, "columns"));
+                            rs.Columns.AddRange(columns);
                             if (J.Get(sec, "rows") is JsonArray rows)
                                 foreach (var row in rows)
                                 {
                                     if (row is not JsonArray cells) continue;
-                                    var key = cells.Count > 0 ? CellText(cells[0]) : "";
-                                    var rest = cells.Skip(1).Select(CellText).Where(x => x.Length > 0).ToList();
+                                    var texts = cells.Select(CellText).ToList();
+                                    rs.Cells.Add(texts);
+                                    var key = texts.Count > 0 ? texts[0] : "";
+                                    var rest = texts.Skip(1).Where(x => x.Length > 0).ToList();
                                     rs.Rows.Add(new KeyValuePair<string, string>(key, string.Join(" · ", rest)));
                                 }
                             rep.Sections.Add(rs);
@@ -1271,11 +1274,15 @@ public sealed class CoreDesktopData : IDesktopData
         return n.ToJsonString();
     }
 
-    public OpResult GenerateReport(string type)
+    public OpResult GenerateReport(string type, string? from = null, string? to = null, string? title = null)
     {
         try
         {
-            var r = _core.Reports.CreateReport(_user, new JsonObject { ["type"] = type, ["siteId"] = _siteId }, "desktop");
+            var body = new JsonObject { ["type"] = type, ["siteId"] = _siteId };
+            if (!string.IsNullOrWhiteSpace(from)) body["from"] = from;
+            if (!string.IsNullOrWhiteSpace(to)) body["to"] = to;
+            if (!string.IsNullOrWhiteSpace(title)) body["title"] = title;
+            var r = _core.Reports.CreateReport(_user, body, "desktop");
             Refresh();
             return OpResult.Done($"报表已生成：{J.Str(r, "title", J.Str(r, "id"))}");
         }
@@ -1462,22 +1469,17 @@ public sealed class CoreDesktopData : IDesktopData
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }
 
-    public OpResult SubmitInspection(string id, string summary, int abnormal)
+    public OpResult SubmitInspection(string id, string summary, IReadOnlyList<InspectionItemInput> inputs)
     {
         try
         {
-            var detail = _core.Ops.InspectionDetail(_user, id);
             var items = new JsonArray();
-            var i = 0;
-            foreach (var it in J.Objs(J.Get(detail, "items")))
-            {
-                var result = i < abnormal ? "abnormal" : "ok";
-                items.Add(new JsonObject { ["key"] = J.Str(it, "key"), ["result"] = result, ["note"] = i < abnormal ? "现场发现异常，已记录" : "" });
-                i++;
-            }
+            foreach (var input in inputs)
+                items.Add(new JsonObject { ["key"] = input.Key, ["result"] = input.Result, ["note"] = input.Note });
             _core.Ops.SubmitInspection(_user, id, new JsonObject { ["summary"] = summary, ["items"] = items }, "desktop");
             Refresh();
-            return OpResult.Done("巡检结果已提交" + (abnormal > 0 ? "，异常项已自动建单" : ""));
+            var bad = inputs.Count(x => x.Result == "abnormal");
+            return OpResult.Done("巡检结果已提交" + (bad > 0 ? "，异常项已自动建单" : ""));
         }
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }

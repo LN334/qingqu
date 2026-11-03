@@ -729,7 +729,7 @@ public sealed partial class DemoDesktopData
     // ============================ 报表 ============================
     public IReadOnlyList<ReportInfo> Reports => Rt.Reports.OrderByDescending(r => r.CreatedAt).ToList();
 
-    public OpResult GenerateReport(string type)
+    public OpResult GenerateReport(string type, string? from = null, string? to = null, string? customTitle = null)
     {
         if (_user == null) return OpResult.Fail("请先登录");
         if (_user.Can("report.export") != true && _user.Role != "operator") return OpResult.Fail("当前账号无报表生成权限");
@@ -934,16 +934,23 @@ public sealed partial class DemoDesktopData
         return OpResult.Done("已生成巡检任务，截止 " + due.ToString("MM-dd HH:mm"));
     }
 
-    public OpResult SubmitInspection(string id, string summary, int abnormal)
+    public OpResult SubmitInspection(string id, string summary, IReadOnlyList<InspectionItemInput> inputs)
     {
         if (_user?.Can("inspection.execute") != true) return OpResult.Fail("当前账号无巡检执行权限");
         var ins = Rt.Inspections.FirstOrDefault(i => i.Id == id);
         if (ins == null) return OpResult.Fail("巡检任务不存在");
         if (ins.Status == "done") return OpResult.Fail("该巡检已提交");
+        foreach (var input in inputs)
+        {
+            var item = ins.Items.FirstOrDefault(x => x.Key == input.Key);
+            if (item == null) continue;
+            item.Result = input.Result;
+            item.Note = input.Note;
+        }
         ins.Status = "done";
         ins.DoneAt = Ms(DateTime.Now);
         ins.Summary = summary;
-        ins.Abnormal = abnormal;
+        ins.Abnormal = inputs.Count(x => x.Result == "abnormal");
         ins.Assignee = _user.Name;
         RecordAudit("inspection.submit", "inspection", id, ins.Plan + "：" + summary);
         Touch();

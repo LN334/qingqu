@@ -142,17 +142,30 @@ public sealed class InspectionsPage : PageBase
             Toast("该巡检任务已提交", false);
             return;
         }
-        var dlg = new FormDialog(Host, "提交巡检结果", _selected.Plan);
-        dlg.AddMessage("请确认 8 项检查均已完成。", "warn");
-        var summary = dlg.AddText("巡检结论（必填）", "设备运行正常，无异常项", "概述现场检查情况");
-        var abnormalBox = dlg.AddText("异常项数量", "0", "0 - 8");
+        var ins = _selected;
+        var dlg = new FormDialog(Host, "提交巡检结果", ins.Plan);
+        dlg.AddMessage("逐项判定；标记为「异常」的项会自动生成工单。", "warn");
+        var choices = new[] { "正常", "关注", "异常" };
+        var combos = new List<(InspectionItem Item, ComboBox Box)>();
+        foreach (var item in ins.Items)
+        {
+            var box = dlg.AddCombo(item.Name, choices, item.Result == "abnormal" ? 2 : item.Result == "attention" ? 1 : 0);
+            combos.Add((item, box));
+        }
+        var note = dlg.AddText("异常说明（可选）", "", "例：曝气风机电流偏高，已安排检修");
+        var summary = dlg.AddText("巡检结论（必填）", "", "概述现场检查情况");
         if (!dlg.Ask("提交", validate: () =>
             {
                 if (string.IsNullOrWhiteSpace(summary.Text) || summary.Text.Trim().Length < 3) return "请填写巡检结论（至少 3 个字）";
-                if (!int.TryParse(abnormalBox.Text, out var n) || n < 0 || n > 8) return "异常项数量需为 0 – 8";
                 return null;
             })) return;
-        var result = Svc.Data.SubmitInspection(_selected.Id, summary.Text.Trim(), int.Parse(abnormalBox.Text));
+        var items = combos.Select(c => new InspectionItemInput
+        {
+            Key = c.Item.Key,
+            Result = c.Box.SelectedIndex switch { 2 => "abnormal", 1 => "attention", _ => "ok" },
+            Note = c.Box.SelectedIndex == 2 ? note.Text.Trim() : "",
+        }).ToList();
+        var result = Svc.Data.SubmitInspection(ins.Id, summary.Text.Trim(), items);
         Toast(result.Message, result.Ok);
         RefreshData();
         Host.RefreshShell();

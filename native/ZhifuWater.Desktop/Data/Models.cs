@@ -287,6 +287,8 @@ public sealed class ReportInfo
 public sealed class ReportSection
 {
     public string Title { get; set; } = "";
+    public List<string> Columns { get; set; } = new();
+    public List<List<string>> Cells { get; set; } = new();
     public List<KeyValuePair<string, string>> Rows { get; set; } = new();
 }
 
@@ -389,6 +391,13 @@ public sealed class BackupInfo
     public string By { get; set; } = "";
     public string Note { get; set; } = "";
     public bool IsAuto { get; set; }
+}
+
+public sealed class InspectionItemInput
+{
+    public string Key { get; set; } = "";
+    public string Result { get; set; } = "ok";
+    public string Note { get; set; } = "";
 }
 
 public sealed class InspectionInfo

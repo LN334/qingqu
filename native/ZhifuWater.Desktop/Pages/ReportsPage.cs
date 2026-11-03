@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using Microsoft.Win32;
 using ZhifuWater.Desktop.Data;
 using ZhifuWater.Desktop.Ui;
@@ -30,6 +31,8 @@ public sealed class ReportsPage : PageBase
         var actions = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
         actions.Children.Add(Kit.Btn("生成日报", () => Generate("daily"), primary: true, small: true));
         actions.Children.Add(Kit.Btn("生成周报", () => Generate("weekly"), small: true));
+        actions.Children.Add(Kit.Btn("生成月报", () => Generate("monthly"), small: true));
+        actions.Children.Add(Kit.Btn("自定义报表", GenerateCustom, small: true));
         actions.Children.Add(Kit.Btn("导出 CSV", Export, small: true));
         var head = new StackPanel();
         head.Children.Add(_info);
@@ -113,6 +116,20 @@ public sealed class ReportsPage : PageBase
         {
             var block = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
             block.Children.Add(Kit.T(section.Title, 11, Pal.AccentStrong, bold: true));
+            if (section.Columns.Count > 1 && section.Cells.Count > 0)
+            {
+                var head = new UniformGrid { Columns = section.Columns.Count, Margin = new Thickness(0, 2, 0, 2) };
+                foreach (var col in section.Columns) head.Children.Add(Kit.T(col, 10, Pal.Muted2, bold: true));
+                block.Children.Add(head);
+                foreach (var cells in section.Cells)
+                {
+                    var line = new UniformGrid { Columns = section.Columns.Count, Margin = new Thickness(0, 1, 0, 1) };
+                    foreach (var cell in cells) line.Children.Add(Kit.T(cell, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
+                    block.Children.Add(line);
+                }
+                block.Children.Add(Kit.Divider(0, 0));
+            }
+            else
             foreach (var row in section.Rows)
             {
                 var line = new Grid { Margin = new Thickness(0, 2, 0, 0) };
@@ -149,6 +166,26 @@ public sealed class ReportsPage : PageBase
         {
             Toast("生成失败：" + ex.Message, false);
         }
+    }
+
+    private void GenerateCustom()
+    {
+        var dlg = new FormDialog(Host, "自定义报表", "按时间范围生成，报表内容为生成时刻的快照。");
+        var from = dlg.AddText("开始日期（yyyy-MM-dd）", DateTime.Today.AddDays(-6).ToString("yyyy-MM-dd"));
+        var to = dlg.AddText("结束日期（yyyy-MM-dd）", DateTime.Today.ToString("yyyy-MM-dd"));
+        var title = dlg.AddText("报表标题（可选）", "", "留空自动命名");
+        if (!dlg.Ask("生成", validate: () =>
+            {
+                if (!DateTime.TryParse(from.Text, out var f)) return "开始日期格式不正确";
+                if (!DateTime.TryParse(to.Text, out var t)) return "结束日期格式不正确";
+                if (f > t) return "开始日期不能晚于结束日期";
+                if ((t - f).TotalDays > 366) return "时间范围不能超过一年";
+                return null;
+            })) return;
+        var result = Svc.Data.GenerateReport("custom", from.Text.Trim(), to.Text.Trim(), string.IsNullOrWhiteSpace(title.Text) ? null : title.Text.Trim());
+        Toast(result.Message, result.Ok);
+        RefreshData();
+        Host.RefreshShell();
     }
 
     private void Export()

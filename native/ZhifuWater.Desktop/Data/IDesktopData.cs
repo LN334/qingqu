@@ -85,7 +85,7 @@ public interface IDesktopData
     IReadOnlyList<DiagnosisInfo> Diagnoses { get; }
     AnalysisData Analysis(int days);
     IReadOnlyList<ReportInfo> Reports { get; }
-    OpResult GenerateReport(string type);
+    OpResult GenerateReport(string type, string? from = null, string? to = null, string? title = null);
     OpResult ExportReportCsv(string id, string filePath);
 
     // ---------- 工单 / 巡检 / 设备 ----------
@@ -95,7 +95,7 @@ public interface IDesktopData
     OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description);
     IReadOnlyList<InspectionInfo> Inspections { get; }
     OpResult GenerateInspection();
-    OpResult SubmitInspection(string id, string summary, int abnormal);
+    OpResult SubmitInspection(string id, string summary, IReadOnlyList<InspectionItemInput> items);
     IReadOnlyList<DeviceInfo> Devices { get; }
     OpResult RegisterMaintenance(string id, string note);
 
