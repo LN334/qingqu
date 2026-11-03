@@ -25,11 +25,11 @@ public sealed class ControlPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_info);
         head.Children.Add(Kit.T("所有动作通过原生命令引擎下发：写操作 → 二次确认 → 联锁检查 → 生成命令记录 → 现场执行。危险动作需填写原因。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _actions = new WrapPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -61,7 +61,7 @@ public sealed class ControlPage : PageBase
             Kit.T(action.Label, 12, Pal.Ink, bold: true),
             Kit.Badge(action.Risk == "high" ? "高风险" : action.Risk == "medium" ? "谨慎" : "常规", tone)));
         stack.Children.Add(Kit.T(action.Device, 10, Pal.Muted2));
-        var desc = Kit.T(action.Desc, 10.5, Pal.Muted, wrap: TextWrapping.Wrap);
+        var desc = Kit.T(action.Desc, 11, Pal.Muted, wrap: TextWrapping.Wrap);
         desc.Margin = new Thickness(0, 3, 0, 2);
         stack.Children.Add(desc);
         if (!string.IsNullOrEmpty(action.Interlock))

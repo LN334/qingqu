@@ -28,7 +28,7 @@ public sealed class AnalysisPage : PageBase
     {
         var root = new StackPanel();
         var head = new StackPanel { Orientation = Orientation.Horizontal };
-        head.Children.Add(Kit.T("运行数据分析", 11.5, Pal.Muted));
+        head.Children.Add(Kit.T("运行数据分析", 12, Pal.Muted));
         _info = Kit.T("", 11, Pal.Muted2);
         _info.Margin = new Thickness(12, 1, 0, 0);
         head.Children.Add(_info);

@@ -408,7 +408,7 @@ public sealed class CoreDesktopData : IDesktopData
         JsonObject series;
         try { series = _core.Analytics.Series(_siteId, codeList, from, to, Math.Max(60, (int)(to - from) / 240 / 1000)); }
         catch (CoreException) { return result; }
-        var colors = new[] { "#0B6BB5", "#1C6B45", "#8A5A12", "#2A5F8A", "#A32C22", "#5C6B75" };
+        var colors = new[] { "#0E7C74", "#1C6B45", "#8A5A12", "#2A5F8A", "#A32C22", "#5C6B75" };
         var i = 0;
         foreach (var code in codeList)
         {
@@ -1009,7 +1009,7 @@ public sealed class CoreDesktopData : IDesktopData
         try
         {
             var s = _core.Ops.LabStats(_user, _siteId, days);
-            var colors = new[] { "#0B6BB5", "#1C6B45", "#8A5A12", "#2A5F8A", "#A32C22" };
+            var colors = new[] { "#0E7C74", "#1C6B45", "#8A5A12", "#2A5F8A", "#A32C22" };
             var i = 0;
             foreach (var kv in J.O(s, "series", false))
             {
@@ -1149,7 +1149,7 @@ public sealed class CoreDesktopData : IDesktopData
 
             var daily = J.Objs(J.Get(s, "daily")).ToDictionary(d => J.Str(d, "day"), StringComparer.Ordinal);
             var from = TimeUtil.StartOfDay(TimeUtil.Now() - (days - 1) * TimeUtil.DayMs);
-            var waterSeries = new TrendSeries { Code = "water", Name = "处理水量", Unit = "m³", Color = "#0B6BB5" };
+            var waterSeries = new TrendSeries { Code = "water", Name = "处理水量", Unit = "m³", Color = "#0E7C74" };
             var energySeries = new TrendSeries { Code = "energy", Name = "耗电", Unit = "kWh", Color = "#1C6B45" };
             var costSeries = new TrendSeries { Code = "cost", Name = "运行成本", Unit = "元", Color = "#8A5A12" };
             for (var i = 0; i < days; i++)

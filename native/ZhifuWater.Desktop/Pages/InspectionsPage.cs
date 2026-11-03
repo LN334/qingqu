@@ -24,7 +24,7 @@ public sealed class InspectionsPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var actions = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
         actions.Children.Add(Kit.Btn("生成巡检任务", CreateInspection, primary: true, small: true));
         actions.Children.Add(Kit.Btn("提交巡检结果", SubmitSelected, small: true));
@@ -32,7 +32,7 @@ public sealed class InspectionsPage : PageBase
         head.Children.Add(_info);
         head.Children.Add(actions);
         head.Children.Add(Kit.T("巡检任务覆盖泵、风机、阀门、仪表、控制柜、药箱、反冲洗与现场安全 8 项；提交后记录巡检人与时间。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -104,10 +104,10 @@ public sealed class InspectionsPage : PageBase
             return;
         }
         var ins = _selected;
-        _summary.Children.Add(Kit.Row(7, Kit.T(ins.Plan, 12.5, Pal.Ink, bold: true), Kit.Badge(Pal.InspectionStatusText(ins.Status), Pal.InspectionStatusTone(ins.Status))));
+        _summary.Children.Add(Kit.Row(7, Kit.T(ins.Plan, 13, Pal.Ink, bold: true), Kit.Badge(Pal.InspectionStatusText(ins.Status), Pal.InspectionStatusTone(ins.Status))));
         _summary.Children.Add(Kit.T($"{ins.Id} · 负责人 {ins.Assignee} · 截止 {Kit.FormatTimeFull(ins.DueAt)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
         if (!string.IsNullOrEmpty(ins.Summary)) _summary.Children.Add(Kit.T("结果：" + ins.Summary, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
-        _summary.Children.Add(Kit.T("检查项", 10.5, Pal.Muted2, bold: true));
+        _summary.Children.Add(Kit.T("检查项", 11, Pal.Muted2, bold: true));
         foreach (var item in ins.Items)
         {
             var tone = item.Result switch { "abnormal" => "bad", "na" => "muted", "ok" => "good", _ => "muted" };

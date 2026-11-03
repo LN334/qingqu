@@ -29,7 +29,7 @@ public sealed class FormDialog : Window
         if (owner != null) Owner = owner;
         FontFamily = new FontFamily("Segoe UI, Microsoft YaHei UI");
 
-        _error = new TextBlock { FontSize = 11.5, Foreground = Pal.Bad, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
+        _error = new TextBlock { FontSize = 12, Foreground = Pal.Bad, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
 
         var root = new Border
         {
@@ -42,7 +42,7 @@ public sealed class FormDialog : Window
         if (!string.IsNullOrEmpty(hint))
             stack.Children.Add(new TextBlock
             {
-                Text = hint, FontSize = 11.5, Foreground = Pal.Muted, TextWrapping = TextWrapping.Wrap,
+                Text = hint, FontSize = 12, Foreground = Pal.Muted, TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(0, 6, 0, 10),
             });
         else

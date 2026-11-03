@@ -352,11 +352,11 @@ public sealed partial class DemoDesktopData : IDesktopData
 
     public static string SeriesColor(int index) => (index % 4) switch
     {
-        0 => "#0B6BB5",
+        0 => "#0E7C74",
         1 => "#1C6B45",
         2 => "#8A5A12",
         3 => "#2A5F8A",
-        _ => "#0B6BB5",
+        _ => "#0E7C74",
     };
 
     public IReadOnlyList<string> UnitWarnings(string unitCode) => Rt.Alarms

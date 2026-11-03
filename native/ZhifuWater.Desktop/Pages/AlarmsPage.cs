@@ -71,7 +71,7 @@ public sealed class AlarmsPage : PageBase
             Query();
         }, small: true));
 
-        _listInfo = Kit.T("", 10.5, Pal.Muted2);
+        _listInfo = Kit.T("", 11, Pal.Muted2);
         _table = Table(new[] { "时间", "级别", "告警", "单元", "当前值", "阈值", "状态", "处理人" },
             new double[] { 92, 56, 0, 150, 70, 86, 64, 64 }, row =>
             {

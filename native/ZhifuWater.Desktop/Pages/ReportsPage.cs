@@ -26,7 +26,7 @@ public sealed class ReportsPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var actions = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 6, 0, 0) };
         actions.Children.Add(Kit.Btn("生成日报", () => Generate("daily"), primary: true, small: true));
         actions.Children.Add(Kit.Btn("生成周报", () => Generate("weekly"), small: true));
@@ -35,7 +35,7 @@ public sealed class ReportsPage : PageBase
         head.Children.Add(_info);
         head.Children.Add(actions);
         head.Children.Add(Kit.T("报表由运行数据、化验记录与告警统计自动汇总生成；导出为 UTF-8 CSV（带 BOM），可用 Excel 直接打开。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -118,7 +118,7 @@ public sealed class ReportsPage : PageBase
                 var line = new Grid { Margin = new Thickness(0, 2, 0, 0) };
                 line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(130) });
                 line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                var key = Kit.T(row.Key, 10.5, Pal.Muted);
+                var key = Kit.T(row.Key, 11, Pal.Muted);
                 var value = Kit.T(row.Value, 11, Pal.Ink2, wrap: TextWrapping.Wrap);
                 Grid.SetColumn(value, 1);
                 line.Children.Add(key);

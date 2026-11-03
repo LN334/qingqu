@@ -579,7 +579,7 @@ public sealed partial class DemoDesktopData
                     Code = point + "." + metric,
                     Name = (point == "inlet" ? "进水 " : "出水 ") + metric,
                     Unit = "mg/L",
-                    Color = point == "inlet" ? "#8A979F" : "#0B6BB5",
+                    Color = point == "inlet" ? "#8A979F" : "#0E7C74",
                 };
                 foreach (var row in rows)
                 {
@@ -632,7 +632,7 @@ public sealed partial class DemoDesktopData
     {
         var rt = Rt;
         var data = new AnalysisData();
-        var dailyVolume = new TrendSeries { Code = "volume", Name = "日处理水量", Unit = "m³", Color = "#0B6BB5" };
+        var dailyVolume = new TrendSeries { Code = "volume", Name = "日处理水量", Unit = "m³", Color = "#0E7C74" };
         var dailyPower = new TrendSeries { Code = "power", Name = "日耗电", Unit = "kWh", Color = "#8A5A12" };
         var dailyCost = new TrendSeries { Code = "cost", Name = "吨水成本", Unit = "元/m³", Color = "#1C6B45" };
         var alarmDaily = new List<KeyValuePair<string, int>>();

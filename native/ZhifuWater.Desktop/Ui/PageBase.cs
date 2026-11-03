@@ -37,7 +37,7 @@ public abstract class PageBase : UserControl
             _built = true;
             Build();
             var dock = new DockPanel { LastChildFill = true };
-            _footnote = new TextBlock { FontSize = 10.5, Foreground = Pal.Muted2, TextTrimming = TextTrimming.CharacterEllipsis };
+            _footnote = new TextBlock { FontSize = 11, Foreground = Pal.Muted2, TextTrimming = TextTrimming.CharacterEllipsis };
             dock.Children.Add(new Border { Background = Pal.Bg, Child = _content });
             Content = dock;
         }

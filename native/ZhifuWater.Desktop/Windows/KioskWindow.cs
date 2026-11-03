@@ -239,13 +239,13 @@ public sealed class KioskWindow : Window
         var left = new TextBlock
         {
             Text = "数据来源：" + _services.BackendName + " · 每 5 秒自动刷新 · 全屏现场视图",
-            FontSize = 11.5, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(20, 0, 0, 0),
+            FontSize = 12, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(20, 0, 0, 0),
         };
         footer.Children.Add(left);
         var right = new TextBlock
         {
             Text = "v2.0 · 原生 WPF · .NET 8",
-            FontSize = 11.5, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 20, 0),
+            FontSize = 12, Foreground = KioskMuted, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(0, 0, 20, 0),
         };
         Grid.SetColumn(right, 1);
         footer.Children.Add(right);
@@ -287,7 +287,7 @@ public sealed class KioskWindow : Window
             var line = new StackPanel { Margin = new Thickness(0, 0, 0, 9) };
             line.Children.Add(new TextBlock
             {
-                Text = alarm.Title, FontSize = 13.5, Foreground = KioskText, TextTrimming = TextTrimming.CharacterEllipsis,
+                Text = alarm.Title, FontSize = 14, Foreground = KioskText, TextTrimming = TextTrimming.CharacterEllipsis,
             });
             var meta = new StackPanel { Orientation = Orientation.Horizontal };
             meta.Children.Add(new Border
@@ -296,7 +296,7 @@ public sealed class KioskWindow : Window
                 CornerRadius = new CornerRadius(2),
                 Padding = new Thickness(6, 1, 6, 1),
                 Margin = new Thickness(0, 3, 6, 0),
-                Child = new TextBlock { Text = Pal.AlarmLevelText(alarm.Level), FontSize = 10.5, Foreground = KioskToneFg(alarm.Level) },
+                Child = new TextBlock { Text = Pal.AlarmLevelText(alarm.Level), FontSize = 11, Foreground = KioskToneFg(alarm.Level) },
             });
             meta.Children.Add(new TextBlock
             {
@@ -403,12 +403,12 @@ public sealed class KioskWindow : Window
         title.Children.Add(new Border { Width = 10, Height = 10, CornerRadius = new CornerRadius(5), Background = KioskToneFg(tone), Margin = new Thickness(0, 4, 8, 0), VerticalAlignment = VerticalAlignment.Top });
         title.Children.Add(new TextBlock { Text = unit.Unit?.Name ?? unit.Unit?.Code ?? "单元", FontSize = 14, Foreground = KioskText, TextWrapping = TextWrapping.Wrap, MaxWidth = 160 });
         stack.Children.Add(title);
-        stack.Children.Add(new TextBlock { Text = Pal.UnitStateText(unit.State), FontSize = 11.5, Foreground = KioskToneFg(tone), Margin = new Thickness(18, 2, 0, 0) });
+        stack.Children.Add(new TextBlock { Text = Pal.UnitStateText(unit.State), FontSize = 12, Foreground = KioskToneFg(tone), Margin = new Thickness(18, 2, 0, 0) });
         var reading = unit.Readings.FirstOrDefault();
         stack.Children.Add(new TextBlock
         {
             Text = reading == null ? "待接入" : reading.Name + " " + reading.Text,
-            FontSize = 12.5, Foreground = KioskMuted, Margin = new Thickness(18, 5, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis,
+            FontSize = 13, Foreground = KioskMuted, Margin = new Thickness(18, 5, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis,
         });
         if (!string.IsNullOrEmpty(unit.BwText))
             stack.Children.Add(new TextBlock { Text = unit.BwText, FontSize = 11, Foreground = Hex("#E3B15E"), Margin = new Thickness(18, 2, 0, 0) });

@@ -27,7 +27,7 @@ public sealed class ParamsPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var tabs = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
         var groups = new List<string> { "all" };
         groups.AddRange(Svc.Data.Params.Select(p => p.Group).Distinct());
@@ -52,7 +52,7 @@ public sealed class ParamsPage : PageBase
         head.Children.Add(_info);
         head.Children.Add(tabs);
         head.Children.Add(Kit.T("参数修改即时生效并记录版本；审批流中的申请需管理员通过后写入。回滚可选择历史版本。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -193,12 +193,12 @@ public sealed class ParamsPage : PageBase
         var p = _selected;
         _detail.Children.Add(Kit.T(p.Name, 13, Pal.Ink, bold: true));
         _detail.Children.Add(Kit.T($"键 {p.Key} · 分组 {p.Group} · 写入方式 {(p.WriteMode == "cloud" ? "云端下发" : "就地设置")}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
-        _detail.Children.Add(Kit.T(p.Desc, 10.5, Pal.Muted, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.T(p.Desc, 11, Pal.Muted, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(6, 4));
 
         var valueRow = Kit.Row(8,
             Kit.KpiValueText(p.Current.ToString("F2")),
-            Kit.T(p.Unit + "  ·  范围 " + p.Min + " – " + p.Max + " · 步长 " + p.Step, 10.5, Pal.Muted));
+            Kit.T(p.Unit + "  ·  范围 " + p.Min + " – " + p.Max + " · 步长 " + p.Step, 11, Pal.Muted));
         _detail.Children.Add(valueRow);
         _detail.Children.Add(Kit.T($"版本 v{p.Version} · 最近修改 {p.UpdatedAt} · 操作人 {p.UpdatedBy}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 

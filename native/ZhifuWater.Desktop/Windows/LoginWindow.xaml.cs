@@ -23,14 +23,6 @@ public partial class LoginWindow : Window
 
     private void OnLoginClick(object sender, RoutedEventArgs e) => TryLogin();
 
-    private void OnFillClick(object sender, RoutedEventArgs e)
-    {
-        AccountBox.Text = "admin";
-        PasswordBox.Password = "water123";
-        PasswordBox.Focus();
-        ErrorText.Visibility = Visibility.Collapsed;
-    }
-
     private void TryLogin()
     {
         ErrorText.Visibility = Visibility.Collapsed;

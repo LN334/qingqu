@@ -24,7 +24,7 @@ public sealed class DiagnosisPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var tabs = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 8, 0, 0) };
         foreach (var (key, text) in new[] { ("all", "全部"), ("warning", "需处理"), ("attention", "需关注"), ("ok", "正常") })
         {
@@ -43,7 +43,7 @@ public sealed class DiagnosisPage : PageBase
         head.Children.Add(_info);
         head.Children.Add(tabs);
         head.Children.Add(Kit.T("诊断基于当前实时点位、阈值规则与人工化验结果生成，每条结论都附带现象、原因、检查项与依据。结论仅供参考，处置前请现场确认。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _list = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -121,17 +121,17 @@ public sealed class DiagnosisPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         var left = new StackPanel();
-        left.Children.Add(Kit.T("现象", 10.5, Pal.Muted2, bold: true));
-        left.Children.Add(Kit.T(d.Phenomenon, 11.5, Pal.Ink2, wrap: TextWrapping.Wrap));
+        left.Children.Add(Kit.T("现象", 11, Pal.Muted2, bold: true));
+        left.Children.Add(Kit.T(d.Phenomenon, 12, Pal.Ink2, wrap: TextWrapping.Wrap));
         left.Children.Add(Section("可能原因", d.Causes, "· "));
         left.Children.Add(Section("建议检查项", d.Checks, "", numbered: true));
 
         var right = new StackPanel();
-        right.Children.Add(Kit.T("判断依据", 10.5, Pal.Muted2, bold: true));
+        right.Children.Add(Kit.T("判断依据", 11, Pal.Muted2, bold: true));
         right.Children.Add(Kit.T(d.Basis, 11, Pal.Muted, wrap: TextWrapping.Wrap));
         if (!string.IsNullOrEmpty(d.Boundary))
         {
-            var boundary = Kit.T("边界条件：" + d.Boundary, 10.5, Pal.Muted2, wrap: TextWrapping.Wrap);
+            var boundary = Kit.T("边界条件：" + d.Boundary, 11, Pal.Muted2, wrap: TextWrapping.Wrap);
             boundary.Margin = new Thickness(0, 4, 0, 0);
             right.Children.Add(boundary);
         }
@@ -164,7 +164,7 @@ public sealed class DiagnosisPage : PageBase
     private static StackPanel Section(string title, List<string> items, string prefix, bool numbered = false)
     {
         var stack = new StackPanel { Margin = new Thickness(0, 7, 0, 0) };
-        stack.Children.Add(Kit.T(title, 10.5, Pal.Muted2, bold: true));
+        stack.Children.Add(Kit.T(title, 11, Pal.Muted2, bold: true));
         var i = 1;
         foreach (var item in items)
         {

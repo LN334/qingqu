@@ -29,7 +29,7 @@ public sealed class QualityPage : PageBase
     {
         var root = new StackPanel();
         var head = new StackPanel { Orientation = Orientation.Horizontal };
-        head.Children.Add(Kit.T("进出水水质、化验记录与去除率", 11.5, Pal.Muted));
+        head.Children.Add(Kit.T("进出水水质、化验记录与去除率", 12, Pal.Muted));
         _info = Kit.T("", 11, Pal.Muted2);
         _info.Margin = new Thickness(14, 1, 0, 0);
         head.Children.Add(_info);
@@ -45,7 +45,7 @@ public sealed class QualityPage : PageBase
 
         var left = new StackPanel();
         var trendHead = new StackPanel { Orientation = Orientation.Horizontal };
-        trendHead.Children.Add(Kit.T("化验指标趋势（进水 / 出水 COD、氨氮，mg/L）", 10.5, Pal.Muted));
+        trendHead.Children.Add(Kit.T("化验指标趋势（进水 / 出水 COD、氨氮，mg/L）", 11, Pal.Muted));
         trendHead.Children.Add(Kit.Spacer());
         var range = Kit.Select(new[] { "近 7 天", "近 30 天", "近 90 天" }, 1, 104);
         range.SelectionChanged += (_, _) =>

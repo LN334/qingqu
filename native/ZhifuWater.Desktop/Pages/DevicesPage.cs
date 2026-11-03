@@ -25,25 +25,32 @@ public sealed class DevicesPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
-        var bar = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
-        foreach (var (key, text) in new[] { ("all", "全部"), ("online", "在线"), ("offline", "离线"), ("attention", "需关注") })
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
+        var filterKeys = new[] { "all", "online", "offline", "attention" };
+        var bar = new StackPanel { Orientation = Orientation.Horizontal };
+        bar.Children.Add(Kit.Segments(new[] { "全部", "在线", "离线", "需关注" }, 0, index =>
         {
-            var k = key;
-            var b = new Button { Content = text, Style = Kit.St("TabButton"), Margin = new Thickness(0, 0, 4, 0) };
-            b.Click += (_, _) =>
-            {
-                _filter = k;
-                RefreshData();
-            };
-            bar.Children.Add(b);
-        }
-        var head = new StackPanel();
-        head.Children.Add(_info);
-        head.Children.Add(bar);
-        head.Children.Add(Kit.T("台账包含设备型号、规格、安装位置、PLC 地址、维护周期与健康度；维护登记后健康度自动更新并写入审计。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
-        root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
+            _filter = filterKeys[index];
+            RefreshData();
+        }));
+        var toolbarInner = new Grid();
+        toolbarInner.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        toolbarInner.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        _info.VerticalAlignment = VerticalAlignment.Center;
+        bar.VerticalAlignment = VerticalAlignment.Center;
+        bar.Margin = new Thickness(0);
+        Grid.SetColumn(_info, 0);
+        Grid.SetColumn(bar, 1);
+        toolbarInner.Children.Add(_info);
+        toolbarInner.Children.Add(bar);
+        root.Children.Add(new Border
+        {
+            Background = Pal.Surface,
+            BorderBrush = Pal.Line,
+            BorderThickness = new Thickness(1),
+            Padding = new Thickness(12, 8, 12, 8),
+            Child = toolbarInner,
+        });
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.65, GridUnitType.Star) });
@@ -52,6 +59,7 @@ public sealed class DevicesPage : PageBase
 
         _table = Table(new[] { "编号", "名称", "单元", "类型", "状态", "健康", "运行小时", "上次维护" },
             new double[] { 72, 0, 104, 66, 56, 60, 68, 90 });
+        _table.MinHeight = 420;
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is DeviceInfo device)
@@ -60,7 +68,7 @@ public sealed class DevicesPage : PageBase
                 ShowDetail();
             }
         };
-        var tableCard = Kit.Card("设备列表", _table, Kit.T("在线 + 离线", 10, Pal.Muted2), null, new Thickness(10, 8, 10, 8));
+        var tableCard = Kit.Card("设备列表", _table, null, null, new Thickness(10, 8, 10, 8));
 
         _detail = new StackPanel();
         var detailCard = Kit.Card("设备详情", Kit.Scroll(_detail, 0), null, null, new Thickness(10, 8, 10, 8));
@@ -119,7 +127,7 @@ public sealed class DevicesPage : PageBase
             return;
         }
         var d = _selected;
-        _detail.Children.Add(Kit.Row(7, Kit.T(d.Name, 12.5, Pal.Ink, bold: true), Kit.Badge(d.Online ? "在线" : "离线", d.Online ? "good" : "bad")));
+        _detail.Children.Add(Kit.Row(7, Kit.T(d.Name, 13, Pal.Ink, bold: true), Kit.Badge(d.Online ? "在线" : "离线", d.Online ? "good" : "bad")));
         _detail.Children.Add(Kit.T(d.Code + " · " + d.UnitName + " · " + Pal.DeviceTypeText(d.Type), 10, Pal.Muted2, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(5, 4));
 
@@ -127,22 +135,21 @@ public sealed class DevicesPage : PageBase
         {
             ["型号规格"] = d.Model + (d.Spec.Length > 0 ? " / " + d.Spec : ""),
             ["健康度"] = d.Health + "%（" + d.HealthText + "）",
-            ["运行小时"] = d.RuntimeHours.ToString("F0") + " 小时 · 启动 " + d.Starts + " 次",
-            ["安装位置"] = d.PlAddress,
+            ["运行时长"] = d.RuntimeHours.ToString("F0") + " 小时 · 启动 " + d.Starts + " 次",
+            ["PLC 地址"] = d.PlAddress,
             ["安装日期"] = d.InstallDate,
             ["保修截止"] = d.WarrantyUntil,
             ["维护周期"] = d.MaintCycleDays + " 天",
             ["上次维护"] = d.LastMaintAt,
             ["所属单元"] = d.UnitName + "（" + d.UnitCode + "）",
         };
-        foreach (var pair in info)
-            _detail.Children.Add(Kit.T("· " + pair.Key + "：" + (string.IsNullOrEmpty(pair.Value) ? "待接入" : pair.Value), 10.5, Pal.Muted, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.KvGrid(info));
 
         var btn = Kit.Btn("登记维护", () => Maintain(d), primary: true, small: true);
         btn.Margin = new Thickness(0, 9, 0, 0);
         btn.HorizontalAlignment = HorizontalAlignment.Left;
         _detail.Children.Add(btn);
-        var schedule = Kit.Btn("生成保养工单", () => Toast("保养工单需在工单中心由管理员创建（当前数据层未提供直接创建接口）", false), small: true);
+        var schedule = Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true);
         schedule.Margin = new Thickness(0, 5, 0, 0);
         schedule.HorizontalAlignment = HorizontalAlignment.Left;
         _detail.Children.Add(schedule);

@@ -35,7 +35,7 @@ internal static class ChartDraw
 
     public static readonly Brush[] SeriesPalette =
     {
-        Pal.FromHex("#0B6BB5"), Pal.FromHex("#1C6B45"), Pal.FromHex("#8A5A12"),
+        Pal.FromHex("#0E7C74"), Pal.FromHex("#1C6B45"), Pal.FromHex("#8A5A12"),
         Pal.FromHex("#2A5F8A"), Pal.FromHex("#6B4C9A"), Pal.FromHex("#A32C22"),
     };
 
@@ -570,7 +570,7 @@ public sealed class DonutChart : FrameworkElement
             var brush = ChartDraw.Color(item.Color, 0);
             dc.DrawRectangle(brush, null, new Rect(lx, ly + 3, 8, 8));
             var pct = total <= 0 ? 0 : item.Value / total * 100;
-            ChartDraw.Draw(this, dc, $"{item.Label}  {item.Value:0} 条（{pct:0}%）", new Point(lx + 13, ly), 10.5, Pal.Ink2, TextAlignment.Left, Math.Max(40, w - lx - 20));
+            ChartDraw.Draw(this, dc, $"{item.Label}  {item.Value:0} 条（{pct:0}%）", new Point(lx + 13, ly), 11, Pal.Ink2, TextAlignment.Left, Math.Max(40, w - lx - 20));
             ly += 22;
         }
     }

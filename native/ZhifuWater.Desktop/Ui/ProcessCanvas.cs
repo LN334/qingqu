@@ -197,7 +197,7 @@ public sealed class ProcessCanvas : FrameworkElement
         var valueText = reading == null ? "待接入" : (reading.Value.HasValue
             ? reading.Value.Value.ToString("F" + reading.Point.Digits) + " " + reading.Point.Unit
             : reading.Text);
-        ChartDraw.Draw(this, dc, valueText, new Point(rect.X + 9, rect.Y + 39), 10.5, Pal.Ink2, maxWidth: rect.Width - 18);
+        ChartDraw.Draw(this, dc, valueText, new Point(rect.X + 9, rect.Y + 39), 11, Pal.Ink2, maxWidth: rect.Width - 18);
 
         var st = Pal.UnitStateText(state);
         ChartDraw.Draw(this, dc, st, new Point(rect.Right - 5, rect.Y + 7), 8.5, tone, TextAlignment.Right, 34);

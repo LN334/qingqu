@@ -24,9 +24,9 @@ public static class Pal
     public static readonly Brush Bg = FromHex("#ECEFF2");
     public static readonly Brush Surface = FromHex("#FFFFFF");
     public static readonly Brush Surface2 = FromHex("#F6F8F9");
-    public static readonly Brush Accent = FromHex("#0B6BB5");
-    public static readonly Brush AccentStrong = FromHex("#085291");
-    public static readonly Brush AccentSoft = FromHex("#E9F2FA");
+    public static readonly Brush Accent = FromHex("#0E7C74");
+    public static readonly Brush AccentStrong = FromHex("#0B645D");
+    public static readonly Brush AccentSoft = FromHex("#E7F3F1");
     public static readonly Brush Good = FromHex("#1C6B45");
     public static readonly Brush GoodSoft = FromHex("#E9F2EC");
     public static readonly Brush Warn = FromHex("#8A5A12");
@@ -35,8 +35,8 @@ public static class Pal
     public static readonly Brush BadSoft = FromHex("#F7E9E7");
     public static readonly Brush Info = FromHex("#2A5F8A");
     public static readonly Brush InfoSoft = FromHex("#ECF2F7");
-    public static readonly Brush Sidebar = FromHex("#101A20");
-    public static readonly Brush SidebarText = FromHex("#A9BCC4");
+    public static readonly Brush Sidebar = FromHex("#0B2427");
+    public static readonly Brush SidebarText = FromHex("#A7C4C0");
 
     public static Brush ToneFg(string tone) => tone switch
     {

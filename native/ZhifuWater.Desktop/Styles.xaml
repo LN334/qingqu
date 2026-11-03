@@ -8,7 +8,7 @@
          ========================================================================== -->
 
     <!-- ========== 字体 ========== -->
-    <FontFamily x:Key="UiFont">Segoe UI, Microsoft YaHei UI</FontFamily>
+    <FontFamily x:Key="UiFont">Microsoft YaHei UI, Segoe UI</FontFamily>
     <FontFamily x:Key="MonoFont">Consolas, Microsoft YaHei UI</FontFamily>
 
     <!-- ========== 颜色 ========== -->
@@ -21,9 +21,9 @@
     <Color x:Key="BgColor">#FFECEFF2</Color>
     <Color x:Key="SurfaceColor">#FFFFFFFF</Color>
     <Color x:Key="Surface2Color">#FFF6F8F9</Color>
-    <Color x:Key="AccentColor">#FF0B6BB5</Color>
-    <Color x:Key="AccentStrongColor">#FF085291</Color>
-    <Color x:Key="AccentSoftColor">#FFE9F2FA</Color>
+    <Color x:Key="AccentColor">#FF0E7C74</Color>
+    <Color x:Key="AccentStrongColor">#FF0B645D</Color>
+    <Color x:Key="AccentSoftColor">#FFE7F3F1</Color>
     <Color x:Key="GoodColor">#FF1C6B45</Color>
     <Color x:Key="GoodSoftColor">#FFE9F2EC</Color>
     <Color x:Key="WarnColor">#FF8A5A12</Color>
@@ -32,10 +32,10 @@
     <Color x:Key="BadSoftColor">#FFF7E9E7</Color>
     <Color x:Key="InfoColor">#FF2A5F8A</Color>
     <Color x:Key="InfoSoftColor">#FFECF2F7</Color>
-    <Color x:Key="SidebarColor">#FF101A20</Color>
-    <Color x:Key="SidebarTextColor">#FFA9BCC4</Color>
-    <Color x:Key="SidebarMutedColor">#FF6D838D</Color>
-    <Color x:Key="SidebarActiveColor">#FF1B2C36</Color>
+    <Color x:Key="SidebarColor">#FF0B2427</Color>
+    <Color x:Key="SidebarTextColor">#FFA7C4C0</Color>
+    <Color x:Key="SidebarMutedColor">#FF6C9A93</Color>
+    <Color x:Key="SidebarActiveColor">#FF123A3C</Color>
 
     <SolidColorBrush x:Key="Ink" Color="{StaticResource InkColor}" />
     <SolidColorBrush x:Key="Ink2" Color="{StaticResource Ink2Color}" />
@@ -64,9 +64,6 @@
 
     <!-- ========== 文字 ========== -->
     <Style TargetType="TextBlock">
-        <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="12.5" />
-        <Setter Property="Foreground" Value="{StaticResource Ink2}" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
         <Setter Property="TextWrapping" Value="NoWrap" />
     </Style>
@@ -80,13 +77,13 @@
     </Style>
     <Style x:Key="H2" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="13.5" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{StaticResource Ink}" />
     </Style>
     <Style x:Key="CardTitle" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Foreground" Value="{StaticResource Ink}" />
     </Style>
@@ -97,7 +94,7 @@
     </Style>
     <Style x:Key="Tiny" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="Foreground" Value="{StaticResource Muted2}" />
     </Style>
     <Style x:Key="Mono" TargetType="TextBlock">
@@ -297,7 +294,7 @@
     <!-- ========== 输入控件 ========== -->
     <Style TargetType="TextBox">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Height" Value="30" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -311,7 +308,7 @@
     </Style>
     <Style TargetType="PasswordBox">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="Height" Value="30" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
@@ -380,7 +377,7 @@
         <Setter Property="Background" Value="#F5F7F8" />
         <Setter Property="Foreground" Value="#61707A" />
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
-        <Setter Property="FontSize" Value="10.5" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="FontWeight" Value="SemiBold" />
         <Setter Property="Padding" Value="8,0" />
         <Setter Property="Height" Value="30" />

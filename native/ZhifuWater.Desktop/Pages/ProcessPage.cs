@@ -38,7 +38,7 @@ public sealed class ProcessPage : PageBase
                 Background = Pal.ToneFg(Pal.UnitStateTone(state)), Margin = new Thickness(0, 0, 4, 0),
                 VerticalAlignment = VerticalAlignment.Center,
             };
-            legend.Children.Add(Kit.Row(0, dot, Kit.T(Pal.UnitStateText(state), 10.5, Pal.Muted)));
+            legend.Children.Add(Kit.Row(0, dot, Kit.T(Pal.UnitStateText(state), 11, Pal.Muted)));
             legend.Children.Add(new Border { Width = 10 });
         }
 
@@ -143,7 +143,7 @@ public sealed class ProcessPage : PageBase
             Kit.T(snap.Unit.Name, 13, Pal.Ink, bold: true),
             Kit.Badge(snap.StateText, Pal.UnitStateTone(snap.State)));
         _detail.Children.Add(head);
-        _detail.Children.Add(Kit.T(snap.Unit.Note, 10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.T(snap.Unit.Note, 11, Pal.Muted2, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(6, 4));
 
         if (snap.Readings.Count == 0)
@@ -156,7 +156,7 @@ public sealed class ProcessPage : PageBase
             line.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             line.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             var name = Kit.T(reading.Name, 11, Pal.Muted);
-            var value = Kit.T(ValueOf(reading), 11.5, reading.Quality == "good" ? Pal.Ink : Pal.Warn, bold: true);
+            var value = Kit.T(ValueOf(reading), 12, reading.Quality == "good" ? Pal.Ink : Pal.Warn, bold: true);
             Grid.SetColumn(name, 0);
             Grid.SetColumn(value, 1);
             line.Children.Add(name);

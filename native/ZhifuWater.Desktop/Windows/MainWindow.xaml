@@ -6,6 +6,7 @@
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource Bg}"
         FontFamily="{DynamicResource UiFont}"
+        Foreground="{DynamicResource Ink2}"
         UseLayoutRounding="True" SnapsToDevicePixels="True">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -19,10 +20,11 @@
                 <Border DockPanel.Dock="Top" Padding="14,13,12,10">
                     <StackPanel>
                         <StackPanel Orientation="Horizontal">
-                            <Border Width="26" Height="26" Background="{DynamicResource Accent}" CornerRadius="2">
-                                <TextBlock Text="清" Foreground="White" FontSize="14" FontWeight="SemiBold"
-                                           HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
+                            <Grid Width="26" Height="27">
+                                <Border Background="{DynamicResource Accent}" CornerRadius="3" />
+                                <Path Data="M13,4 C13,4 22,14 22,20 A9,9 0 0 1 4,20 C4,14 13,4 13,4 Z"
+                                      Fill="#F2FFFD" Stretch="Fill" Margin="6,4.5,6,5.5" />
+                            </Grid>
                             <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
                                 <TextBlock Text="清渠" Foreground="#F2F7F8" FontSize="14" FontWeight="SemiBold" />
                                 <TextBlock Text="村镇水处理站智能运维平台" Foreground="#7E939D" FontSize="9.5" />
@@ -32,11 +34,8 @@
                     </StackPanel>
                 </Border>
 
-                <Border DockPanel.Dock="Bottom" Padding="12,7,12,9">
-                    <StackPanel>
-                        <TextBlock x:Name="SidebarSource" FontSize="9.5" Foreground="#7E939D" TextWrapping="Wrap" />
-                        <TextBlock Text="v2.0.8" FontSize="9.5" Foreground="#5D727B" Margin="0,2,0,0" />
-                    </StackPanel>
+                <Border DockPanel.Dock="Bottom" Padding="14,7,12,10">
+                    <TextBlock Text="v2.0.8" FontSize="10" Foreground="#6C9A93" />
                 </Border>
 
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
@@ -66,10 +65,8 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                        <TextBlock x:Name="PageTitle" FontSize="13.5" FontWeight="SemiBold"
+                        <TextBlock x:Name="PageTitle" FontSize="14" FontWeight="SemiBold"
                                    Foreground="{DynamicResource Ink}" Text="综合驾驶舱" />
-                        <TextBlock x:Name="PageCrumb" FontSize="10.5" Foreground="{DynamicResource Muted2}"
-                                   Margin="0,1,0,0" Text="总览 / 综合驾驶舱" />
                     </StackPanel>
 
                     <ComboBox x:Name="SiteCombo" Grid.Column="1" Width="186" Height="27" Margin="10,0,0,0"
@@ -112,9 +109,12 @@
 
             <Border Grid.Row="2" Background="{DynamicResource Surface2}"
                     BorderBrush="{DynamicResource LineSoft}" BorderThickness="0,1,0,0">
-                <Grid Margin="14,0,12,0">
-                    <TextBlock x:Name="FooterSource" FontSize="10" Foreground="{DynamicResource Muted2}"
-                               VerticalAlignment="Center" Text="本机业务层" />
+                <Grid Margin="16,0,14,0">
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <Ellipse Width="6" Height="6" Fill="{DynamicResource Good}" VerticalAlignment="Center" />
+                        <TextBlock x:Name="FooterSource" FontSize="10" Foreground="{DynamicResource Muted2}"
+                                   Margin="6,0,0,0" VerticalAlignment="Center" Text="运行正常" />
+                    </StackPanel>
                     <TextBlock x:Name="FooterRight" FontSize="10" Foreground="{DynamicResource Muted2}"
                                VerticalAlignment="Center" HorizontalAlignment="Right" Text="最后更新 —" />
                 </Grid>

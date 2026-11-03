@@ -58,8 +58,6 @@ public partial class MainWindow : Window
         UserNameText.Text = user.Name;
         MenuName.Text = user.Name + "（" + user.Username + "）";
         MenuRole.Text = user.RoleName + (user.Role == "super" ? " · 全部站点" : " · " + string.Join("、", user.SiteIds));
-        SidebarSource.Text = "本机业务层 · 每 5 秒刷新";
-        FooterSource.Text = "本机业务层";
 
         _clockTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
         _clockTimer.Tick += (_, _) => UpdateClock();
@@ -207,7 +205,6 @@ public partial class MainWindow : Window
 
         var nav = NavItems.FirstOrDefault(n => n.Id == id);
         PageTitle.Text = nav.Title ?? id;
-        PageCrumb.Text = (nav.Group ?? "页面") + " / " + (nav.Title ?? id);
         UpdateFooter();
     }
 
@@ -257,7 +254,6 @@ public partial class MainWindow : Window
 
     private void UpdateFooter()
     {
-        FooterSource.Text = "站点：" + _services.Data.Site.Name;
         FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
     }
 
@@ -319,7 +315,7 @@ public partial class MainWindow : Window
             };
             var text = new TextBlock
             {
-                Text = n.Title, FontSize = 11.5, Foreground = Kit.Br(n.Read ? "Muted" : "Ink2"),
+                Text = n.Title, FontSize = 12, Foreground = Kit.Br(n.Read ? "Muted" : "Ink2"),
                 TextWrapping = TextWrapping.Wrap, MaxWidth = 268, VerticalAlignment = VerticalAlignment.Center,
             };
             var right = new TextBlock

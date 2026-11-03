@@ -30,11 +30,11 @@ public sealed class MonitorPage : PageBase
     {
         var root = new StackPanel();
 
-        _liveInfo = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _liveInfo = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_liveInfo);
         head.Children.Add(Kit.T("选择左侧点位查看实时曲线；数据每 5 秒刷新，写操作不会改变点位归属。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var columns = new Grid { Margin = new Thickness(0, 10, 0, 0) };
@@ -56,7 +56,7 @@ public sealed class MonitorPage : PageBase
         Grid.SetColumn(tableCard, 0);
 
         var chartHead = new StackPanel { Orientation = Orientation.Horizontal };
-        _pointTitle = Kit.T("", 12.5, Pal.Ink, bold: true);
+        _pointTitle = Kit.T("", 13, Pal.Ink, bold: true);
         chartHead.Children.Add(_pointTitle);
         _hours = new ComboBox { Width = 116, Margin = new Thickness(10, 0, 0, 0) };
         _hours.Items.Add("最近 1 小时");
@@ -71,7 +71,7 @@ public sealed class MonitorPage : PageBase
         chartHead.Children.Add(_hours);
 
         _chart = new LineChart { Height = 268, NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
-        _pointMeta = Kit.T("", 10.5, Pal.Muted2, wrap: TextWrapping.Wrap);
+        _pointMeta = Kit.T("", 11, Pal.Muted2, wrap: TextWrapping.Wrap);
         var chartBody = new StackPanel();
         chartBody.Children.Add(_chart);
         chartBody.Children.Add(Kit.Divider(4, 3));

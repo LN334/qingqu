@@ -11,6 +11,7 @@ namespace ZhifuWater.Desktop.Pages;
 public sealed class WorkOrdersPage : PageBase
 {
     private DataGrid _table = null!;
+    private StackPanel _emptyPanel = null!;
     private StackPanel _detail = null!;
     private TextBlock _info = null!;
     private WorkOrderInfo? _selected;
@@ -26,7 +27,7 @@ public sealed class WorkOrdersPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
 
         var filters = new[] { ("open", "待处理"), ("all", "全部"), ("pending", "待接单"), ("processing", "处理中"),
             ("done", "已完成"), ("verified", "已验收"), ("closed", "已关闭") };
@@ -64,6 +65,7 @@ public sealed class WorkOrdersPage : PageBase
 
         _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "单元", "负责人", "创建时间" },
             new double[] { 126, 0, 52, 58, 66, 112, 62, 92 });
+        _table.MinHeight = 420;
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is WorkOrderInfo wo)
@@ -72,7 +74,18 @@ public sealed class WorkOrdersPage : PageBase
                 ShowDetail();
             }
         };
-        var tableCard = Kit.Card("工单列表", _table, null, null, new Thickness(10, 8, 10, 8));
+        var tableHost = new Grid();
+        tableHost.Children.Add(_table);
+        _emptyPanel = new StackPanel
+        {
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Thickness(0, 36, 0, 0),
+            Visibility = Visibility.Collapsed,
+        };
+        _emptyPanel.Children.Add(Kit.T("没有符合条件的工单", 13, Pal.Muted));
+        tableHost.Children.Add(_emptyPanel);
+        var tableCard = Kit.Card("工单列表", tableHost, null, null, new Thickness(10, 8, 10, 8));
 
         _detail = new StackPanel();
         var detailCard = Kit.Card("工单详情", Kit.Scroll(_detail, 0), null, null, new Thickness(10, 8, 10, 8));
@@ -115,6 +128,8 @@ public sealed class WorkOrdersPage : PageBase
             Key = w.Id,
         }).ToList();
         _table.ItemsSource = rows;
+        if (_emptyPanel != null)
+            _emptyPanel.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         _selected = all.FirstOrDefault(w => w.Id == keep) ?? all.FirstOrDefault();
         _table.SelectedItem = rows.FirstOrDefault(r => r.Data == _selected) ?? rows.FirstOrDefault();
         ShowDetail();
@@ -130,17 +145,17 @@ public sealed class WorkOrdersPage : PageBase
             return;
         }
         var w = _selected;
-        _detail.Children.Add(Kit.Row(7, Kit.T(w.Title, 12.5, Pal.Ink, bold: true), Kit.Badge(Pal.WorkOrderStatusText(w.Status), Pal.WorkOrderStatusTone(w.Status))));
+        _detail.Children.Add(Kit.Row(7, Kit.T(w.Title, 13, Pal.Ink, bold: true), Kit.Badge(Pal.WorkOrderStatusText(w.Status), Pal.WorkOrderStatusTone(w.Status))));
         _detail.Children.Add(Kit.T(w.Id + " · " + Pal.WorkOrderTypeText(w.Type) + " · 优先级 " + Pal.WorkOrderPriorityText(w.Priority), 10, Pal.Muted2));
         var meta = Kit.T($"单元 {w.UnitName} · 设备 {w.DeviceName}\n负责人 {w.Assignee} · 创建人 {w.Creator} · 来源 {Pal.WorkOrderSourceText(w.Source)}",
-            10.5, Pal.Muted, wrap: TextWrapping.Wrap);
+            11, Pal.Muted, wrap: TextWrapping.Wrap);
         meta.Margin = new Thickness(0, 4, 0, 4);
         _detail.Children.Add(meta);
-        _detail.Children.Add(Kit.T("故障描述", 10.5, Pal.Muted2, bold: true));
+        _detail.Children.Add(Kit.T("故障描述", 11, Pal.Muted2, bold: true));
         _detail.Children.Add(Kit.T(w.Desc, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
         if (!string.IsNullOrEmpty(w.Result))
         {
-            _detail.Children.Add(Kit.T("处理结果", 10.5, Pal.Muted2, bold: true));
+            _detail.Children.Add(Kit.T("处理结果", 11, Pal.Muted2, bold: true));
             _detail.Children.Add(Kit.T(w.Result, 11, Pal.Good, wrap: TextWrapping.Wrap));
         }
         _detail.Children.Add(Kit.T($"时限 {Kit.FormatTimeFull(w.DueAt ?? 0)} · 完成 {Kit.FormatTimeFull(w.DoneAt ?? 0)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
@@ -158,9 +173,9 @@ public sealed class WorkOrdersPage : PageBase
         _detail.Children.Add(Kit.T("处理时间线", 11, Pal.Ink, bold: true));
         foreach (var entry in w.Timeline.OrderBy(t => t.At))
         {
-            _detail.Children.Add(Kit.T($"· {Kit.FormatTime(entry.At)}  {entry.Actor}  {entry.Text}", 10.5, Pal.Muted, wrap: TextWrapping.Wrap));
+            _detail.Children.Add(Kit.T($"· {Kit.FormatTime(entry.At)}  {entry.Actor}  {entry.Text}", 11, Pal.Muted, wrap: TextWrapping.Wrap));
         }
-        if (w.Timeline.Count == 0) _detail.Children.Add(Kit.T("暂无处理记录", 10.5, Pal.Muted2));
+        if (w.Timeline.Count == 0) _detail.Children.Add(Kit.T("暂无处理记录", 11, Pal.Muted2));
     }
 
     private Button ActionButton(string text, Action click)

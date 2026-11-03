@@ -424,7 +424,7 @@ public sealed class TrendSeries
     public string Code { get; set; } = "";
     public string Name { get; set; } = "";
     public string Unit { get; set; } = "";
-    public string Color { get; set; } = "#0B6BB5";
+    public string Color { get; set; } = "#0E7C74";
     public List<MetricPoint> Points { get; set; } = new();
 }
 

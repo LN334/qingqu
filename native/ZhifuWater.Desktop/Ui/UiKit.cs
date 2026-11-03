@@ -40,7 +40,7 @@ public static class Kit
     public static Brush Br(string key) => (Brush)Res[key];
     public static Style St(string key) => (Style)Res[key];
 
-    public static TextBlock T(string text, double size = 12.5, Brush? fg = null, bool bold = false,
+    public static TextBlock T(string text, double size = 13, Brush? fg = null, bool bold = false,
         TextWrapping wrap = TextWrapping.NoWrap, TextTrimming trim = TextTrimming.CharacterEllipsis)
     {
         return new TextBlock
@@ -59,7 +59,7 @@ public static class Kit
     public static TextBlock H2(string text) => new() { Text = text, Style = St("H2") };
     public static TextBlock CardTitle(string text) => new() { Text = text, Style = St("CardTitle") };
     public static TextBlock Small(string text, Brush? fg = null) => T(text, 11, fg ?? Pal.Muted);
-    public static TextBlock Tiny(string text, Brush? fg = null) => T(text, 10.5, fg ?? Pal.Muted2);
+    public static TextBlock Tiny(string text, Brush? fg = null) => T(text, 11, fg ?? Pal.Muted2);
     public static TextBlock Muted(string text) => T(text, 12, Pal.Muted);
 
     public static TextBlock Label(string text) => T(text, 11, Pal.Muted);
@@ -129,7 +129,7 @@ public static class Kit
 
     public static Grid SectionHead(string title, UIElement? right = null, string? subtitle = null)
     {
-        var grid = new Grid { Margin = new Thickness(12, 9, 12, 7) };
+        var grid = new Grid { Margin = new Thickness(16, 10, 16, 8) };
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
         var titles = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
@@ -153,16 +153,14 @@ public static class Kit
         var tone = string.IsNullOrEmpty(kpi.Tone) ? "normal" : kpi.Tone;
         var stack = new StackPanel { Orientation = Orientation.Vertical };
         stack.Children.Add(Small(kpi.Label, Pal.Muted));
-        var valueRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
-        valueRow.Children.Add(KpiValueText(kpi.Value));
-        if (!string.IsNullOrEmpty(kpi.Unit))
-            valueRow.Children.Add(new TextBlock { Text = " " + kpi.Unit, FontSize = 11, Foreground = Pal.Muted, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 3) });
+        var valueRow = ValueWithUnit(kpi.Value, kpi.Unit);
+        valueRow.Margin = new Thickness(0, 2, 0, 0);
         stack.Children.Add(valueRow);
         if (!string.IsNullOrEmpty(kpi.Delta))
-            stack.Children.Add(new TextBlock { Text = kpi.Delta, FontSize = 10.5, Foreground = Pal.ToneFg(tone), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
+            stack.Children.Add(new TextBlock { Text = kpi.Delta, FontSize = 11, Foreground = Pal.ToneFg(tone), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
         return new Border
         {
-            Padding = new Thickness(12, 9, 12, 9),
+            Padding = new Thickness(16, 10, 16, 10),
             Child = stack,
             ToolTip = string.IsNullOrEmpty(kpi.Hint) ? null : kpi.Hint + (string.IsNullOrEmpty(kpi.Source) ? "" : "\n来源：" + kpi.Source),
         };
@@ -176,8 +174,58 @@ public static class Kit
             CornerRadius = new CornerRadius(2),
             Padding = new Thickness(5, 2, 5, 2),
             VerticalAlignment = VerticalAlignment.Center,
-            Child = T(text, 10.5, Pal.ToneFg(tone), bold: true),
+            Child = T(text, 11, Pal.ToneFg(tone), bold: true),
         };
+    }
+
+    public static TextBlock ValueWithUnit(string value, string unit, double valueSize = 20, double unitSize = 11)
+    {
+        var tb = new TextBlock
+        {
+            FontFamily = (System.Windows.Media.FontFamily)Application.Current.Resources["UiFont"],
+        };
+        TextOptions.SetTextFormattingMode(tb, TextFormattingMode.Display);
+        tb.Inlines.Add(new Run(value) { FontSize = valueSize, FontWeight = FontWeights.SemiBold, Foreground = Pal.Ink });
+        if (!string.IsNullOrEmpty(unit))
+            tb.Inlines.Add(new Run(" " + unit) { FontSize = unitSize, FontWeight = FontWeights.Normal, Foreground = Pal.Muted });
+        return tb;
+    }
+
+    public static Grid KvGrid(IEnumerable<KeyValuePair<string, string>> items, double labelWidth = 62)
+    {
+        var grid = new Grid { Margin = new Thickness(0, 2, 0, 0), HorizontalAlignment = HorizontalAlignment.Stretch };
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(labelWidth) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        var row = 0;
+        foreach (var pair in items)
+        {
+            grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            var label = new TextBlock
+            {
+                Text = pair.Key,
+                FontSize = 11,
+                Foreground = Pal.Muted2,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                Margin = new Thickness(0, 0, 8, 5),
+                TextTrimming = TextTrimming.CharacterEllipsis,
+            };
+            var value = new TextBlock
+            {
+                Text = string.IsNullOrWhiteSpace(pair.Value) ? "待接入" : pair.Value,
+                FontSize = 12,
+                Foreground = Pal.Ink2,
+                TextWrapping = TextWrapping.Wrap,
+                Margin = new Thickness(0, 0, 0, 5),
+            };
+            Grid.SetRow(label, row);
+            Grid.SetColumn(label, 0);
+            Grid.SetRow(value, row);
+            Grid.SetColumn(value, 1);
+            grid.Children.Add(label);
+            grid.Children.Add(value);
+            row++;
+        }
+        return grid;
     }
 
     public static Border Kpi(KpiInfo kpi, double minWidth = 0)
@@ -185,13 +233,11 @@ public static class Kit
         var tone = string.IsNullOrEmpty(kpi.Tone) ? "normal" : kpi.Tone;
         var stack = new StackPanel { Orientation = Orientation.Vertical };
         stack.Children.Add(Small(kpi.Label, Pal.Muted));
-        var valueRow = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 2, 0, 0) };
-        valueRow.Children.Add(KpiValueText(kpi.Value));
-        if (!string.IsNullOrEmpty(kpi.Unit))
-            valueRow.Children.Add(new TextBlock { Text = " " + kpi.Unit, FontSize = 11, Foreground = Pal.Muted, VerticalAlignment = VerticalAlignment.Bottom, Margin = new Thickness(0, 0, 0, 3) });
+        var valueRow = ValueWithUnit(kpi.Value, kpi.Unit);
+        valueRow.Margin = new Thickness(0, 2, 0, 0);
         stack.Children.Add(valueRow);
         if (!string.IsNullOrEmpty(kpi.Delta))
-            stack.Children.Add(new TextBlock { Text = kpi.Delta, FontSize = 10.5, Foreground = Pal.ToneFg(tone), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
+            stack.Children.Add(new TextBlock { Text = kpi.Delta, FontSize = 11, Foreground = Pal.ToneFg(tone), Margin = new Thickness(0, 2, 0, 0), TextTrimming = TextTrimming.CharacterEllipsis });
         var border = new Border
         {
             Style = St("KpiCard"),
@@ -221,7 +267,7 @@ public static class Kit
             BorderBrush = Pal.LineSoft,
             Padding = new Thickness(0, 6, 0, 0),
             Margin = new Thickness(0, 4, 0, 0),
-            Child = T(line, 10.5, Pal.Muted2, wrap: TextWrapping.Wrap),
+            Child = T(line, 11, Pal.Muted2, wrap: TextWrapping.Wrap),
         };
     }
 
@@ -233,6 +279,22 @@ public static class Kit
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Content = new Border { Padding = new Thickness(padding), Child = content },
         };
+    }
+
+    public static Button Link(string text, Action click)
+    {
+        var btn = new Button
+        {
+            Content = text,
+            Style = St("LinkButton"),
+            FontSize = 11,
+            Height = 20,
+            Padding = new Thickness(0),
+            MinWidth = 0,
+            Cursor = System.Windows.Input.Cursors.Hand,
+        };
+        btn.Click += (_, _) => click();
+        return btn;
     }
 
     public static Button Btn(string text, Action click, bool primary = false, bool small = false, bool danger = false)
@@ -284,7 +346,7 @@ public static class Kit
             BorderBrush = Pal.ToneFg(tone),
             BorderThickness = new Thickness(2, 0, 0, 0),
             Padding = new Thickness(9, 6, 9, 6),
-            Child = T(text, 11.5, Pal.ToneFg(tone), wrap: TextWrapping.Wrap),
+            Child = T(text, 12, Pal.ToneFg(tone), wrap: TextWrapping.Wrap),
         };
     }
 
@@ -308,7 +370,7 @@ public static class Kit
             var xaml = $@"<DataTemplate xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation""
                 xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
                 <TextBlock Text=""{{Binding Texts[{index}]}}"" Foreground=""{{Binding Fgs[{index}]}}""
-                    FontSize=""11.5"" VerticalAlignment=""Center"" TextTrimming=""CharacterEllipsis""
+                    FontSize=""12"" VerticalAlignment=""Center"" TextTrimming=""CharacterEllipsis""
                     ToolTip=""{{Binding Texts[{index}]}}"" />
             </DataTemplate>";
             var template = (DataTemplate)XamlReader.Parse(xaml);

@@ -36,7 +36,7 @@ public sealed class AdminPage : PageBase
     protected override void Build()
     {
         var root = new StackPanel();
-        _info = Kit.T("", 11.5, Pal.Ink2, wrap: TextWrapping.Wrap);
+        _info = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         _tabs = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(0, 7, 0, 0) };
         var defs = new[] { ("users", "用户"), ("roles", "角色"), ("settings", "设置"), ("channels", "通道"), ("audit", "审计"), ("backup", "备份") };
         foreach (var (key, text) in defs)
@@ -54,7 +54,7 @@ public sealed class AdminPage : PageBase
         head.Children.Add(_info);
         head.Children.Add(_tabs);
         head.Children.Add(Kit.T("系统管理操作受角色权限约束：用户管理需 admin.users，设置/通道/备份需 admin.config，审计查看需 admin.audit。",
-            10.5, Pal.Muted2, wrap: TextWrapping.Wrap));
+            11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         _body = new StackPanel { Margin = new Thickness(0, 10, 0, 0) };
@@ -177,11 +177,11 @@ public sealed class AdminPage : PageBase
             return;
         }
         var r = _selectedRole;
-        _permDetail.Children.Add(Kit.T(r.Name + "（" + r.Key + "）", 12.5, Pal.Ink, bold: true));
-        _permDetail.Children.Add(Kit.T(r.Desc, 10.5, Pal.Muted, wrap: TextWrapping.Wrap));
+        _permDetail.Children.Add(Kit.T(r.Name + "（" + r.Key + "）", 13, Pal.Ink, bold: true));
+        _permDetail.Children.Add(Kit.T(r.Desc, 11, Pal.Muted, wrap: TextWrapping.Wrap));
         _permDetail.Children.Add(Kit.T("站点范围：" + (r.Sites == "all" ? "全部站点" : "按用户分配站点") + " · " + r.UserCount + " 个用户", 10, Pal.Muted2));
         _permDetail.Children.Add(Kit.Divider(5, 4));
-        foreach (var perm in r.Perms) _permDetail.Children.Add(Kit.T("· " + PermName(perm), 10.5, Pal.Ink2, wrap: TextWrapping.Wrap));
+        foreach (var perm in r.Perms) _permDetail.Children.Add(Kit.T("· " + PermName(perm), 11, Pal.Ink2, wrap: TextWrapping.Wrap));
     }
 
     private static string PermName(string key) => key switch
