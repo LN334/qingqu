@@ -21,5 +21,6 @@
   <ItemGroup>
     <!-- 首次运行的数据快照（安装包与开发输出都带上，Core 会复制到 %LOCALAPPDATA%\ZhifuWater）。 -->
     <Content Include="..\seed\db.json" Link="seed\db.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  <Resource Include="Assets\*.jpg" />
   </ItemGroup>
 </Project>

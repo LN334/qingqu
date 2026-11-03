@@ -18,13 +18,25 @@
 
         <!-- 品牌侧 -->
         <Grid Grid.Column="0" ClipToBounds="True">
-            <Grid.Background>
-                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                    <GradientStop Color="#06252A" Offset="0" />
-                    <GradientStop Color="#0A3638" Offset="0.55" />
-                    <GradientStop Color="#0D4743" Offset="1" />
-                </LinearGradientBrush>
-            </Grid.Background>
+            <Image Source="pack://application:,,,/Assets/site-plant.jpg" Stretch="UniformToFill" Opacity="0.9" />
+            <Border>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#B806252A" Offset="0" />
+                        <GradientStop Color="#D90A3638" Offset="0.55" />
+                        <GradientStop Color="#F00D4743" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+            <Border>
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                        <GradientStop Color="#A6000000" Offset="0" />
+                        <GradientStop Color="#33000000" Offset="0.55" />
+                        <GradientStop Color="#00000000" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
 
             <Canvas IsHitTestVisible="False">
                 <Ellipse Width="760" Height="760" Stroke="#12FFFFFF" StrokeThickness="1"

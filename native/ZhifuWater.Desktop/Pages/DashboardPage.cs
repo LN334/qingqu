@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using ZhifuWater.Desktop.Data;
 using ZhifuWater.Desktop.Ui;
 
@@ -71,13 +72,29 @@ public sealed class DashboardPage : PageBase
     private UIElement BuildSiteBar()
     {
         var site = Svc.Data.Site;
-        var left = new StackPanel();
-        left.Children.Add(Kit.Row(8,
+        var text = new StackPanel();
+        text.Children.Add(Kit.Row(8,
             Kit.T(site.Name, 15, Pal.Ink, bold: true),
             Kit.Badge(Pal.SiteStatusText(site.Status), "good"),
             Kit.Badge(site.Id, "muted")));
-        left.Children.Add(Kit.T($"{site.Process} · 设计规模 {site.Capacity} · 投运 {site.CommissionedAt} · {site.Address}",
+        text.Children.Add(Kit.T($"{site.Process} · 设计规模 {site.Capacity} · 投运 {site.CommissionedAt} · {site.Address}",
             11, Pal.Muted, wrap: TextWrapping.Wrap));
+
+        var thumb = new Border
+        {
+            Width = 76,
+            Height = 48,
+            CornerRadius = new CornerRadius(2),
+            Margin = new Thickness(0, 0, 12, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Background = new ImageBrush(new BitmapImage(new Uri("pack://application:,,,/Assets/tanks-aerial.jpg")))
+            {
+                Stretch = Stretch.UniformToFill,
+            },
+        };
+        var left = new StackPanel { Orientation = Orientation.Horizontal };
+        left.Children.Add(thumb);
+        left.Children.Add(text);
 
         var health = new StackPanel { VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
         _healthText = Kit.T("数据健康检查中…", 11, Pal.Ink2, bold: true);
