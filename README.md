@@ -24,7 +24,7 @@
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
 | Windows 桌面版 | [`Qingqu-Setup-2.0.10.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.10/Qingqu-Setup-2.0.10.exe)（约 49 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
-| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.10.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.10/Qingqu-Kiosk-Setup-2.0.10.exe)（约 49 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
+| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.10.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.10/Qingqu-Kiosk-Setup-2.0.10.exe)（约 50 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
 | 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.10/zhifu-water-mobile.apk)（约 155 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
