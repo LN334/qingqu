@@ -134,7 +134,6 @@ public sealed class QualityPage : PageBase
                 Kit.C(rate.HasValue ? rate.Value.ToString("F1") + "%" : "待接入", rate >= 80 ? "good" : rate.HasValue ? "warn" : "muted"));
         }).ToList();
         _removal.Children.Add(removalTable);
-        _removal.Children.Add(Kit.T("数据来源：人工化验记录（CoreServices）", 9.5, Pal.Muted2));
 
         var rows = Svc.Data.Labs.Take(24).Select(r => new UiRow
         {

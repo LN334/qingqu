@@ -33,7 +33,7 @@ public sealed class MonitorPage : PageBase
         _liveInfo = Kit.T("", 12, Pal.Ink2, wrap: TextWrapping.Wrap);
         var head = new StackPanel();
         head.Children.Add(_liveInfo);
-        head.Children.Add(Kit.T("选择左侧点位查看实时曲线；数据每 3 秒刷新，写操作不会改变点位归属。",
+        head.Children.Add(Kit.T("点选点位叠加曲线，最多 4 个。",
             11, Pal.Muted2, wrap: TextWrapping.Wrap));
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 

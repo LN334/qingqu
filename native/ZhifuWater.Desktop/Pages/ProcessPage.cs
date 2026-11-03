@@ -166,7 +166,7 @@ public sealed class ProcessPage : PageBase
 
         _detail.Children.Add(Kit.Divider(6, 4));
         _detail.Children.Add(Kit.T($"设备在线：{snap.OnlineDevices}/{snap.DeviceCount} 台", 11, Pal.Muted));
-        _detail.Children.Add(Kit.T($"数据来源：{snap.Unit.Code} 单元点位 · 最新采集 {Svc.Data.LastUpdated:HH:mm:ss}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
+        _detail.Children.Add(Kit.T($"最新采集 {Svc.Data.LastUpdated:HH:mm:ss}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 
         var buttons = Kit.Row(6,
             Kit.Btn("去实时监测", () => Host.ShowPage("monitor"), small: true),
