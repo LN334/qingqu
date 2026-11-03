@@ -4,7 +4,7 @@
 
 !define APP_NAME "清渠现场触摸屏"
 !define APP_FULL "清渠 · 现场触摸屏"
-!define APP_VERSION "2.0.9"
+!define APP_VERSION "2.0.10"
 !define APP_PUBLISHER "LN334"
 !define APP_EXE "QingquKiosk.exe"
 !define REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\QingquKioskNative"
