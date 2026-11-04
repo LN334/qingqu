@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -60,8 +60,9 @@ public sealed class AutomationPage : PageBase
 
         var left = new StackPanel();
         left.Children.Add(Kit.Card("自动化规则", _rules, null, null, new Thickness(12, 10, 12, 10)));
-        left.Children.Add(new Border { Height = 10 });
-        left.Children.Add(Kit.Card("最近执行", _events, Kit.Btn("全部执行记录", ShowAllEvents, small: true), null,
+
+        right.Children.Add(new Border { Height = 10 });
+        right.Children.Add(Kit.Card("最近执行", _events, Kit.Btn("全部执行记录", ShowAllEvents, small: true), null,
             new Thickness(12, 10, 12, 10)));
 
         var grid = new Grid();
@@ -101,7 +102,7 @@ public sealed class AutomationPage : PageBase
         _stateDot.Background = _enabled ? Pal.ToneFg("good") : Pal.Muted2;
         var head = _enabled ? "运行中" : "已暂停";
         var blockedText = blocked > 0 ? $" · 被联锁阻止 {blocked} 次" : "";
-        _info.Text = $"{head} · 今日执行 {snap.TodayRuns} 次 · 成功 {ok} 次{blockedText} · 规则 {enabled}/{snap.Rules.Count} 启用";
+        _info.Text = $"{head} · 今日执行 {snap.TodayRuns} 次 · 累计成功 {ok} 次{blockedText} · 规则 {enabled}/{snap.Rules.Count} 启用";
 
         var rows = snap.Rules.Select(r => new UiRow
         {

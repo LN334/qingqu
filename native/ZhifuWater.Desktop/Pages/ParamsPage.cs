@@ -244,6 +244,23 @@ public sealed class ParamsPage : PageBase, IFocusablePage
             _detail.Children.Add(item);
             _detail.Children.Add(Kit.Divider(0, 0));
         }
+
+        var siblings = Svc.Data.Params.Where(x => x.Group == p.Group && x.Id != p.Id).Take(5).ToList();
+        if (siblings.Count > 0)
+        {
+            var groupTitle = Kit.T("同组参数", 11, Pal.Ink, bold: true);
+            groupTitle.Margin = new Thickness(0, 8, 0, 6);
+            _detail.Children.Add(groupTitle);
+            foreach (var q in siblings)
+            {
+                var shown = IsModeParam(q) ? ParamValueText(q) : Fmt(q.Current, ParamDigits(q));
+                var text = $"{q.Name}  {shown}{(q.Unit.Length > 0 ? " " + q.Unit : "")}";
+                var btn = Kit.Btn(text, () => { _selected = q; ShowDetail(); }, small: true);
+                btn.HorizontalAlignment = HorizontalAlignment.Left;
+                btn.Margin = new Thickness(0, 0, 0, 4);
+                _detail.Children.Add(btn);
+            }
+        }
     }
 
     private string UnitCodeOf(string group)
