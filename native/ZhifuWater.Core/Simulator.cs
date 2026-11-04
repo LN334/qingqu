@@ -291,22 +291,28 @@ public sealed class Simulator
                     : -1 + 2 * ((f - 0.62) / 0.38);
                 double wobble = 1.4 * Math.Sin(hours / 0.9) + 0.7 * Math.Sin(hours / 0.33);
                 double v = JsMath.Clamp(mid + amp * shape + wobble + noise * 1.0, 20, 70);
-                return JsMath.Round(BlendToCurrent(v, st.Raw.Level, ago, 25), 1);
+                return JsMath.Round(BlendToCurrent(v, st.Raw.Level, ago, 240), 1);
             }
             case "RAW.PUMP.RUN": return RawCyclePhase(t) < 0.62 ? 1 : 0;
             case "RAW.PUMP.FAULT": return 0;
             case "RAW.PUMP.MODE": return 0;
             case "RAW.PUMP.HOURS": return JsMath.Round(st.Raw.Hours - (ago / 60) * 0.18, 1);
             case "RAW.PUMP.STARTS": return Math.Max(0, st.Raw.Starts - Math.Floor(ago / 180));
-            case "FLOW.IN": return JsMath.Round(JsMath.Clamp(0.1 + noise * 0.012, 0.07, 0.13), 3);
+            case "FLOW.IN":
+            {
+                // 泵停时流量不是瞬间归零，而是随管道余流在三小时内缓降，避免 24 小时曲线末端断崖
+                double flowNow = st.Raw.PumpRun ? 0.1 : 0.0;
+                return JsMath.Round(JsMath.Clamp(BlendToCurrent(0.1 + noise * 0.012, flowNow, ago, 180), 0, 0.13), 3);
+            }
             case "BAF.PH":
-                if (ago < 25) return JsMath.Round(7.05 + (25 - ago) * 0.0028 + noise * 0.01, 2);
-                return JsMath.Round(7.15 + 0.08 * Math.Sin((t / 28000000.0) * Math.PI * 2) + noise * 0.04, 2);
+                // 与实时值用同一锚点做长时间渐变（4 小时），末端不再出现「前一秒 7.1、下一秒 7.05」的断崖
+                return JsMath.Round(BlendToCurrent(7.15 + 0.08 * Math.Sin((t / 28000000.0) * Math.PI * 2) + noise * 0.04,
+                    st.Baf.Ph, ago, 240), 2);
             case "BAF.DO":
             {
                 // 曝气生物滤池溶解氧：随曝气周期在 2.0–3.0 缓变，末端与实际状态衔接
                 double v = 2.45 + 0.42 * Math.Sin((t / 10800000.0) * Math.PI * 2) + noise * 0.12;
-                return JsMath.Round(BlendToCurrent(JsMath.Clamp(v, 1.7, 3.3), st.Baf.Do, ago, 25), 2);
+                return JsMath.Round(BlendToCurrent(JsMath.Clamp(v, 1.7, 3.3), st.Baf.Do, ago, 180), 2);
             }
             case "BAF.BLOWER.RUN": return ago < 52 * 60 && ago > 50 * 60 ? 0 : 1;
             case "BAF.BLOWER.CURRENT": return JsMath.Round(1.62 + noise * 0.06, 2);
@@ -322,8 +328,9 @@ public sealed class Simulator
             case "PAC.PUMP.RUN": return 1;
             case "PAC.DOSE": return 0.06;
             case "PAC.LEVEL":
-                if (ago < 30) return JsMath.Round(18.4 + (30 - ago) * 0.02, 1);
-                return JsMath.Round(JsMath.Clamp(58 + 32 * Math.Sin((t / 12000000.0) * Math.PI * 2) + noise * 3, 16, 92), 1);
+                return JsMath.Round(BlendToCurrent(
+                    JsMath.Clamp(58 + 32 * Math.Sin((t / 12000000.0) * Math.PI * 2) + noise * 3, 16, 92),
+                    st.Pac.Level, ago, 240), 1);
             case "PAC.TOTAL": return JsMath.Round(st.Pac.Total - (ago / 60) * 0.06, 1);
             case "PAC.MIXER.RUN": return 1;
             case "PAM.PUMP.RUN": return 1;
@@ -332,15 +339,15 @@ public sealed class Simulator
             case "PAM.TOTAL": return JsMath.Round(st.Pam.Total - (ago / 60) * 0.02, 1);
             case "PAM.MIXER.RUN": return 1;
             case "SULFUR.PH":
-                if (ago < 90) return JsMath.Round(6.76 + (90 - ago) * 0.0018 + noise * 0.01, 2);
-                return JsMath.Round(7.05 + 0.05 * Math.Sin((t / 30000000.0) * Math.PI * 2) + noise * 0.03, 2);
+                return JsMath.Round(BlendToCurrent(7.05 + 0.05 * Math.Sin((t / 30000000.0) * Math.PI * 2) + noise * 0.03,
+                    st.Sulfur.Ph, ago, 240), 2);
             case "SULFUR.DO": return JsMath.Round(JsMath.Clamp(0.32 + 0.04 * Math.Sin((t / 10000000.0) * Math.PI * 2) + noise * 0.02, 0.15, 0.8), 2);
             case "SULFUR.P": return JsMath.Round(JsMath.Clamp(0.4 + 0.05 * Math.Sin((t / 5000000.0) * Math.PI * 2) + noise * 0.03, 0.25, 0.58), 2);
             case "SULFUR.BW.STATE": return 0;
             case "SULFUR.BW.COUNT": return st.Sulfur.BwCount;
             case "SULFUR.DP": return JsMath.Round(16.4 + noise * 0.8, 1);
-            case "CLEAR.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(58 + 6 * Math.Sin((t / 20000000.0) * Math.PI * 2) + noise * 2, 20, 95), st.ClearLevel, ago, 30), 1);
-            case "WASTE.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(40 + 18 * Math.Sin((t / 18000000.0) * Math.PI * 2) + noise * 3, 8, 80), st.WasteLevel, ago, 30), 1);
+            case "CLEAR.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(58 + 6 * Math.Sin((t / 20000000.0) * Math.PI * 2) + noise * 2, 20, 95), st.ClearLevel, ago, 180), 1);
+            case "WASTE.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(40 + 18 * Math.Sin((t / 18000000.0) * Math.PI * 2) + noise * 3, 8, 80), st.WasteLevel, ago, 180), 1);
             case "POWER.KW": return JsMath.Round(JsMath.Clamp(1.3 + 0.18 * Math.Sin((t / 16000000.0) * Math.PI * 2) + noise * 0.05, 0.9, 1.8), 2);
             case "ENERGY.KWH": return JsMath.Round(st.PowerKwh - (ago / 60) * 1.38, 1);
             default: return 0;
