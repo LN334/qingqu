@@ -69,12 +69,17 @@ public abstract class PageBase : UserControl
     // ------------------------------------------------------------------
     // 表格工具
     // ------------------------------------------------------------------
-    protected static DataGrid Table(string[] headers, double[] widths, Action<UiRow>? onSelect = null)
-        => Kit.Table(headers, Array.Empty<UiRow>(), widths, onSelect);
+    protected static UiTable Table(string[] headers, double[] widths, Action<UiRow>? onSelect = null)
+        => new UiTable(headers, widths, onSelect);
 
     protected static void Bind(DataGrid grid, IEnumerable<UiRow> rows)
     {
         grid.ItemsSource = rows.ToList();
+    }
+
+    protected static void Bind(UiTable table, IEnumerable<UiRow> rows)
+    {
+        table.ItemsSource = rows.ToList();
     }
 
     /// <summary>工整的数字：去掉无意义的尾随零（1.00 → 1、1132.50 → 1132.5），极小噪声归零避免出现 -0.00。</summary>

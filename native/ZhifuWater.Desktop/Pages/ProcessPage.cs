@@ -12,7 +12,7 @@ namespace ZhifuWater.Desktop.Pages;
 public sealed class ProcessPage : PageBase
 {
     private ProcessCanvas _canvas = null!;
-    private DataGrid _table = null!;
+    private UiTable _table = null!;
     private StackPanel _detail = null!;
     private TextBlock _summary = null!;
     private TextBlock _bwInfo = null!;

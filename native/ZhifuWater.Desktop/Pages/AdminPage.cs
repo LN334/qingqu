@@ -15,16 +15,16 @@ public sealed class AdminPage : PageBase
     private TextBlock _info = null!;
     private string _tab = "users";
 
-    private DataGrid? _users;
+    private UiTable? _users;
     private UserRowInfo? _selectedUser;
-    private DataGrid? _roles;
+    private UiTable? _roles;
     private RoleInfo? _selectedRole;
-    private DataGrid? _settings;
+    private UiTable? _settings;
     private string? _selectedSetting;
-    private DataGrid? _channels;
+    private UiTable? _channels;
     private ChannelInfo? _selectedChannel;
-    private DataGrid? _audit;
-    private DataGrid? _backups;
+    private UiTable? _audit;
+    private UiTable? _backups;
     private BackupInfo? _selectedBackup;
 
     public override string Id => "admin";

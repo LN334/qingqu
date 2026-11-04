@@ -9,7 +9,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class InspectionsPage : PageBase
 {
-    private DataGrid _table = null!;
+    private UiTable _table = null!;
     private StackPanel _items = null!;
     private StackPanel _summary = null!;
     private TextBlock _info = null!;

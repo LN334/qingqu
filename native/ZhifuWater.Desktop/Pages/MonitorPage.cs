@@ -11,7 +11,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class MonitorPage : PageBase
 {
-    private DataGrid _table = null!;
+    private UiTable _table = null!;
     private LineChart _chart = null!;
     private TextBlock _pointTitle = null!;
     private TextBlock _pointMeta = null!;

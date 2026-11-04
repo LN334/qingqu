@@ -17,10 +17,10 @@ public sealed class DashboardPage : PageBase
     private StackPanel _chainPanel = null!;
     private LineChart _trend = null!;
     private StackPanel _diagPanel = null!;
-    private DataGrid _alarmTable = null!;
-    private DataGrid _workTable = null!;
+    private UiTable _alarmTable = null!;
+    private UiTable _workTable = null!;
     private TextBlock _workEmpty = null!;
-    private DataGrid _deviceTable = null!;
+    private UiTable _deviceTable = null!;
     private TextBlock _healthText = null!;
     private TextBlock _deviceSummary = null!;
     private TextBlock _alarmSummary = null!;

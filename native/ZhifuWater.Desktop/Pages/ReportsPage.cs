@@ -13,7 +13,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class ReportsPage : PageBase
 {
-    private DataGrid _list = null!;
+    private UiTable _list = null!;
     private StackPanel _preview = null!;
     private TextBlock _info = null!;
     private TextBlock _previewTitle = null!;

@@ -12,7 +12,7 @@ namespace ZhifuWater.Desktop.Pages;
 /// <summary>自动控制：规则列表 + 规则详情 + 最近执行。</summary>
 public sealed class AutomationPage : PageBase
 {
-    private DataGrid _rules = null!;
+    private UiTable _rules = null!;
     private StackPanel _detail = null!;
     private StackPanel _events = null!;
     private TextBlock _info = null!;
@@ -41,8 +41,8 @@ public sealed class AutomationPage : PageBase
         root.Children.Add(Kit.Card(null, Kit.Row(8, _stateDot, _info, Kit.Spacer(), _master), null, null,
             new Thickness(12, 9, 12, 9)));
 
-        _rules = Table(new[] { "规则", "触发条件", "动作", "状态" },
-            new double[] { 0, 206, 112, 56 }, row =>
+        _rules = new UiTable(new[] { "规则", "触发条件", "动作", "状态" },
+            new double[] { 0, 0, 0, 0 }, row =>
             {
                 if (row.Data is AutoRuleInfo rule)
                 {

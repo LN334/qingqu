@@ -10,8 +10,8 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class ParamsPage : PageBase
 {
-    private DataGrid _table = null!;
-    private DataGrid _requests = null!;
+    private UiTable _table = null!;
+    private UiTable _requests = null!;
     private TextBlock _requestsEmpty = null!;
     private StackPanel _detail = null!;
     private TextBlock _info = null!;

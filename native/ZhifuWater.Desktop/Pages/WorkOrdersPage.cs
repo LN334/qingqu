@@ -10,7 +10,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class WorkOrdersPage : PageBase
 {
-    private DataGrid _table = null!;
+    private UiTable _table = null!;
     private StackPanel _emptyPanel = null!;
     private StackPanel _detail = null!;
     private TextBlock _info = null!;

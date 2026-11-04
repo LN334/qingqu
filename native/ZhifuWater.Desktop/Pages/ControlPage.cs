@@ -12,7 +12,7 @@ namespace ZhifuWater.Desktop.Pages;
 public sealed class ControlPage : PageBase
 {
     private WrapPanel _actions = null!;
-    private DataGrid _commands = null!;
+    private UiTable _commands = null!;
     private TextBlock _info = null!;
     private CommandRecord? _selected;
 

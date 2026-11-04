@@ -14,7 +14,7 @@ public sealed class AnalysisPage : PageBase
     private UniformGrid _kpiHost = null!;
     private LineChart _daily = null!;
     private BarChart _cost = null!;
-    private DataGrid _units = null!;
+    private UiTable _units = null!;
     private TextBlock _info = null!;
     private int _days = 7;
 

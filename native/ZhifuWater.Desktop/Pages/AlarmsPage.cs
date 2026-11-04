@@ -12,7 +12,7 @@ namespace ZhifuWater.Desktop.Pages;
 public sealed class AlarmsPage : PageBase
 {
     private UniformGrid _kpiHost = null!;
-    private DataGrid _table = null!;
+    private UiTable _table = null!;
     private BarChart _bar = null!;
     private DonutChart _donut = null!;
     private ComboBox _status = null!;
@@ -20,7 +20,7 @@ public sealed class AlarmsPage : PageBase
     private TextBox _keyword = null!;
     private TextBlock _listInfo = null!;
     private AlarmInfo? _selected;
-    private DataGrid _ruleTable = null!;
+    private UiTable _ruleTable = null!;
     private AlarmRuleInfo? _ruleSelected;
 
     public override string Id => "alarms";

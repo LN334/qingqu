@@ -13,7 +13,7 @@ public sealed class QualityPage : PageBase
 {
     private UniformGrid _kpiHost = null!;
     private LineChart _trend = null!;
-    private DataGrid _records = null!;
+    private UiTable _records = null!;
     private StackPanel _removal = null!;
     private TextBlock _info = null!;
     private int _days = 30;
