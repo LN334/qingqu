@@ -78,6 +78,8 @@ public sealed class CoreServices : IDisposable
     public DiagnosisService Diagnosis { get; }
     public AnalyticsService Analytics { get; }
     public OpsService Ops { get; }
+    /// <summary>自动控制：按监测数据自动下发命令或派发工单。</summary>
+    public AutomationService Automation { get; }
     public ParamsService Params { get; }
     public AdminService Admin { get; }
     public ReportsService Reports { get; }
@@ -159,6 +161,7 @@ public sealed class CoreServices : IDisposable
             RuntimeInfo = RuntimeSnapshot,
         };
         Ops = new OpsService(Store, Auth, _audit, Notifier) { Publish = Publish };
+        Automation = new AutomationService(Store, Telemetry, Commands, Ops, Notifier, _audit) { Publish = Publish };
         Params = new ParamsService(Store, Auth, Notifier, _audit) { Publish = Publish };
         Reports = new ReportsService(Store, Telemetry, Analytics, Auth, _audit) { Publish = Publish };
         Admin = new AdminService(Store, Auth, Notifier, _audit)
@@ -219,6 +222,7 @@ public sealed class CoreServices : IDisposable
         {
             Simulator.Tick(dtSec);
             Rules.Evaluate();
+            Automation.Evaluate();
         }
     }
 

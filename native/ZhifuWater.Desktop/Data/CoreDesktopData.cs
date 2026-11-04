@@ -1891,6 +1891,88 @@ public sealed class CoreDesktopData : IDesktopData
         catch (CoreException) { }
     }
 
+    /* ---------------- 自动控制 ---------------- */
+
+    public AutoSnapshot Automation()
+    {
+        var snap = new AutoSnapshot();
+        if (_user is null) return snap;
+        var raw = _core.Automation.Snapshot();
+        snap.Enabled = J.Bool(raw, "enabled", true);
+        snap.TodayRuns = (int)J.NumOr(raw, "todayRuns", 0);
+        snap.AlarmRuleTotal = (int)J.NumOr(raw, "alarmRuleTotal", 0);
+        snap.AlarmRuleEnabled = (int)J.NumOr(raw, "alarmRuleEnabled", 0);
+        snap.LastAt = (long)TimeUtil.Parse(raw, "lastAt");
+        foreach (var r in J.ObjsIn(raw, "rules"))
+        {
+            snap.Rules.Add(new AutoRuleInfo
+            {
+                Id = J.Str(r, "id"),
+                Name = J.Str(r, "name"),
+                Group = J.Str(r, "group"),
+                UnitCode = J.Str(r, "unitCode"),
+                Action = J.Str(r, "action", "command"),
+                ActionName = J.Str(r, "actionName"),
+                Conditions = J.Str(r, "conditions"),
+                Reason = J.Str(r, "reason"),
+                Enabled = J.Bool(r, "enabled", true),
+                HoldSec = (int)J.NumOr(r, "holdSec", 0),
+                CooldownSec = (int)J.NumOr(r, "cooldownSec", 0),
+                MaxPerDay = (int)J.NumOr(r, "maxPerDay", 0),
+                Runs = (int)J.NumOr(r, "runs", 0),
+                TodayRuns = (int)J.NumOr(r, "todayRuns", 0),
+                LastAt = (long)TimeUtil.Parse(r, "lastAt"),
+                LastResult = J.Str(r, "lastResult"),
+            });
+        }
+        foreach (var e in J.ObjsIn(raw, "events"))
+        {
+            snap.Events.Add(new AutoEventInfo
+            {
+                Id = J.Str(e, "id"),
+                RuleId = J.Str(e, "ruleId"),
+                RuleName = J.Str(e, "ruleName"),
+                Action = J.Str(e, "action"),
+                Result = J.Str(e, "result"),
+                At = (long)TimeUtil.Parse(e, "at"),
+            });
+        }
+        return snap;
+    }
+
+    public OpResult SetAutomationEnabled(bool enabled)
+    {
+        try
+        {
+            _core.Automation.SetEnabled(enabled);
+            Refresh();
+            return OpResult.Done(enabled ? "自动化已开启" : "自动化已关闭");
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
+    public OpResult ToggleAutomationRule(string id, bool enabled)
+    {
+        try
+        {
+            _core.Automation.ToggleRule(id, enabled);
+            Refresh();
+            return OpResult.Done(enabled ? "规则已启用" : "规则已停用");
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
+    public OpResult RunAutomationRule(string id)
+    {
+        try
+        {
+            var r = _core.Automation.RunNow(id);
+            Refresh();
+            return OpResult.Done(J.Str(r, "result"));
+        }
+        catch (CoreException ex) { return OpResult.Fail(ex.Message); }
+    }
+
     public KioskData Kiosk()
     {
         var k = new KioskData();

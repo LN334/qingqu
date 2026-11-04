@@ -12,6 +12,7 @@ public static class PageFactory
         "process" => new ProcessPage(services, host),
         "monitor" => new MonitorPage(services, host),
         "alarms" => new AlarmsPage(services, host),
+        "automation" => new AutomationPage(services, host),
         "control" => new ControlPage(services, host),
         "params" => new ParamsPage(services, host),
         "quality" => new QualityPage(services, host),

@@ -1131,6 +1131,23 @@ public sealed partial class DemoDesktopData
         Touch();
     }
 
+    /* ---------------- 自动控制（演示数据不模拟执行） ---------------- */
+
+    public AutoSnapshot Automation() => new()
+    {
+        Enabled = true,
+        AlarmRuleTotal = 0,
+        AlarmRuleEnabled = 0,
+        Rules = new List<AutoRuleInfo>(),
+        Events = new List<AutoEventInfo>(),
+    };
+
+    public OpResult SetAutomationEnabled(bool enabled) => OpResult.Done("演示数据不支持自动化");
+
+    public OpResult ToggleAutomationRule(string id, bool enabled) => OpResult.Done("演示数据不支持自动化");
+
+    public OpResult RunAutomationRule(string id) => OpResult.Fail("演示数据不支持自动化");
+
     public KioskData Kiosk()
     {
         var rt = Rt;
