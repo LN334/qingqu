@@ -16,6 +16,7 @@ public sealed class DashboardPage : PageBase
     private Grid _kpiGrid = null!;
     private StackPanel _chainPanel = null!;
     private LineChart _trend = null!;
+    private StackPanel _trendPanel = null!;
     private StackPanel _diagPanel = null!;
     private UiTable _alarmTable = null!;
     private UiTable _workTable = null!;
@@ -133,7 +134,9 @@ public sealed class DashboardPage : PageBase
 
     private UIElement BuildTrendCard()
     {
-        _trend = new LineChart { Height = 190, YUnit = "", NormalizePerSeries = false, EnablePan = true, ViewWindow = TimeSpan.FromHours(24), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
+        _trend = new LineChart { Height = 190, YUnit = "", NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(24), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
+        _trendPanel = new StackPanel();
+        _trendPanel.Children.Add(_trend);
         var chips = new StackPanel { Orientation = Orientation.Horizontal, VerticalAlignment = VerticalAlignment.Center };
         foreach (var (code, label, hex) in TrendDefs)
         {
@@ -145,7 +148,7 @@ public sealed class DashboardPage : PageBase
             _trendChips.Add((code, button, label, hex));
             chips.Children.Add(button);
         }
-        var trendBody = new Border { Padding = new Thickness(0, 0, 12, 0), Child = _trend };
+        var trendBody = new Border { Padding = new Thickness(0, 0, 12, 0), Child = _trendPanel };
         return Kit.Card("24 小时关键趋势", trendBody, chips, null, new Thickness(8, 4, 8, 4));
     }
 
@@ -166,11 +169,40 @@ public sealed class DashboardPage : PageBase
     private void RefreshTrend()
     {
         var codes = TrendDefs.Select(d => d.Code).Where(_trendPicked.Contains).ToArray();
-        _trend.Series.Clear();
-        _trend.Series.AddRange(Svc.Data.Trend(codes, 24));
-        _trend.NormalizePerSeries = codes.Length > 1;
-        _trend.YUnit = _trend.Series.Count == 1 ? _trend.Series[0].Unit : "";
-        _trend.InvalidateVisual();
+        _trendPanel.Children.Clear();
+        if (codes.Length <= 1)
+        {
+            // 单指标：一张大图，带 Y 轴刻度
+            var single = Svc.Data.Trend(codes, 24);
+            _trend.Series.Clear();
+            _trend.Series.AddRange(single);
+            _trend.NormalizePerSeries = false;
+            _trend.YUnit = single.Count == 1 ? single[0].Unit : "";
+            _trend.Height = 190;
+            _trendPanel.Children.Add(_trend);
+        }
+        else
+        {
+            // 多指标：各自一张小图，各带自己的刻度与单位，高度不可比的问题就不存在了
+            foreach (var code in codes)
+            {
+                var one = Svc.Data.Trend(new[] { code }, 24);
+                if (one.Count == 0) continue;
+                var s = one[0];
+                var chart = new LineChart
+                {
+                    Height = 84,
+                    NormalizePerSeries = false,
+                    ShowLegend = false,
+                    ShowYLabels = true,
+                    YUnit = s.Unit,
+                    ViewWindow = TimeSpan.FromHours(24),
+                    Margin = new Thickness(0, 0, 0, 2),
+                };
+                chart.Series.Add(s);
+                _trendPanel.Children.Add(chart);
+            }
+        }
         foreach (var (code, btn, _, hex) in _trendChips)
         {
             var active = _trendPicked.Contains(code);
