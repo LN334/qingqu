@@ -116,7 +116,8 @@ public partial class MainWindow : Window
         UpdateClock();
         UpdateBadges();
         UpdateFooter();
-        ShowPage("dashboard");
+        var startPage = Environment.GetEnvironmentVariable("ZHIFU_START_PAGE");
+        ShowPage(string.IsNullOrWhiteSpace(startPage) ? "dashboard" : startPage);
         SidebarVersion.Text = "v" + UpdateService.CurrentVersionText;
         CheckUpdateMenu.Content = "检查更新（v" + UpdateService.CurrentVersionText + "）";
         Closed += OnClosed;

@@ -193,8 +193,8 @@ public static class TrayIcon
             Content = new Border
             {
                 Background = Brushes.White,
-                Margin = new Thickness(10),
-                Width = 268,
+                Margin = new Thickness(8),
+                Width = 186,
                 BorderBrush = new SolidColorBrush(Color.FromRgb(227, 231, 235)),
                 BorderThickness = new Thickness(1),
                 CornerRadius = new CornerRadius(8),
@@ -232,7 +232,7 @@ public static class TrayIcon
             {
                 Text = glyph,
                 FontFamily = new FontFamily("Segoe MDL2 Assets"),
-                FontSize = 15,
+                FontSize = 12,
                 Foreground = danger ? Danger : Muted,
                 VerticalAlignment = VerticalAlignment.Center,
                 HorizontalAlignment = HorizontalAlignment.Center
@@ -242,13 +242,13 @@ public static class TrayIcon
             {
                 Text = label,
                 FontFamily = new FontFamily("Microsoft YaHei UI"),
-                FontSize = 13,
+                FontSize = 11.5,
                 Foreground = color,
                 VerticalAlignment = VerticalAlignment.Center,
-                Margin = new Thickness(10, 0, 0, 0)
+                Margin = new Thickness(6, 0, 0, 0)
             };
             var grid = new Grid();
-            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(22) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             Grid.SetColumn(g, 0);
             Grid.SetColumn(text, 1);
@@ -259,11 +259,11 @@ public static class TrayIcon
             {
                 Background = Brushes.Transparent,
                 CornerRadius = new CornerRadius(6),
-                Height = 42,
-                Padding = new Thickness(10, 0, 18, 0),
+                Height = 28,
+                Padding = new Thickness(6, 0, 10, 0),
                 Cursor = Cursors.Hand,
                 Child = grid,
-                Width = 252
+                Width = 170
             };
             row.MouseEnter += (_, _) => row.Background = danger ? DangerHover : Hover;
             row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
@@ -279,7 +279,7 @@ public static class TrayIcon
         {
             Height = 1,
             Background = new SolidColorBrush(Color.FromRgb(230, 234, 239)),
-            Margin = new Thickness(12, 6, 12, 6)
+            Margin = new Thickness(8, 2, 8, 2)
         };
     }
 }
