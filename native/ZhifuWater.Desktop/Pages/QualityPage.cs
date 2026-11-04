@@ -71,7 +71,7 @@ public sealed class QualityPage : PageBase
 
         var right = new StackPanel();
         _records = Table(new[] { "采样时间", "点位", "COD", "氨氮", "总氮", "总磷", "状态" },
-            new double[] { 96, 108, 52, 52, 52, 52, 70 });
+            new double[] { 96, 122, 66, 58, 58, 58, 66 });
         _records.SelectionChanged += (_, _) =>
         {
             if (_records.SelectedItem is UiRow row) _selected = row.Data as LabRecord;
