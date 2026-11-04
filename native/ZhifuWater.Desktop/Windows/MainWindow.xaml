@@ -89,11 +89,11 @@
                         <TextBlock Text="&#xE72C;" FontFamily="Segoe MDL2 Assets" FontSize="13" />
                     </Button>
 
-                    <Button x:Name="BellButton" Grid.Column="4" Style="{DynamicResource IconButton}"
+                    <Button x:Name="BellButton" AutomationProperties.AutomationId="bell" Grid.Column="4" Style="{DynamicResource IconButton}"
                             VerticalAlignment="Center" ToolTip="通知与未读消息" Click="OnBellClick">
                         <Grid>
                             <TextBlock Text="&#xEA8F;" FontFamily="Segoe MDL2 Assets" FontSize="14" />
-                            <Border x:Name="BellBadge" Background="#B23A2E" CornerRadius="7" Height="14"
+                            <Border x:Name="BellBadge" AutomationProperties.AutomationId="bell-badge" Background="#B23A2E" CornerRadius="7" Height="14"
                                     MinWidth="14" Padding="4,0" Margin="12,-12,-12,0" Visibility="Collapsed"
                                     HorizontalAlignment="Right" VerticalAlignment="Top">
                                 <TextBlock x:Name="BellBadgeText" Text="0" FontSize="9" Foreground="White"
@@ -163,7 +163,7 @@
                         <DockPanel LastChildFill="False">
                             <TextBlock Text="通知中心" FontSize="12" FontWeight="SemiBold"
                                        Foreground="{DynamicResource Ink}" VerticalAlignment="Center" />
-                            <Button Content="全部标为已读" Style="{DynamicResource LinkButton}" HorizontalAlignment="Right"
+                            <Button Content="全部标为已读" AutomationProperties.AutomationId="mark-all-read" Style="{DynamicResource LinkButton}" HorizontalAlignment="Right"
                                     Click="OnMarkReadClick" />
                         </DockPanel>
                     </Border>

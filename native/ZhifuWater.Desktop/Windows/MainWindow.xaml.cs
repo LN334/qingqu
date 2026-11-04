@@ -419,6 +419,24 @@ public partial class MainWindow : Window
                 Padding = new Thickness(8, 6, 8, 6),
                 Background = n.Read ? System.Windows.Media.Brushes.Transparent : Kit.Br("Surface2"),
                 Child = rowGrid,
+                Cursor = System.Windows.Input.Cursors.Hand,
+            };
+            System.Windows.Automation.AutomationProperties.SetAutomationId(border, "notif-" + n.Id);
+            var item = n;
+            border.MouseLeftButtonUp += (_, _) =>
+            {
+                if (!item.Read)
+                {
+                    _services.Data.MarkNotificationRead(item.Id);
+                    BuildBellList();
+                    UpdateBadges();
+                }
+                var link = item.Link.TrimStart('/');
+                if (link.Length > 0)
+                {
+                    BellPopup.IsOpen = false;
+                    ShowPage(link);
+                }
             };
             BellList.Children.Add(border);
         }

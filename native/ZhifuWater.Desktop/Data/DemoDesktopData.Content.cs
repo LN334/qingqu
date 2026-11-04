@@ -1131,6 +1131,14 @@ public sealed partial class DemoDesktopData
         Touch();
     }
 
+    public void MarkNotificationRead(string id)
+    {
+        var item = _notifications.FirstOrDefault(n => n.Id == id);
+        if (item == null || item.Read) return;
+        item.Read = true;
+        Touch();
+    }
+
     /* ---------------- 自动控制（演示数据不模拟执行） ---------------- */
 
     public AutoSnapshot Automation() => new()

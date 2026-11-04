@@ -341,6 +341,7 @@ public sealed class NotificationInfo
     public long At { get; set; }
     public bool Read { get; set; }
     public string Kind { get; set; } = "system";
+    public string Link { get; set; } = "";
 }
 
 public sealed class UserRowInfo

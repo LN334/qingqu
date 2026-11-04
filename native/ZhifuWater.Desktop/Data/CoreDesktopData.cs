@@ -1911,6 +1911,7 @@ public sealed class CoreDesktopData : IDesktopData
             At = (long)TimeUtil.Parse(n, "at"),
             Read = J.Bool(n, "read"),
             Kind = J.Str(n, "type", "system"),
+            Link = J.Str(n, "link"),
         }).ToList();
 
     public int UnreadNotifications => J.Int(NotificationsRaw(), "unread");
@@ -1919,7 +1920,18 @@ public sealed class CoreDesktopData : IDesktopData
     {
         try
         {
-            _core.Admin.MarkNotificationsRead(_user, null);
+            _core.Admin.MarkNotificationsRead(_user, new JsonObject { ["all"] = true });
+            _notificationsAt = 0;
+            _notifications = new JsonObject();
+        }
+        catch (CoreException) { }
+    }
+
+    public void MarkNotificationRead(string id)
+    {
+        try
+        {
+            _core.Admin.MarkNotificationsRead(_user, new JsonObject { ["ids"] = new JsonArray(id) });
             _notificationsAt = 0;
             _notifications = new JsonObject();
         }

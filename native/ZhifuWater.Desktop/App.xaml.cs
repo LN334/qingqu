@@ -109,6 +109,18 @@ public partial class App : Application
                 w.Show();
                 var page = e.Args.FirstOrDefault(x => x.StartsWith("--page=", StringComparison.OrdinalIgnoreCase));
                 if (page is not null) w.ShowPage(page.Substring("--page=".Length));
+                var pageShot = e.Args.FirstOrDefault(x => x.StartsWith("--page-shot=", StringComparison.OrdinalIgnoreCase));
+                if (pageShot is not null)
+                {
+                    var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
+                    timer.Tick += (_, _) =>
+                    {
+                        timer.Stop();
+                        try { Smoke.CaptureElement(w, (int)w.ActualWidth, (int)w.ActualHeight, pageShot.Substring("--page-shot=".Length)); } catch { }
+                        Shutdown(0);
+                    };
+                    timer.Start();
+                }
                 return;
             }
         }

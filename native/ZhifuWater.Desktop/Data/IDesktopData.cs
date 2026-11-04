@@ -128,5 +128,6 @@ public interface IDesktopData
     IReadOnlyList<NotificationInfo> Notifications { get; }
     int UnreadNotifications { get; }
     void MarkNotificationsRead();
+    void MarkNotificationRead(string id);
     KioskData Kiosk();
 }

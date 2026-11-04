@@ -323,7 +323,7 @@ internal static class Program
         core.CommandChanged += evt => commandEvents.Add(J.Str(evt, "action"));
 
         var actions = core.Commands.ListActions(admin, "site-1");
-        Check("动作清单 11 个", J.Get(actions, "actions") is JsonArray aa && aa.Count == 11);
+        Check("动作清单 13 个", J.Get(actions, "actions") is JsonArray aa && aa.Count == 13);
         Check("动作清单含联锁状态", J.Get(actions, "status") is JsonObject);
 
         // 联锁：液位 < 5% 时禁止启泵（联锁读的是模拟网关实时状态，等价 Node 的 sim.state）
@@ -584,6 +584,14 @@ internal static class Program
         Check("恢复备份成功并留回滚点", JsMath.Truthy(J.Get(restored, "restored"))
             && J.Str(restored, "rollbackFile").StartsWith("pre-restore-"));
         Check("恢复后数据仍完整", J.ObjsIn(core.Store.Data, "sites").Count == 2 && J.ObjsIn(core.Store.Data, "users").Count >= 8);
+
+        /* ================= 13.5 通知已读 ================= */
+        Section("通知：全部标为已读");
+        var unreadBefore = J.Num(core.Admin.ListNotifications(admin, false, pageSize: 50), "unread");
+        Check("初始存在未读通知", unreadBefore > 0, $"实际 {unreadBefore}");
+        var marked = core.Admin.MarkNotificationsRead(admin, new JsonObject { ["all"] = true });
+        Eq("标记后 unread=0", "0", J.Num(marked, "unread").ToString());
+        Eq("再次查询 unread=0", "0", J.Num(core.Admin.ListNotifications(admin, false, pageSize: 50), "unread").ToString());
 
         /* ================= 14. 数据持久化 ================= */
         Section("持久化与数据兼容");
