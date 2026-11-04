@@ -36,7 +36,7 @@
 
                 <Border DockPanel.Dock="Bottom" Padding="16,8,14,12">
                     <Grid>
-                        <TextBlock Text="v2.0.10" FontSize="10" Foreground="#5F8580" VerticalAlignment="Center" />
+                        <TextBlock Text="v2.0.11" FontSize="10" Foreground="#5F8580" VerticalAlignment="Center" />
                         <TextBlock Text="本机运行" FontSize="10" Foreground="#5F8580" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
                 </Border>
