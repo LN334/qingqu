@@ -224,7 +224,7 @@ public sealed class DashboardPage : PageBase
         _alarmTable = Table(new[] { "时间", "级别", "告警", "状态" }, new double[] { 100, 58, 0, 62 },
             row => Host.ShowPage("alarms"));
         _alarmSummary = Kit.T("", 10, Pal.Muted2);
-        return Kit.Card("活动告警", _alarmTable,
+        return Kit.Card("未关闭告警", _alarmTable,
             Kit.Row(8, _alarmSummary, Kit.Link("告警管理", () => Host.ShowPage("alarms"))),
             null, new Thickness(8, 6, 8, 8));
     }
