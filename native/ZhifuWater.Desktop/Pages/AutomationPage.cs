@@ -61,6 +61,7 @@ public sealed class AutomationPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         var leftCard = Kit.Card("自动化规则", _rules, null, null, new Thickness(12, 10, 12, 10));
+        leftCard.VerticalAlignment = VerticalAlignment.Top;
         Grid.SetColumn(leftCard, 0);
         Grid.SetColumn(right, 2);
         grid.Children.Add(leftCard);

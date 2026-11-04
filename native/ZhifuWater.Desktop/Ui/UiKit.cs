@@ -486,8 +486,8 @@ public static class Kit
             var chrome = grid.Items.Count * grid.RowHeight + grid.ColumnHeaderHeight + 4 > grid.ActualHeight
                 ? SystemParameters.VerticalScrollBarWidth : 0;
             var avail = scroller != null && scroller.ViewportWidth > 80
-                ? scroller.ViewportWidth - 6
-                : grid.ActualWidth - 6 - chrome;
+                ? scroller.ViewportWidth - 14
+                : grid.ActualWidth - 14 - chrome;
             if (avail < 80 || headers.Length == 0 || Math.Abs(avail - lastAvail) < 0.5) return;
             lastAvail = avail;
 
@@ -520,7 +520,7 @@ public static class Kit
                 var extra = avail - sum;
                 if (flex.Length > 0)
                 {
-                    foreach (var i in flex) final[i] += extra / flex.Length;
+                    foreach (var i in flex) final[i] += extra / flex.Length - 1;
                 }
                 else
                 {
@@ -534,8 +534,8 @@ public static class Kit
                 // 固定列放得下、只是弹性列内容长：固定列按内容给足，剩下的全给弹性列。
                 final = (double[])need.Clone();
                 var fixedNeed = need.Sum() - flex.Sum(i => need[i]);
-                var share = (avail - fixedNeed) / flex.Length;
-                foreach (var i in flex) final[i] = share;
+                var share = (avail - fixedNeed) / flex.Length - 2;
+                foreach (var i in flex) final[i] = Math.Max(108, share);
                 grid.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
             }
             else

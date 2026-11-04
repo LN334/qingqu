@@ -12,6 +12,7 @@ public sealed class ParamsPage : PageBase
 {
     private DataGrid _table = null!;
     private DataGrid _requests = null!;
+    private TextBlock _requestsEmpty = null!;
     private StackPanel _detail = null!;
     private TextBlock _info = null!;
     private ParamInfo? _selected;
@@ -59,8 +60,8 @@ public sealed class ParamsPage : PageBase
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         var left = new StackPanel();
-        _table = Table(new[] { "参数", "分组", "当前值", "范围", "单位", "写入", "版本", "更新时间" },
-            new double[] { 0, 118, 84, 108, 52, 56, 42, 112 });
+        _table = Table(new[] { "参数", "分组", "当前值", "范围", "写入", "版本", "更新时间" },
+            new double[] { 0, 118, 96, 108, 60, 42, 108 });
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is ParamInfo p)
@@ -80,7 +81,14 @@ public sealed class ParamsPage : PageBase
         var reqBody = new DockPanel { LastChildFill = true };
         DockPanel.SetDock(reqButtons, Dock.Bottom);
         reqBody.Children.Add(reqButtons);
-        reqBody.Children.Add(_requests);
+        _requestsEmpty = Kit.T("暂无待审批的修改申请", 12, Pal.Muted2);
+        _requestsEmpty.HorizontalAlignment = HorizontalAlignment.Center;
+        _requestsEmpty.Margin = new Thickness(0, 16, 0, 16);
+        _requestsEmpty.Visibility = Visibility.Collapsed;
+        var reqHost = new Grid();
+        reqHost.Children.Add(_requests);
+        reqHost.Children.Add(_requestsEmpty);
+        reqBody.Children.Add(reqHost);
         var reqCard = Kit.Card("参数修改申请", reqBody, null, "审批后生效", new Thickness(10, 8, 10, 8));
         reqCard.Margin = new Thickness(0, 10, 0, 0);
         left.Children.Add(reqCard);
@@ -117,12 +125,11 @@ public sealed class ParamsPage : PageBase
                 p.Group,
                 ParamValueText(p),
                 ParamRangeText(p),
-                p.Unit,
                 WriteModeText(p.WriteMode),
                 "v" + p.Version,
                 p.UpdatedAt,
             },
-            Fgs = new[] { Pal.Ink2, Pal.Muted, Pal.Ink, Pal.Muted, Pal.Muted2, Pal.Muted2, Pal.Muted2, Pal.Muted2 },
+            Fgs = new[] { Pal.Ink2, Pal.Muted, Pal.Ink, Pal.Muted, Pal.Muted2, Pal.Muted2, Pal.Muted2 },
             Data = p,
             Key = p.Key,
         }).ToList();
@@ -146,17 +153,8 @@ public sealed class ParamsPage : PageBase
             Key = r.Id,
         }).ToList();
         _requests.ItemsSource = reqRows;
-        if (reqRows.Count == 0)
-        {
-            _requests.ItemsSource = new[]
-            {
-                new UiRow
-                {
-                    Texts = new[] { "暂无待审批的修改申请", "", "", "", "", "" },
-                    Fgs = Enumerable.Repeat(Pal.Muted2, 6).ToArray(),
-                },
-            };
-        }
+        _requests.Visibility = reqRows.Count == 0 ? Visibility.Collapsed : Visibility.Visible;
+        _requestsEmpty.Visibility = reqRows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         ShowDetail();
     }
 
