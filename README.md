@@ -8,7 +8,6 @@
 
 - **Windows 桌面端**：C# / .NET 8 / WPF 原生程序，业务与数据都在本机，不依赖浏览器或服务器。
 - **安卓 App**：Java + SQLite，内置本机引擎，不连电脑也能独立运行；也可以连平台服务看同一份数据。
-- **现场触摸屏**：独立全屏值守程序，开机自启，给不碰电脑的现场人员用。
 - **Web 版**：仓库保留源码，供浏览器访问与二次开发。
 
 ### 它管什么
@@ -24,15 +23,14 @@
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
 | Windows 桌面版 | [`Qingqu-Setup-2.0.11.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.11/Qingqu-Setup-2.0.11.exe)（约 49 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
-| 现场触摸屏 | [`Qingqu-Kiosk-Setup-2.0.11.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.11/Qingqu-Kiosk-Setup-2.0.11.exe)（约 50 MB） | 给现场机器安装：开机自启、全屏大字值守，无登录页 |
 | 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.11/zhifu-water-mobile.apk)（约 190 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
 > 全部版本与 SHA256 见 [Releases · v2.0.11](https://github.com/LN334/qingqu/releases/tag/v2.0.11)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
-**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面与 kiosk 的程序集、安装包版本需与平台发布版本保持一致。Android 是独立发布的原生客户端，APK 版本以 `android/AndroidManifest.xml` 为准，当前源码与 v2.0.11 Release 内的 APK 均为 **2.2.0（versionCode 6）**。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
+**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面端的程序集、安装包版本需与平台发布版本保持一致。Android 是独立发布的原生客户端，APK 版本以 `android/AndroidManifest.xml` 为准，当前源码与 v2.0.11 Release 内的 APK 均为 **2.2.0（versionCode 6）**。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
 
-**发布范围：** Releases 只提供 Windows 桌面版、现场触摸屏与 Android APK 三个可安装产物；Web 端以源码方式提供，不含托管服务。desktop/ 的 Electron 遗留壳与 _preview/、native/publish* 等构建产物不发布、不入库。当前版本 2.0.11（2026-11-04）。
+**发布范围：** Releases 只提供 Windows 桌面版与 Android APK 两个可安装产物；Web 端以源码方式提供，不含托管服务。desktop/ 的 Electron 遗留壳与 _preview/、native/publish* 等构建产物不发布、不入库。当前版本 2.0.11（2026-11-04）。
 
 各端实际能力、数据持久化位置和同步边界见 [当前架构与端能力](docs/ARCHITECTURE-STATUS.md)。
 
@@ -67,7 +65,7 @@ node server/index.js
 
 服务器默认只允许本机访问。需要让同一局域网的手机连接时，使用 `node server/index.js --host 0.0.0.0`，并在受控网络中运行。
 
-Web 端与桌面端同为 2.0.11：品牌、浅色水务蓝界面、数据模型一致；现场触摸屏入口不在侧栏，直接访问 `http://127.0.0.1:8765/#/kiosk` 进入全屏视图。
+Web 端与桌面端同为 2.0.11：品牌、浅色水务蓝界面、数据模型一致。
 
 ### 演示账号
 
@@ -106,7 +104,6 @@ Web 端与桌面端同为 2.0.11：品牌、浅色水务蓝界面、数据模型
 | 系统管理 | 用户/角色/设置/通知通道/审计日志/备份与恢复 |
 | 权限与数据范围 | 6 角色 × 功能权限，站点范围双重校验；业务层拒绝越权（界面只做展示层禁用） |
 | 安卓 App | 原生 5 Tab（总览 / 监测 / 告警 / 工单 / 更多）：点位实时值与 24 小时曲线、水质化验与复核、设备台账、智能诊断、巡检执行都在手机上；本机 SQLite + 5 秒实时引擎，可离线；也可连服务器 |
-| 现场触摸屏（独立模式） | 给现场机器用的全屏大字值守界面（1920×1080 / 1366×768），**不在电脑端侧栏里**；由单独的 `Qingqu-Kiosk-Setup-2.0.11.exe` 安装，开机自启：站点状态、6 项关键读数、11 单元工艺链、告警一键确认、固液分离反冲快捷操作，3 秒自动刷新 |
 | 多端同源 | 桌面端与安卓端共用同一套业务规则与数据模型（桌面 C# Core、安卓 LocalCore 各自移植），Web 端可作为服务端 |
 
 ---
@@ -150,9 +147,7 @@ zhifu-water-platform/
 │   ├── ZhifuWater.Core/      业务层：存储、登录、遥测、模拟引擎、告警、命令、工单、报表
 │   ├── ZhifuWater.Core.Tests/ 业务层自测（174 断言）
 │   ├── ZhifuWater.Desktop/   WPF 界面：14 个页面
-│   ├── ZhifuWater.Kiosk/     现场触摸屏独立入口（全屏、自动登录、开机自启）
 │   ├── installer/setup.nsi   桌面安装包脚本
-│   ├── installer/kiosk.nsi   现场触摸屏安装包脚本
 │   └── seed/db.json          首次启动的种子数据
 ├── android/                  安卓端（Java，手工打包，无 Gradle）
 │   ├── src/                  Activity / 页面 / LocalDb / LocalEngine / LocalApi
@@ -232,8 +227,8 @@ node scripts/smoke.js        # 78 项接口冒烟
 | 工单管理 | 设备台账 |
 | ![自动控制](docs/screenshots/native/page-automation.png) | ![报表中心](docs/screenshots/native/page-reports.png) |
 | 自动控制（8 条规则） | 报表中心 |
-| ![登录页](docs/screenshots/native/login.png) | ![现场触摸屏](docs/screenshots/native/kiosk.png) |
-| 登录页（C# / WPF） | 现场触摸屏（1920×1080） |
+| ![登录页](docs/screenshots/native/login.png) | ![数据分析](docs/screenshots/native/page-analysis.png) |
+| 登录页（C# / WPF） | 数据分析 |
 
 Web 版历史截图在 [`docs/screenshots/`](docs/screenshots)。
 

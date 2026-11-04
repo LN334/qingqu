@@ -179,6 +179,8 @@ public sealed class UiTable : Border
             grid.Tag = host;
         }
 
+        // 行视图是新建的：即使总宽与上次相同，也必须重新下发列宽，否则单元格会全部落在第 0 列。
+        _lastTotal = double.NaN;
         PaintRows();
     }
 
