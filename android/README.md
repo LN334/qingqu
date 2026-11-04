@@ -8,7 +8,7 @@
 | --- | --- |
 | APK | `dist/zhifu-water-mobile.apk` |
 | 包名 | `com.ln334.zhifuwater` |
-| 应用版本 | 2.1.1（versionCode 5） |
+| 应用版本 | 2.2.0（versionCode 6） |
 | 版本来源 | `AndroidManifest.xml`；构建脚本从 Manifest 读取版本 |
 | SDK | minSdk 24 / targetSdk 34 |
 | 启动页 | `com.ln334.zhifuwater.LoginActivity` |
@@ -28,7 +28,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\build.ps1
 
 - **离线演示：** 首次启动时从 `assets/demo/` 导入 SQLite。`LocalEngine` 每 5 秒推进 site-1 的模拟遥测和告警；本地告警、工单与巡检操作写入 SQLite，关闭或重启 App 后仍保留。引擎不连接现场 PLC。
 - **连接服务端：** 在登录页配置平台服务地址，客户端通过 HTTP API 操作服务器数据。此模式的数据以服务端为准，与离线演示数据库分开。
-- **页面：** 总览、告警、工单、巡检和我的；支持切换站点、查看详情、处理告警和流转工单。
+- **页面：** 底部 5 个入口 —— 总览、监测、告警、工单、更多。
+  - 监测：点位实时值与 24 小时曲线、区间统计；
+  - 更多：巡检任务（可逐项判定并提交）、水质化验（查看指标与复核）、设备台账（状态与维护信息）、智能诊断（按点位与化验结果给出处置建议）、关于；
+  - 远程控制与参数修改不在手机端（需要联锁校验和二次确认，留在桌面端）。
 
 ## 已知限制
 

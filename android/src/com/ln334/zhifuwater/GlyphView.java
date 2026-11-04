@@ -30,6 +30,8 @@ public class GlyphView extends View {
     public static final int SERVER = 15;
     public static final int SWITCH = 16;
     public static final int DOT = 17;
+    public static final int MONITOR = 18;
+    public static final int MORE = 19;
 
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Path path = new Path();
@@ -124,6 +126,14 @@ public class GlyphView extends View {
                 path.cubicTo(15.8f, 14.2f, 18.8f, 16.4f, 18.8f, 20.2f);
                 canvas.drawPath(path, paint);
                 break;
+            case MONITOR:
+                polyline(canvas, 3.4f, 13.2f, 7.2f, 13.2f, 9.6f, 7.4f, 12.6f, 17.4f, 15.2f, 11f, 20.6f, 11f);
+                break;
+            case MORE:
+                circleFill(canvas, 5.6f, 12f, 1.7f);
+                circleFill(canvas, 12f, 12f, 1.7f);
+                circleFill(canvas, 18.4f, 12f, 1.7f);
+                break;
             case REFRESH:
                 arc(canvas, 4.6f, 4.6f, 19.4f, 19.4f, -50, 290);
                 line(canvas, 16.9f, 6.4f, 17.9f, 2.6f);
@@ -174,6 +184,13 @@ public class GlyphView extends View {
                 break;
         }
         canvas.restore();
+    }
+
+    private void circleFill(Canvas canvas, float cx, float cy, float r) {
+        Paint.Style old = paint.getStyle();
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawCircle(cx, cy, r, paint);
+        paint.setStyle(old);
     }
 
     private void line(Canvas c, float x1, float y1, float x2, float y2) {

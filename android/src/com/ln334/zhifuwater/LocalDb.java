@@ -28,7 +28,7 @@ public final class LocalDb extends SQLiteOpenHelper {
 
     private static final String TAG = "LocalDb";
     private static final String DB_NAME = "zhifu_local.db";
-    private static final int DB_VERSION = 1;
+    private static final int DB_VERSION = 2;
 
     private static volatile LocalDb instance;
 
@@ -52,7 +52,8 @@ public final class LocalDb extends SQLiteOpenHelper {
 
     private static final String[] TABLES = {
             "meta", "sites", "points", "telemetry", "alarms", "alarm_rules",
-            "workorders", "inspections", "inspection_items", "notifications"
+            "workorders", "inspections", "inspection_items", "notifications",
+            "devices", "lab"
     };
 
     /**
@@ -70,11 +71,15 @@ public final class LocalDb extends SQLiteOpenHelper {
             "CREATE TABLE IF NOT EXISTS inspections (id TEXT PRIMARY KEY, site_id TEXT, plan_id TEXT, title TEXT, type TEXT, due_at TEXT, assignee_id TEXT, status TEXT, created_at TEXT, done_at TEXT, done_by TEXT, summary TEXT, raw TEXT)",
             "CREATE TABLE IF NOT EXISTS inspection_items (inspection_id TEXT NOT NULL, item_key TEXT NOT NULL, seq INTEGER, label TEXT, standard TEXT, result TEXT, note TEXT, PRIMARY KEY(inspection_id, item_key))",
             "CREATE TABLE IF NOT EXISTS notifications (id INTEGER PRIMARY KEY AUTOINCREMENT, kind TEXT, level TEXT, title TEXT, body TEXT, created_at TEXT, read INTEGER DEFAULT 0, ref_id TEXT)",
+            "CREATE TABLE IF NOT EXISTS devices (id TEXT PRIMARY KEY, site_id TEXT, unit_code TEXT, code TEXT, name TEXT, type TEXT, status TEXT, online INTEGER, runtime_hours REAL, starts INTEGER, maint_cycle_days INTEGER, last_maint_at TEXT, warranty_until TEXT, install_date TEXT, health INTEGER, raw TEXT)",
+            "CREATE TABLE IF NOT EXISTS lab (id TEXT PRIMARY KEY, site_id TEXT, sample_point TEXT, sample_point_name TEXT, sampled_at TEXT, recorded_at TEXT, operator_id TEXT, operator_name TEXT, status TEXT, reviewed_at TEXT, reviewer_name TEXT, cod REAL, nh3n REAL, tn REAL, tp REAL, ss REAL, raw TEXT)",
             "CREATE INDEX IF NOT EXISTS idx_alarms_status ON alarms(site_id, status)",
             "CREATE INDEX IF NOT EXISTS idx_workorders_status ON workorders(site_id, status)",
             "CREATE INDEX IF NOT EXISTS idx_inspections_status ON inspections(site_id, status)",
             "CREATE INDEX IF NOT EXISTS idx_telemetry_code ON telemetry(code, bucket)",
-            "CREATE INDEX IF NOT EXISTS idx_notifications_at ON notifications(created_at)"
+            "CREATE INDEX IF NOT EXISTS idx_notifications_at ON notifications(created_at)",
+            "CREATE INDEX IF NOT EXISTS idx_devices_unit ON devices(site_id, unit_code)",
+            "CREATE INDEX IF NOT EXISTS idx_lab_time ON lab(site_id, sampled_at)"
     };
 
     @Override
@@ -146,6 +151,8 @@ public final class LocalDb extends SQLiteOpenHelper {
                 importWorkorders(db, woDone, delta);
                 importInspections(db, inspections, detail, delta);
                 importRules(db);
+                importDevices(db, delta);
+                importLab(db, delta);
                 importMe(db, me, delta);
                 importOverviewSeed(db, ov, delta);
                 importCounters(db, ov, delta, now);
@@ -330,6 +337,73 @@ public final class LocalDb extends SQLiteOpenHelper {
             v.put("source", a.optString("source", "rule"));
             v.put("raw", a.toString());
             db.insertWithOnConflict("alarms", null, v, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+
+    private JSONObject assetJsonQuiet(String name) {
+        try {
+            return assetJson(name);
+        } catch (Exception e) {
+            Log.w(TAG, "缺少演示快照 " + name + "：" + e.getMessage());
+            return null;
+        }
+    }
+
+    private void importDevices(SQLiteDatabase db, long delta) {
+        JSONArray list = dataArray(assetJsonQuiet("devices.json"));
+        if (list == null) return;
+        for (int i = 0; i < list.length(); i++) {
+            JSONObject d = list.optJSONObject(i);
+            if (d == null) continue;
+            JSONObject health = d.optJSONObject("health");
+            ContentValues v = new ContentValues();
+            v.put("id", d.optString("id"));
+            v.put("site_id", d.optString("siteId", "site-1"));
+            v.put("unit_code", d.optString("unitCode"));
+            v.put("code", d.optString("code"));
+            v.put("name", d.optString("name"));
+            v.put("type", d.optString("type"));
+            v.put("status", d.optString("status"));
+            v.put("online", d.optBoolean("online", true) ? 1 : 0);
+            v.put("runtime_hours", d.optDouble("runtimeHours", 0));
+            v.put("starts", d.optInt("starts", 0));
+            v.put("maint_cycle_days", d.optInt("maintCycleDays", 0));
+            v.put("last_maint_at", LocalCore.shiftIso(d.optString("lastMaintAt"), delta));
+            v.put("warranty_until", d.optString("warrantyUntil"));
+            v.put("install_date", d.optString("installDate"));
+            v.put("health", health == null ? 100 : health.optInt("score", 100));
+            v.put("raw", d.toString());
+            db.insertWithOnConflict("devices", null, v, SQLiteDatabase.CONFLICT_REPLACE);
+        }
+    }
+
+    private void importLab(SQLiteDatabase db, long delta) {
+        JSONArray list = dataArray(assetJsonQuiet("lab.json"));
+        if (list == null) return;
+        for (int i = 0; i < list.length(); i++) {
+            JSONObject r = list.optJSONObject(i);
+            if (r == null) continue;
+            JSONObject m = r.optJSONObject("metrics");
+            ContentValues v = new ContentValues();
+            v.put("id", r.optString("id"));
+            v.put("site_id", r.optString("siteId", "site-1"));
+            v.put("sample_point", r.optString("samplePoint"));
+            v.put("sample_point_name", r.optString("samplePointName"));
+            v.put("sampled_at", LocalCore.shiftIso(r.optString("sampledAt"), delta));
+            v.put("recorded_at", LocalCore.shiftIso(r.optString("recordedAt"), delta));
+            v.put("operator_id", r.optString("operatorId"));
+            v.put("operator_name", r.optString("operatorName"));
+            v.put("status", r.optString("status", "pending_review"));
+            v.put("reviewed_at", r.optString("reviewedAt", ""));
+            v.put("reviewer_name", r.optString("reviewerName", ""));
+            v.put("cod", m == null ? null : m.optDouble("COD"));
+            v.put("nh3n", m == null ? null : m.optDouble("NH3N"));
+            v.put("tn", m == null ? null : m.optDouble("TN"));
+            v.put("tp", m == null ? null : m.optDouble("TP"));
+            v.put("ss", m == null ? null : m.optDouble("SS"));
+            v.put("raw", r.toString());
+            db.insertWithOnConflict("lab", null, v, SQLiteDatabase.CONFLICT_REPLACE);
         }
     }
 
@@ -670,6 +744,247 @@ public final class LocalDb extends SQLiteOpenHelper {
             closeQuietly(c);
         }
         return out;
+    }
+
+
+    // ======================= 设备 / 化验 =======================
+
+    public JSONArray deviceList(String siteId) {
+        Cursor c = null;
+        JSONArray out = new JSONArray();
+        try {
+            c = db().rawQuery("SELECT id, unit_code, code, name, type, status, online, runtime_hours, starts, maint_cycle_days, last_maint_at, warranty_until, install_date, health, raw FROM devices WHERE site_id = ? ORDER BY code",
+                    new String[]{siteId});
+            while (c.moveToNext()) {
+                JSONObject o = json(c.getString(14));
+                if (o == null) o = new JSONObject();
+                o.put("id", c.getString(0));
+                o.put("unitCode", c.getString(1));
+                o.put("code", c.getString(2));
+                o.put("name", c.getString(3));
+                o.put("type", c.getString(4));
+                o.put("status", c.getString(5));
+                o.put("online", c.getInt(6) == 1);
+                o.put("runtimeHours", c.getDouble(7));
+                o.put("starts", c.getInt(8));
+                o.put("maintCycleDays", c.getInt(9));
+                o.put("lastMaintAt", c.getString(10));
+                o.put("warrantyUntil", c.getString(11));
+                o.put("installDate", c.getString(12));
+                o.put("health", c.getInt(13));
+                out.put(o);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "读取设备失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return out;
+    }
+
+    public JSONArray labList(String siteId, String status, int limit) {
+        Cursor c = null;
+        JSONArray out = new JSONArray();
+        try {
+            String sql = "SELECT raw, sampled_at, recorded_at, status, reviewer_name, reviewed_at, cod, nh3n, tn, tp, ss FROM lab WHERE site_id = ?";
+            String[] args;
+            if (status == null || status.length() == 0) {
+                sql += " ORDER BY sampled_at DESC LIMIT ?";
+                args = new String[]{siteId, String.valueOf(limit)};
+            } else {
+                sql += " AND status = ? ORDER BY sampled_at DESC LIMIT ?";
+                args = new String[]{siteId, status, String.valueOf(limit)};
+            }
+            c = db().rawQuery(sql, args);
+            while (c.moveToNext()) {
+                JSONObject o = json(c.getString(0));
+                if (o == null) o = new JSONObject();
+                o.put("sampledAt", c.getString(1));
+                o.put("recordedAt", c.getString(2));
+                o.put("status", c.getString(3));
+                o.put("reviewerName", c.getString(4));
+                o.put("reviewedAt", c.getString(5));
+                JSONObject m = new JSONObject();
+                m.put("COD", c.isNull(6) ? JSONObject.NULL : c.getDouble(6));
+                m.put("NH3N", c.isNull(7) ? JSONObject.NULL : c.getDouble(7));
+                m.put("TN", c.isNull(8) ? JSONObject.NULL : c.getDouble(8));
+                m.put("TP", c.isNull(9) ? JSONObject.NULL : c.getDouble(9));
+                m.put("SS", c.isNull(10) ? JSONObject.NULL : c.getDouble(10));
+                o.put("metrics", m);
+                out.put(o);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "读取化验记录失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return out;
+    }
+
+    public JSONObject labCounts(String siteId) {
+        JSONObject out = new JSONObject();
+        int total = 0, pending = 0;
+        Cursor c = null;
+        try {
+            c = db().rawQuery("SELECT status, COUNT(*) FROM lab WHERE site_id = ? GROUP BY status", new String[]{siteId});
+            while (c.moveToNext()) {
+                int n = c.getInt(1);
+                total += n;
+                if ("pending_review".equals(c.getString(0))) pending += n;
+            }
+            out.put("total", total);
+            out.put("pending", pending);
+            out.put("reviewed", total - pending);
+        } catch (Exception e) {
+            Log.w(TAG, "统计化验记录失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return out;
+    }
+
+    public boolean reviewLab(String id, String reviewer) {
+        ContentValues v = new ContentValues();
+        v.put("status", "reviewed");
+        v.put("reviewed_at", LocalCore.iso(System.currentTimeMillis()));
+        v.put("reviewer_name", reviewer == null ? "" : reviewer);
+        return db().update("lab", v, "id = ?", new String[]{id}) > 0;
+    }
+
+    /** 化验指标统计：进出口最新值、去除率、达标率。 */
+    public JSONObject labStats(String siteId, int days) {
+        final String[] metrics = {"COD", "NH3N", "TN", "TP", "SS"};
+        final double[] limits = {50, 5, 15, 0.5, 10};
+        final String[] names = {"COD", "氨氮", "总氮", "总磷", "悬浮物"};
+        JSONObject out = new JSONObject();
+        JSONArray rows = new JSONArray();
+        long cutoff = System.currentTimeMillis() - Math.max(1, days) * 86400000L;
+        try {
+            JSONArray list = labList(siteId, null, 400);
+            double[] inlet = new double[metrics.length];
+            double[] outlet = new double[metrics.length];
+            boolean[] hasInlet = new boolean[metrics.length];
+            boolean[] hasOutlet = new boolean[metrics.length];
+            int[] samples = new int[metrics.length];
+            int[] exceed = new int[metrics.length];
+            for (int i = 0; i < list.length(); i++) {
+                JSONObject r = list.optJSONObject(i);
+                if (r == null) continue;
+                boolean isOutlet = "outlet".equals(r.optString("samplePoint"));
+                JSONObject m = r.optJSONObject("metrics");
+                if (m == null) continue;
+                long t = LocalCore.parseIso(r.optString("sampledAt"));
+                for (int k = 0; k < metrics.length; k++) {
+                    if (!m.has(metrics[k]) || m.isNull(metrics[k])) continue;
+                    double v = m.optDouble(metrics[k], 0);
+                    if (!isOutlet) {
+                        inlet[k] = v;
+                        hasInlet[k] = true;
+                    } else {
+                        if (t >= cutoff) {
+                            samples[k]++;
+                            if (v > limits[k]) exceed[k]++;
+                        }
+                        if (!hasOutlet[k]) {
+                            outlet[k] = v;
+                            hasOutlet[k] = true;
+                        }
+                    }
+                }
+            }
+            for (int k = 0; k < metrics.length; k++) {
+                JSONObject row = new JSONObject();
+                row.put("metric", metrics[k]);
+                row.put("name", names[k]);
+                row.put("limit", limits[k]);
+                row.put("inlet", hasInlet[k] ? inlet[k] : JSONObject.NULL);
+                row.put("outlet", hasOutlet[k] ? outlet[k] : JSONObject.NULL);
+                double removal = !hasOutlet[k] ? -1
+                        : (hasInlet[k] && inlet[k] > 0 ? (inlet[k] - outlet[k]) / inlet[k] : -1);
+                row.put("removal", removal);
+                row.put("samples", samples[k]);
+                row.put("exceed", exceed[k]);
+                row.put("rate", samples[k] == 0 ? -1 : (samples[k] - exceed[k]) * 100.0 / samples[k]);
+                rows.put(row);
+            }
+            JSONObject counts = labCounts(siteId);
+            out.put("days", days);
+            out.put("total", counts.optInt("total"));
+            out.put("pending", counts.optInt("pending"));
+            out.put("reviewed", counts.optInt("reviewed"));
+            out.put("metrics", rows);
+        } catch (Exception e) {
+            Log.w(TAG, "统计化验指标失败：" + e.getMessage());
+        }
+        return out;
+    }
+
+    /** 点位列表（保留顺序，字段与服务器一致），供监测页使用。 */
+    public JSONArray pointList(String siteId) {
+        Cursor c = null;
+        JSONArray out = new JSONArray();
+        try {
+            c = db().rawQuery("SELECT raw, value, quality, updated_at, unit_code, code, name, unit, type FROM points WHERE site_id = ? ORDER BY rowid",
+                    new String[]{siteId});
+            while (c.moveToNext()) {
+                JSONObject o = json(c.getString(0));
+                if (o == null) o = new JSONObject();
+                o.put("value", c.getDouble(1));
+                o.put("v", c.getDouble(1));
+                o.put("quality", c.getString(2));
+                o.put("q", c.getString(2));
+                o.put("t", c.getString(3));
+                o.put("unitCode", c.getString(4));
+                o.put("code", c.getString(5));
+                o.put("name", c.getString(6));
+                o.put("unit", c.getString(7));
+                o.put("type", c.getString(8));
+                out.put(o);
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "读取点位列表失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return out;
+    }
+
+    /** 单个点位的最新读数（诊断用）。 */
+    public JSONObject pointReading(String siteId, String code) {
+        Cursor c = null;
+        try {
+            c = db().rawQuery("SELECT raw, value, quality, updated_at, unit, name FROM points WHERE site_id = ? AND code = ? LIMIT 1",
+                    new String[]{siteId, code});
+            if (c.moveToNext()) {
+                JSONObject o = json(c.getString(0));
+                if (o == null) o = new JSONObject();
+                o.put("code", code);
+                o.put("value", c.getDouble(1));
+                o.put("quality", c.getString(2));
+                o.put("updatedAt", c.getString(3));
+                o.put("unit", c.getString(4));
+                o.put("name", c.getString(5));
+                return o;
+            }
+        } catch (Exception e) {
+            Log.w(TAG, "读取点位读数失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return null;
+    }
+
+    public int pointCount(String siteId) {
+        Cursor c = null;
+        try {
+            c = db().rawQuery("SELECT COUNT(*) FROM points WHERE site_id = ?", new String[]{siteId});
+            if (c.moveToNext()) return c.getInt(0);
+        } catch (Exception e) {
+            Log.w(TAG, "统计点位失败：" + e.getMessage());
+        } finally {
+            closeQuietly(c);
+        }
+        return 0;
     }
 
     // ======================= 告警 =======================

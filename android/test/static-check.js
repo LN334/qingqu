@@ -123,6 +123,13 @@ const supported = (p) => {
   if (t === 'inspections' && seg.length === 2) return true;
   if (t === 'inspections' && seg.length === 3) return true;
   if (t === 'inspections' && seg.length === 4 && seg[3] === 'submit') return true;
+  if (t === 'points' && seg.length === 2) return true;
+  if (t === 'telemetry' && (seg[2] === 'latest' || seg[2] === 'history')) return true;
+  if (t === 'devices' && seg.length === 2) return true;
+  if (t === 'lab' && seg.length === 2) return true;
+  if (t === 'lab' && seg[2] === 'stats' && seg.length === 3) return true;
+  if (t === 'lab' && seg.length === 4 && seg[3] === 'review') return true;
+  if (t === 'diagnosis' && seg.length === 2) return true;
   return false;
 };
 
@@ -132,7 +139,8 @@ check('页面调用的 ' + apiCalls.length + ' 条路径 LocalApi 都能处理',
 
 // LocalApi 里也要真的出现这些动作字面量，避免 supported() 只是脚本的空想
 ['"ack"', '"submit"', '"me"', '"overview"', '"sites"', '"alarms"', '"workorders"',
-  '"inspections"', '"notifications"'].forEach((lit) => {
+  '"inspections"', '"notifications"', '"points"', '"telemetry"', '"devices"',
+  '"lab"', '"diagnosis"'].forEach((lit) => {
   check('LocalApi 含分支字面量 ' + lit, localApi.includes(lit));
 });
 // 工单动作在 LocalApi 里走 LocalCore 常量 → workorderAction，核对常量与调用都在
@@ -148,8 +156,8 @@ check('引擎使用 HandlerThread', /new HandlerThread\(/.test(localEngine));
 check('引擎持久化 last_tick', /"last_tick"/.test(localEngine));
 check('引擎写 notifications', /notifications/.test(localEngine));
 check('本地库从 assets/demo 导入', /"demo\/"\s*\+\s*name|getAssets\(\)\.open\("demo\//.test(localDb));
-check('Manifest versionCode=5', /android:versionCode="5"/.test(manifest));
-check('Manifest versionName=2.1.1', /android:versionName="2\.1\.1"/.test(manifest));
+check('Manifest versionCode=6', /android:versionCode="6"/.test(manifest));
+check('Manifest versionName=2.2.0', /android:versionName="2\.2\.0"/.test(manifest));
 check('规则含 5 分钟持续判定', /5 \* MINUTE/.test(localCore));
 
 console.log('STATIC-CHECK pass=' + pass + ' fail=' + fail);

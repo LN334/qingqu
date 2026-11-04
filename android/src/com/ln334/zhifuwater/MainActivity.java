@@ -31,12 +31,12 @@ public class MainActivity extends Activity {
     private final TextView[] tabLabels = new TextView[TAB_COUNT];
 
     private static final int[] TAB_GLYPHS = {
-            GlyphView.OVERVIEW, GlyphView.ALARM, GlyphView.WORKORDER,
-            GlyphView.INSPECT, GlyphView.USER
+            GlyphView.OVERVIEW, GlyphView.MONITOR, GlyphView.ALARM,
+            GlyphView.WORKORDER, GlyphView.MORE
     };
     private static final int[] TAB_TEXT = {
-            R.string.tab_overview, R.string.tab_alarms, R.string.tab_workorders,
-            R.string.tab_inspections, R.string.tab_profile
+            R.string.tab_overview, R.string.tab_monitor, R.string.tab_alarms,
+            R.string.tab_workorders, R.string.tab_more
     };
 
     private TextView siteNameView;
@@ -207,16 +207,16 @@ public class MainActivity extends Activity {
                     pages[index] = new OverviewPage(this);
                     break;
                 case 1:
-                    pages[index] = new AlarmsPage(this);
+                    pages[index] = new MonitorPage(this);
                     break;
                 case 2:
-                    pages[index] = new WorkordersPage(this);
+                    pages[index] = new AlarmsPage(this);
                     break;
                 case 3:
-                    pages[index] = new InspectionsPage(this);
+                    pages[index] = new WorkordersPage(this);
                     break;
                 default:
-                    pages[index] = new ProfilePage(this);
+                    pages[index] = new MorePage(this);
                     break;
             }
         }
@@ -426,7 +426,7 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == InspectionsPage.REQ_INSPECT) {
-            BasePage p = pages[3];
+            BasePage p = pages[4];
             if (p != null) {
                 p.invalidateData();
                 p.ensureLoaded();

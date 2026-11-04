@@ -75,6 +75,72 @@ public final class LocalApi {
                 }
                 return error("本机演示不支持的接口：" + path);
             }
+            if ("points".equals(type)) {
+                JSONArray list = store.pointList(siteId);
+                JSONObject meta = new JSONObject();
+                meta.put("total", list.length());
+                return ok(list, meta);
+            }
+            if ("telemetry".equals(type)) {
+                if (seg.length == 3 && "latest".equals(seg[2])) {
+                    JSONObject o = new JSONObject();
+                    o.put("siteId", siteId);
+                    o.put("at", LocalCore.iso(System.currentTimeMillis()));
+                    o.put("items", store.pointList(siteId));
+                    return ok(o);
+                }
+                if (seg.length == 3 && "history".equals(seg[2])) {
+                    String code = LocalCore.query(path, "code");
+                    if (LocalCore.isBlank(code)) return error("缺少 code 参数");
+                    int limit = 96;
+                    String lim = LocalCore.query(path, "limit");
+                    if (!LocalCore.isBlank(lim)) {
+                        try {
+                            limit = Integer.parseInt(lim);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                    JSONObject o = new JSONObject();
+                    o.put("siteId", siteId);
+                    o.put("code", code);
+                    o.put("points", store.telemetry(code, Math.max(2, Math.min(limit, 720))));
+                    return ok(o);
+                }
+                return error("本机演示不支持的接口：" + path);
+            }
+            if ("devices".equals(type)) {
+                JSONArray list = store.deviceList(siteId);
+                JSONObject meta = new JSONObject();
+                meta.put("total", list.length());
+                return ok(list, meta);
+            }
+            if ("lab".equals(type)) {
+                if (seg.length == 3 && "stats".equals(seg[2])) {
+                    int days = 30;
+                    String d = LocalCore.query(path, "days");
+                    if (!LocalCore.isBlank(d)) {
+                        try {
+                            days = Integer.parseInt(d);
+                        } catch (NumberFormatException ignored) {
+                        }
+                    }
+                    return ok(store.labStats(siteId, Math.max(1, Math.min(days, 90))));
+                }
+                if (seg.length == 4 && "review".equals(seg[3]) && post) {
+                    return ok(store.reviewLab(seg[2], reviewer(store)));
+                }
+                if (seg.length == 2) {
+                    String status = LocalCore.query(path, "status");
+                    JSONArray list = store.labList(siteId, status, 60);
+                    JSONObject meta = store.labCounts(siteId);
+                    return ok(list, meta);
+                }
+                return error("本机演示不支持的接口：" + path);
+            }
+            if ("diagnosis".equals(type)) {
+                if (seg.length == 2) return ok(Diagnosis.run(store, siteId));
+                return error("本机演示不支持的接口：" + path);
+            }
             if ("notifications".equals(type)) {
                 JSONArray list = store.notifications(30);
                 JSONObject meta = new JSONObject();
@@ -155,6 +221,14 @@ public final class LocalApi {
     }
 
     // ======================= 站点 =======================
+
+
+    private static String reviewer(LocalDb store) {
+        JSONObject me = store.metaJson(store.db(), "me");
+        if (me == null) return "值班员";
+        String name = me.optString("name");
+        return LocalCore.isBlank(name) ? "值班员" : name;
+    }
 
     private static String siteId(LocalDb store, String path) {
         String s = LocalCore.query(path, "siteId");

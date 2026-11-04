@@ -312,6 +312,21 @@ public final class U {
         return R.drawable.bg_chip_info;
     }
 
+    public static String deviceTypeName(String t) {
+        if (t == null) return "设备";
+        switch (t.toUpperCase(Locale.ROOT)) {
+            case "METER": return "仪表";
+            case "PUMP": return "泵";
+            case "BLOWER": return "风机";
+            case "VALVE": return "阀门";
+            case "DOSER": return "计量泵";
+            case "MIXER": return "搅拌机";
+            case "PLC": return "PLC";
+            case "GATEWAY": return "网关";
+            default: return "设备";
+        }
+    }
+
     public static String woTypeName(String t) {
         if ("repair".equals(t)) return "维修";
         if ("maintain".equals(t)) return "保养";

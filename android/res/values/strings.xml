@@ -12,10 +12,12 @@
     <string name="login_footer">平台演示账号 admin / water123</string>
 
     <string name="tab_overview">总览</string>
+    <string name="tab_monitor">监测</string>
     <string name="tab_alarms">告警</string>
     <string name="tab_workorders">工单</string>
     <string name="tab_inspections">巡检</string>
     <string name="tab_profile">我的</string>
+    <string name="tab_more">更多</string>
 
     <string name="btn_refresh">刷新</string>
     <string name="btn_retry">重新加载</string>
