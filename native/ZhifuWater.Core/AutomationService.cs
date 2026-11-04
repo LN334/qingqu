@@ -90,6 +90,16 @@ public sealed class AutomationService
             action: "command", command: "raw.pump.start",
             reason: "进水调节池液位回升且进水流量中断 1.5 分钟，自动启动提升泵");
 
+        yield return Rule("auto-raw-refill", "低液位自动补水", "pump", "raw",
+            new[] { Cond("RAW.LVL", "<=", 32) }, holdSec: 20, cooldownSec: 600, maxPerDay: 8,
+            action: "command", command: "raw.refill.start",
+            reason: "进水调节池液位低于 32%，自动开启补水阀");
+
+        yield return Rule("auto-raw-refill-stop", "高液位自动停补水", "pump", "raw",
+            new[] { Cond("RAW.LVL", ">=", 56) }, holdSec: 20, cooldownSec: 600, maxPerDay: 8,
+            action: "command", command: "raw.refill.stop",
+            reason: "进水调节池液位高于 56%，自动关闭补水阀");
+
         yield return Rule("auto-pac-stop", "PAC 药箱低液位自动停加药", "dosing", "pac",
             new[] { Cond("PAC.LEVEL", "<=", 12) }, holdSec: 60, cooldownSec: 3600, maxPerDay: 2,
             action: "command", command: "pac.dose.set", args: new JsonObject { ["value"] = 0 },

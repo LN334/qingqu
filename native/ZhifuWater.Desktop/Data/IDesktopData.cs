@@ -41,6 +41,7 @@ public interface IDesktopData
     // ---------- 单元 / 点位 / 读数 ----------
     IReadOnlyList<UnitInfo> Units { get; }
     IReadOnlyList<UnitSnapshot> UnitSnapshots();
+    bool RawRefill();
     IReadOnlyList<PointDef> Points { get; }
     IReadOnlyList<Reading> Readings { get; }
     Reading? ReadingOf(string code);

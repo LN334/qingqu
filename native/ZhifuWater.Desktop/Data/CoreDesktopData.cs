@@ -339,6 +339,8 @@ public sealed class CoreDesktopData : IDesktopData
 
     /* ================= 工艺单元 / 趋势 ================= */
 
+    public bool RawRefill() => _core.Simulator.StateOf(_siteId)?.Raw.Refill ?? false;
+
     public IReadOnlyList<UnitSnapshot> UnitSnapshots()
     {
         if (_user is null) return new List<UnitSnapshot>();

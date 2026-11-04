@@ -93,7 +93,7 @@ public sealed class ProcessPage : PageBase
     protected override void RefreshData()
     {
         var snapshots = Svc.Data.UnitSnapshots();
-        _canvas.SetData(snapshots, Svc.Data.Units);
+        _canvas.SetData(snapshots, Svc.Data.Units, Svc.Data.RawRefill());
         _canvas.SelectedCode = _selected;
 
         var counts = new Dictionary<string, int>();

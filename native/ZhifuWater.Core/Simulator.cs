@@ -256,6 +256,14 @@ public sealed class Simulator
         Log?.Invoke($"[sim] 已回填 30 天历史（{J.ObjsIn(Db, "points").Count} 个点位）");
     }
 
+    /// <summary>把解析曲线在最近 windowMin 分钟内平滑过渡到实际状态，避免曲线末端跳变。</summary>
+    private static double BlendToCurrent(double hist, double current, double agoMin, double windowMin)
+    {
+        if (agoMin >= windowMin) return hist;
+        double w = Math.Max(0, agoMin) / windowMin;
+        return hist * w + current * (1 - w);
+    }
+
     /// <summary>历史曲线：以当前状态为锚的解析序列，事件窗口用于让种子告警在曲线上可解释。</summary>
     public double HistValue(string code, long t, long now, SiteState st, Mulberry32 rand)
     {
@@ -265,12 +273,21 @@ public sealed class Simulator
         {
             case "RAW.LVL":
             {
-                double baseV = 46 + 14 * Math.Sin((t / 36000000.0) * Math.PI * 2 - 1.15)
-                               + 5 * Math.Sin((t / 86400000.0) * Math.PI * 2);
-                if (ago < 120) return JsMath.Round(22.6 + (ago / 120) * 21.4 + noise * 0.4, 1);
-                return JsMath.Round(JsMath.Clamp(baseV + noise * 2, 15, 92), 1);
+                // 调节池：提升泵开 62%→28% 排空（约 70 分钟），泵停后进水回填 28%→62%（约 25 分钟）
+                double period = 240 * 60000.0;
+                double phase = ((t % period) + period) % period / period;
+                double cycle = phase < 0.62
+                    ? 64 - 36 * (phase / 0.62)
+                    : 28 + 36 * ((phase - 0.62) / 0.38);
+                double v = JsMath.Clamp(cycle + noise * 1.0, 21, 70);
+                return JsMath.Round(BlendToCurrent(v, st.Raw.Level, ago, 25), 1);
             }
-            case "RAW.PUMP.RUN": return ago < 18 ? 0 : 1;
+            case "RAW.PUMP.RUN":
+            {
+                double period = 240 * 60000.0;
+                double phase = ((t % period) + period) % period / period;
+                return phase < 0.62 ? 1 : 0;
+            }
             case "RAW.PUMP.FAULT": return 0;
             case "RAW.PUMP.MODE": return 0;
             case "RAW.PUMP.HOURS": return JsMath.Round(st.Raw.Hours - (ago / 60) * 0.18, 1);
@@ -280,8 +297,11 @@ public sealed class Simulator
                 if (ago < 25) return JsMath.Round(7.05 + (25 - ago) * 0.0028 + noise * 0.01, 2);
                 return JsMath.Round(7.15 + 0.08 * Math.Sin((t / 28000000.0) * Math.PI * 2) + noise * 0.04, 2);
             case "BAF.DO":
-                if (ago < 12) return JsMath.Round(1.78 + (12 - ago) * 0.1, 2);
-                return JsMath.Round(JsMath.Clamp(3.0 + 0.3 * Math.Sin((t / 14400000.0) * Math.PI * 2) + noise * 0.15, 1.4, 6.4), 2);
+            {
+                // 曝气生物滤池溶解氧：随曝气周期在 2.0–3.0 缓变，末端与实际状态衔接
+                double v = 2.45 + 0.42 * Math.Sin((t / 10800000.0) * Math.PI * 2) + noise * 0.12;
+                return JsMath.Round(BlendToCurrent(JsMath.Clamp(v, 1.7, 3.3), st.Baf.Do, ago, 25), 2);
+            }
             case "BAF.BLOWER.RUN": return ago < 52 * 60 && ago > 50 * 60 ? 0 : 1;
             case "BAF.BLOWER.CURRENT": return JsMath.Round(1.62 + noise * 0.06, 2);
             case "BAF.BW.STATE":
@@ -313,8 +333,8 @@ public sealed class Simulator
             case "SULFUR.BW.STATE": return 0;
             case "SULFUR.BW.COUNT": return st.Sulfur.BwCount;
             case "SULFUR.DP": return JsMath.Round(16.4 + noise * 0.8, 1);
-            case "CLEAR.LVL": return JsMath.Round(JsMath.Clamp(58 + 6 * Math.Sin((t / 20000000.0) * Math.PI * 2) + noise * 2, 20, 95), 1);
-            case "WASTE.LVL": return JsMath.Round(JsMath.Clamp(40 + 18 * Math.Sin((t / 18000000.0) * Math.PI * 2) + noise * 3, 8, 80), 1);
+            case "CLEAR.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(58 + 6 * Math.Sin((t / 20000000.0) * Math.PI * 2) + noise * 2, 20, 95), st.ClearLevel, ago, 30), 1);
+            case "WASTE.LVL": return JsMath.Round(BlendToCurrent(JsMath.Clamp(40 + 18 * Math.Sin((t / 18000000.0) * Math.PI * 2) + noise * 3, 8, 80), st.WasteLevel, ago, 30), 1);
             case "POWER.KW": return JsMath.Round(JsMath.Clamp(1.3 + 0.18 * Math.Sin((t / 16000000.0) * Math.PI * 2) + noise * 0.05, 0.9, 1.8), 2);
             case "ENERGY.KWH": return JsMath.Round(st.PowerKwh - (ago / 60) * 1.38, 1);
             default: return 0;
@@ -444,17 +464,23 @@ public sealed class Simulator
         // —— 进水调节池与提升泵 ——
         var r = s.Raw;
         bool wasRun = r.PumpRun;
-        if (r.PumpRun) r.Level -= 0.012 * dt;
-        // 补水阀：低液位自动补水，到 70% 关闭
-        if (r.Level < 25) r.Refill = true;
-        if (r.Refill && r.Level >= 70) r.Refill = false;
-        if (r.Refill && !r.PumpRun) r.Level += 0.03 * dt;
-        if (r.Level <= 20 && r.PumpRun)
+        // 连续进水：来水一直进调节池，泵与补水阀决定液位方向
+        r.Level += 0.006 * dt;
+        if (r.PumpRun) r.Level -= 0.050 * dt;
+        if (r.Refill) r.Level += 0.060 * dt;
+        // 补水阀滞环：低液位开、高液位关（自动化规则也会下发同名命令，写执行记录）
+        if (r.Level <= 32) r.Refill = true;
+        if (r.Refill && r.Level >= 64) r.Refill = false;
+        if (r.Level <= 28 && r.PumpRun)
         {
             r.PumpRun = false;
             r.Trip = now;
         }
-        if (!r.PumpRun && !r.Refill && r.Level >= 30 && r.PumpMode == 0 && !r.Fault) r.PumpRun = true;
+        if (!r.PumpRun && r.Level >= 58 && r.PumpMode == 0 && !r.Fault)
+        {
+            r.PumpRun = true;
+            r.Refill = false;
+        }
         r.Level = JsMath.Clamp(r.Level, 0, 100);
         if (r.PumpRun) r.Hours += dt / 3600;
         if (!wasRun && r.PumpRun) r.Starts++;
@@ -594,6 +620,11 @@ public sealed class Simulator
                 return Ok();
             case "raw.pump.stop":
                 return Ok();
+            case "raw.refill.start":
+                if (s.Raw.Level >= 92) return Fail("进水调节池液位已超过 92%，禁止开启补水阀");
+                return Ok();
+            case "raw.refill.stop":
+                return Ok();
             case "raw.pump.mode.set":
             {
                 var mode = J.Num(args, "mode");
@@ -647,6 +678,8 @@ public sealed class Simulator
         {
             case "raw.pump.start": s.Raw.PumpRun = true; break;
             case "raw.pump.stop": s.Raw.PumpRun = false; break;
+            case "raw.refill.start": s.Raw.Refill = true; break;
+            case "raw.refill.stop": s.Raw.Refill = false; break;
             case "raw.pump.mode.set": s.Raw.PumpMode = (int)(J.Num(args, "mode") ?? 0); break;
             case "baf.blower.start": s.Baf.Blower = true; break;
             case "baf.blower.stop": s.Baf.Blower = false; break;

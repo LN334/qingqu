@@ -31,6 +31,7 @@ public sealed class ProcessCanvas : FrameworkElement
     private string _hover = "";
 
     public string SelectedCode { get; set; } = "";
+    public bool RawRefill { get; set; }
     public event Action<string>? UnitSelected;
 
     public ProcessCanvas()
@@ -52,8 +53,9 @@ public sealed class ProcessCanvas : FrameworkElement
         };
     }
 
-    public void SetData(IReadOnlyList<UnitSnapshot> snapshots, IReadOnlyList<UnitInfo> units)
+    public void SetData(IReadOnlyList<UnitSnapshot> snapshots, IReadOnlyList<UnitInfo> units, bool rawRefill = false)
     {
+        RawRefill = rawRefill;
         _snapshots = snapshots;
         Units = units;
         InvalidateVisual();
@@ -254,6 +256,13 @@ public sealed class ProcessCanvas : FrameworkElement
         var value = FirstReading(s);
         ChartDraw.Draw(this, dc, value, new Point(rect.X + rect.Width / 2, rect.Bottom + 7), 10.5,
             Muted, TextAlignment.Center, rect.Width + 22);
+        if (unit.Code == "raw")
+        {
+            var pump = s?.Readings.FirstOrDefault(r => r.Code == "RAW.PUMP.RUN")?.Value is double pv && pv > 0.5;
+            var txt = (RawRefill ? "补水 开" : "补水 关") + " · " + (pump ? "提升泵 运行" : "提升泵 停");
+            ChartDraw.Draw(this, dc, txt, new Point(rect.X + rect.Width / 2, rect.Bottom + 22), 9,
+                RawRefill ? PipeFlow : Muted2, TextAlignment.Center, rect.Width + 30);
+        }
 
         DrawStateDot(dc, new Point(rect.Right - 7, rect.Y + 9), tone, state);
         if (s != null && !string.IsNullOrEmpty(s.BwPhase))

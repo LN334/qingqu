@@ -217,6 +217,8 @@ public sealed partial class DemoDesktopData : IDesktopData
     // ---------------- 单元 / 点位 ----------------
     public IReadOnlyList<UnitInfo> Units => DemoCatalog.Units();
 
+    public bool RawRefill() => false;
+
     public IReadOnlyList<UnitSnapshot> UnitSnapshots()
     {
         var rt = Rt;

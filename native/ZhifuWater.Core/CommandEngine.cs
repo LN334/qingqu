@@ -15,6 +15,8 @@ public sealed partial class CommandEngine
         ["raw.pump.start"] = new("启动进水调节池提升泵", "raw-pump", "medium", 1600, "提升泵启动"),
         ["raw.pump.stop"] = new("停止进水调节池提升泵", "raw-pump", "medium", 1200, "提升泵停止"),
         ["raw.pump.mode.set"] = new("切换提升泵运行模式", "raw-pump", "high", 1000, "运行模式切换"),
+        ["raw.refill.start"] = new("开启进水调节池补水阀", "raw-refill", "medium", 1000, "补水阀开启"),
+        ["raw.refill.stop"] = new("关闭进水调节池补水阀", "raw-refill", "medium", 1000, "补水阀关闭"),
         ["baf.blower.start"] = new("启动 预氧化曝气风机", "baf-blower", "medium", 1500, "曝气风机启动"),
         ["baf.blower.stop"] = new("停止 预氧化曝气风机", "baf-blower", "high", 1500, "曝气风机停止"),
         ["baf.backwash.start"] = new("启动 固液分离反冲", "baf-bw-pump", "high", 2500, "固液分离反冲启动"),
