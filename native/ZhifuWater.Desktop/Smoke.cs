@@ -44,7 +44,11 @@ public static class Smoke
             if (mainMs > 3000) throw new TimeoutException("主窗构造耗时 " + mainMs + " ms，超过 3 秒阈值");
             SmokeConsole.WriteLine($"  [2/4] 主窗构造 OK ({mainMs} ms) · 导航 15 项 · 默认 {main.Width}×{main.Height}");
             if (shots && main.Content is FrameworkElement mc)
-                CaptureElement(mc, 1440, 900, Path.Combine(shotDir, "main.png"));
+            {
+                var mw = int.TryParse(Environment.GetEnvironmentVariable("SHOT_W"), out var shotW) ? shotW : 1440;
+                var mh = int.TryParse(Environment.GetEnvironmentVariable("SHOT_H"), out var sh) ? sh : 900;
+                CaptureElement(mc, mw, mh, Path.Combine(shotDir, "main.png"));
+            }
 
             var pages = main.SmokeExercisePages(shots ? shotDir : null);
             SmokeConsole.WriteLine($"  [3/4] 页面静态构建 OK · 14 页 + 触摸屏（Measure/Arrange/UpdateLayout）");
