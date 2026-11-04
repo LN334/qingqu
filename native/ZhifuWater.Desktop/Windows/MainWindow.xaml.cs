@@ -115,7 +115,7 @@ public partial class MainWindow : Window
         SidebarVersion.Text = "v" + UpdateService.CurrentVersionText;
         CheckUpdateMenu.Content = "检查更新（v" + UpdateService.CurrentVersionText + "）";
         Closed += OnClosed;
-        Loaded += (_, _) => ScheduleStartupUpdateCheck();
+        Loaded += (_, _) => { UpdateBadges(); WatchAssignments(); ScheduleStartupUpdateCheck(); };
     }
 
     private void OnToastRequested(string message, bool ok) => Toast(message, ok);
@@ -445,27 +445,25 @@ public partial class MainWindow : Window
 
     private readonly HashSet<string> _seenNotifications = new();
     private bool _assignmentToastSeeded;
-    private DispatcherTimer? _assignmentToastTimer;
-    private NotificationInfo? _assignmentToastItem;
 
     private void WatchAssignments()
     {
+        if (!IsLoaded) return;
         try
         {
             var unread = _services.Data.Notifications.Where(n => !n.Read).ToList();
             var fresh = unread.Where(n => !_seenNotifications.Contains(n.Id)).ToList();
             foreach (var n in unread) _seenNotifications.Add(n.Id);
+            var orders = unread.Where(n => n.Kind == "workorder").ToList();
 
             if (!_assignmentToastSeeded)
             {
                 _assignmentToastSeeded = true;
-                var first = unread.FirstOrDefault(n => n.Kind == "workorder");
-                if (first != null) ShowAssignmentToast(first);
+                if (orders.Count > 0) ShowAssignmentDialog(orders);
                 return;
             }
 
-            var item = fresh.LastOrDefault(n => n.Kind == "workorder");
-            if (item != null) ShowAssignmentToast(item);
+            if (fresh.Any(n => n.Kind == "workorder") && orders.Count > 0) ShowAssignmentDialog(orders);
         }
         catch
         {
@@ -473,36 +471,59 @@ public partial class MainWindow : Window
         }
     }
 
-    private void ShowAssignmentToast(NotificationInfo n)
+    private void ShowAssignmentDialog(IReadOnlyList<NotificationInfo> orders)
     {
-        _assignmentToastItem = n;
-        AssignmentTitle.Text = n.Title;
-        AssignmentBody.Text = n.Body;
-        AssignmentToast.Visibility = Visibility.Visible;
-        _assignmentToastTimer?.Stop();
-        _assignmentToastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(9) };
-        _assignmentToastTimer.Tick += (_, _) =>
+        if (orders.Count == 0) return;
+        FlashTaskbar();
+        var dlg = new AssignmentDialog(this, orders[orders.Count - 1], orders.Count) { Owner = this };
+        if (dlg.ShowDialog() == true)
         {
-            _assignmentToastTimer?.Stop();
-            AssignmentToast.Visibility = Visibility.Collapsed;
-        };
-        _assignmentToastTimer.Start();
+            _services.Data.MarkNotificationRead(orders[orders.Count - 1].Id);
+            UpdateBadges();
+            ShowPage("workorders");
+        }
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool FlashWindowEx(ref FLASHWINFO pwfi);
+
+    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+    private struct FLASHWINFO
+    {
+        public uint cbSize;
+        public IntPtr hwnd;
+        public uint dwFlags;
+        public uint uCount;
+        public uint dwTimeout;
+    }
+
+    private void FlashTaskbar()
+    {
+        try
+        {
+            var handle = new System.Windows.Interop.WindowInteropHelper(this).Handle;
+            if (handle == IntPtr.Zero) return;
+            var info = new FLASHWINFO
+            {
+                cbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<FLASHWINFO>(),
+                hwnd = handle,
+                dwFlags = 0x00000003 | 0x0000000C,
+                uCount = 4,
+                dwTimeout = 0,
+            };
+            FlashWindowEx(ref info);
+        }
+        catch { }
     }
 
     private void OnAssignmentToastClose(object sender, RoutedEventArgs e)
     {
-        _assignmentToastTimer?.Stop();
         AssignmentToast.Visibility = Visibility.Collapsed;
     }
 
     private void OnAssignmentToastView(object sender, RoutedEventArgs e)
     {
-        var n = _assignmentToastItem;
-        _assignmentToastTimer?.Stop();
         AssignmentToast.Visibility = Visibility.Collapsed;
-        if (n == null) return;
-        _services.Data.MarkNotificationRead(n.Id);
-        UpdateBadges();
         ShowPage("workorders");
     }
 

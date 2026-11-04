@@ -92,6 +92,40 @@ public partial class App : Application
             return;
         }
 
+        var assignmentDemo = e.Args.Any(a => string.Equals(a, "--assignment-demo", StringComparison.OrdinalIgnoreCase));
+        if (assignmentDemo)
+        {
+            var demoItem = new Data.NotificationInfo
+            {
+                Id = "NT-DEMO",
+                Kind = "workorder",
+                Title = "工单已指派：BAF 曝气风机电流偏高排查",
+                Body = "高优先级 · 截止 11-04 21:30",
+            };
+            var dlg = new Windows.AssignmentDialog(null, demoItem, 2);
+            var shot = e.Args.FirstOrDefault(a => a.StartsWith("--shot=", StringComparison.OrdinalIgnoreCase));
+            if (shot == null)
+            {
+                dlg.ShowDialog();
+            }
+            else
+            {
+                dlg.Show();
+                var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(900) };
+                timer.Tick += (_, _) =>
+                {
+                    timer.Stop();
+                    try { Smoke.CaptureElement(dlg, (int)dlg.ActualWidth, (int)dlg.ActualHeight, shot.Substring("--shot=".Length)); }
+                    catch { }
+                    dlg.Close();
+                    Shutdown(0);
+                };
+                timer.Start();
+            }
+            if (shot == null) Shutdown(0);
+            return;
+        }
+
         if (smoke || shots)
         {
             var code = Smoke.Run(Services, shots);

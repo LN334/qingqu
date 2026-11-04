@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using ZhifuWater.Desktop.Data;
 using ZhifuWater.Desktop.Ui;
+using ZhifuWater.Desktop.Windows;
 
 namespace ZhifuWater.Desktop.Pages;
 
@@ -12,7 +13,7 @@ public sealed class WorkOrdersPage : PageBase
 {
     private UiTable _table = null!;
     private StackPanel _emptyPanel = null!;
-    private StackPanel _detail = null!;
+    private bool _suppressOpen;
     private TextBlock _info = null!;
     private WorkOrderInfo? _selected;
     private string _filter = "all";
@@ -59,19 +60,17 @@ public sealed class WorkOrdersPage : PageBase
         root.Children.Add(Kit.Card(null, head, null, null, new Thickness(12, 9, 12, 9)));
 
         var grid = new Grid { Margin = new Thickness(0, 10, 0, 0) };
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(2.05, GridUnitType.Star) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
-        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
         _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "负责人", "创建时间" },
             new double[] { 150, 0, 54, 58, 66, 64, 94 });
         _table.MinHeight = 520;
         _table.SelectionChanged += (_, _) =>
         {
+            if (_suppressOpen) return;
             if (_table.SelectedItem is UiRow row && row.Data is WorkOrderInfo wo)
             {
                 _selected = wo;
-                ShowDetail();
+                OpenDetail(wo);
             }
         };
         var tableHost = new Grid();
@@ -88,15 +87,7 @@ public sealed class WorkOrdersPage : PageBase
         var tableCard = Kit.Card("工单列表", tableHost,
             Kit.Btn("新建工单", CreateOrder, primary: true, small: true), null, new Thickness(10, 8, 10, 8));
 
-        _detail = new StackPanel();
-        var detailScroll = Kit.Scroll(_detail, 12);
-        detailScroll.MinHeight = 540;
-        var detailCard = Kit.Card("工单详情", detailScroll, null, null, new Thickness(10, 8, 10, 8));
-
-        Grid.SetColumn(tableCard, 0);
-        Grid.SetColumn(detailCard, 2);
         grid.Children.Add(tableCard);
-        grid.Children.Add(detailCard);
         root.Children.Add(grid);
         Install(Kit.Scroll(root));
     }
@@ -138,52 +129,61 @@ public sealed class WorkOrdersPage : PageBase
                 emptyText.Text = _filter == "open" ? "暂无待处理工单" : "没有符合条件的工单";
         }
         _selected = all.FirstOrDefault(w => w.Id == keep) ?? all.FirstOrDefault();
+        _suppressOpen = true;
         _table.SelectedItem = rows.FirstOrDefault(r => r.Data == _selected) ?? rows.FirstOrDefault();
-        ShowDetail();
+        _suppressOpen = false;
+        if (Environment.GetCommandLineArgs().Contains("--wo-demo") && _selected != null) OpenDetail(_selected);
     }
 
-    private void ShowDetail()
+    private void ShowDetail(StackPanel host, System.Action? close = null)
     {
-        if (_detail == null) return;
-        _detail.Children.Clear();
+        var target = host;
+        target.Children.Clear();
         if (_selected == null)
         {
-            _detail.Children.Add(Kit.T("选择左侧工单查看详情", 11, Pal.Muted2));
+            target.Children.Add(Kit.T("选择左侧工单查看详情", 11, Pal.Muted2));
             return;
         }
         var w = _selected;
-        _detail.Children.Add(Kit.Row(7, Kit.T(w.Title, 13, Pal.Ink, bold: true), Kit.Badge(Pal.WorkOrderStatusText(w.Status), Pal.WorkOrderStatusTone(w.Status))));
-        _detail.Children.Add(Kit.T(w.Id + " · " + Pal.WorkOrderTypeText(w.Type) + " · 优先级 " + Pal.WorkOrderPriorityText(w.Priority), 10, Pal.Muted2));
+        target.Children.Add(Kit.Row(7, Kit.T(w.Title, 13, Pal.Ink, bold: true), Kit.Badge(Pal.WorkOrderStatusText(w.Status), Pal.WorkOrderStatusTone(w.Status))));
+        target.Children.Add(Kit.T(w.Id + " · " + Pal.WorkOrderTypeText(w.Type) + " · 优先级 " + Pal.WorkOrderPriorityText(w.Priority), 10, Pal.Muted2));
         var meta = Kit.T($"单元 {w.UnitName} · 设备 {w.DeviceName}\n负责人 {w.Assignee} · 创建人 {w.Creator} · 来源 {Pal.WorkOrderSourceText(w.Source)}",
             11, Pal.Muted, wrap: TextWrapping.Wrap);
         meta.Margin = new Thickness(0, 4, 0, 4);
-        _detail.Children.Add(meta);
-        _detail.Children.Add(Kit.T("故障描述", 11, Pal.Muted2, bold: true));
-        _detail.Children.Add(Kit.T(w.Desc, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
+        target.Children.Add(meta);
+        target.Children.Add(Kit.T("故障描述", 11, Pal.Muted2, bold: true));
+        target.Children.Add(Kit.T(w.Desc, 11, Pal.Ink2, wrap: TextWrapping.Wrap));
         if (!string.IsNullOrEmpty(w.Result))
         {
-            _detail.Children.Add(Kit.T("处理结果", 11, Pal.Muted2, bold: true));
-            _detail.Children.Add(Kit.T(w.Result, 11, Pal.Good, wrap: TextWrapping.Wrap));
+            target.Children.Add(Kit.T("处理结果", 11, Pal.Muted2, bold: true));
+            target.Children.Add(Kit.T(w.Result, 11, Pal.Good, wrap: TextWrapping.Wrap));
         }
-        _detail.Children.Add(Kit.T($"时限 {Kit.FormatTimeFull(w.DueAt ?? 0)} · 完成 {Kit.FormatTimeFull(w.DoneAt ?? 0)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
+        target.Children.Add(Kit.T($"时限 {Kit.FormatTimeFull(w.DueAt ?? 0)} · 完成 {Kit.FormatTimeFull(w.DoneAt ?? 0)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
 
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 4) };
-        if (w.Status is "pending" or "accepted" or "processing") actions.Children.Add(ActionButton("派发", () => Assign(w)));
-        if (w.Status == "pending") actions.Children.Add(ActionButton("接单", () => Advance(w, "accept", null)));
-        if (w.Status == "accepted") actions.Children.Add(ActionButton("开始处理", () => Advance(w, "process", false)));
-        if (w.Status is "accepted" or "processing") actions.Children.Add(ActionButton("完成", () => Advance(w, "done", true)));
-        if (w.Status == "done") actions.Children.Add(ActionButton("验收关闭", () => Advance(w, "close", null)));
+        if (w.Status is "pending" or "accepted" or "processing") actions.Children.Add(ActionButton("派发", () => { Assign(w); close?.Invoke(); }));
+        if (w.Status == "pending") actions.Children.Add(ActionButton("接单", () => { Advance(w, "accept", null); close?.Invoke(); }));
+        if (w.Status == "accepted") actions.Children.Add(ActionButton("开始处理", () => { Advance(w, "process", false); close?.Invoke(); }));
+        if (w.Status is "accepted" or "processing") actions.Children.Add(ActionButton("完成", () => { Advance(w, "done", true); close?.Invoke(); }));
+        if (w.Status == "done") actions.Children.Add(ActionButton("验收关闭", () => { Advance(w, "close", null); close?.Invoke(); }));
         if (actions.Children.Count == 0) actions.Children.Add(Kit.T("该工单已结束，无可用操作", 10, Pal.Muted2));
         foreach (UIElement child in actions.Children) ((FrameworkElement)child).Margin = new Thickness(0, 0, 5, 4);
-        _detail.Children.Add(actions);
+        target.Children.Add(actions);
 
-        _detail.Children.Add(Kit.Divider(4, 4));
-        _detail.Children.Add(Kit.T("处理时间线", 11, Pal.Ink, bold: true));
+        target.Children.Add(Kit.Divider(4, 4));
+        target.Children.Add(Kit.T("处理时间线", 11, Pal.Ink, bold: true));
         foreach (var entry in w.Timeline.OrderBy(t => t.At))
         {
-            _detail.Children.Add(Kit.T($"· {Kit.FormatTime(entry.At)}  {entry.Actor}  {entry.Text}", 11, Pal.Muted, wrap: TextWrapping.Wrap));
+            target.Children.Add(Kit.T($"· {Kit.FormatTime(entry.At)}  {entry.Actor}  {entry.Text}", 11, Pal.Muted, wrap: TextWrapping.Wrap));
         }
-        if (w.Timeline.Count == 0) _detail.Children.Add(Kit.T("暂无处理记录", 11, Pal.Muted2));
+        if (w.Timeline.Count == 0) target.Children.Add(Kit.T("暂无处理记录", 11, Pal.Muted2));
+    }
+
+    private void OpenDetail(WorkOrderInfo wo)
+    {
+        var dlg = new DetailDialog(Host, "工单详情");
+        ShowDetail(dlg.Body, dlg.Close);
+        dlg.ShowDialog();
     }
 
     private Button ActionButton(string text, Action click)
