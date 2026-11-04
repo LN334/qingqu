@@ -30,7 +30,7 @@
 >
 > 全部版本与 SHA256 见 [Releases · v2.0.13](https://github.com/LN334/qingqu/releases/tag/v2.0.13)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
-**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面端的程序集、安装包版本需与平台发布版本保持一致。Android 与 Windows 使用同一版本号，APK 版本以 `android/AndroidManifest.xml` 为准；当前版本为 **2.0.13（versionCode 8）**。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
+**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面端的程序集、安装包版本需与平台发布版本保持一致。Android 与 Windows 使用同一版本号，APK 版本以 `android/AndroidManifest.xml` 为准；当前版本为 **2.0.13（versionCode 9）**。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
 
 **发布范围：** Releases 只提供 Windows 桌面版与 Android APK 两个可安装产物；Web 端以源码方式提供，不含托管服务。desktop/ 的 Electron 遗留壳与 _preview/、native/publish* 等构建产物不发布、不入库。当前版本 2.0.13（2026-11-04）。
 
