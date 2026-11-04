@@ -160,7 +160,26 @@ public partial class App : Application
         }
 
         ShortcutGuard.EnsureOnStartup();
+        if (TryAutoLogin()) return;
         ShowLogin();
+    }
+
+    /// <summary>勾了「记住密码」就直接进主界面：更新安装完自动重开时不必再点一次登录。</summary>
+    private static bool TryAutoLogin()
+    {
+        var saved = CredentialStore.Load();
+        if (saved is null) return false;
+        var r = Services.Data.Login(saved.Account, saved.Password);
+        if (!r.Ok || Services.Data.CurrentUser is not { } user)
+        {
+            // 账号或密码已变，清掉旧的，回到手填
+            CredentialStore.Clear();
+            return false;
+        }
+        var main = new Windows.MainWindow(Services, user);
+        Current.MainWindow = main;
+        main.Show();
+        return true;
     }
 
     /// <summary>显示登录窗；登录成功后由本方法创建主窗。</summary>
@@ -180,5 +199,11 @@ public partial class App : Application
         };
         Current.MainWindow = login;
         login.Show();
+    }
+
+    protected override void OnExit(ExitEventArgs e)
+    {
+        TrayIcon.Dispose();
+        base.OnExit(e);
     }
 }

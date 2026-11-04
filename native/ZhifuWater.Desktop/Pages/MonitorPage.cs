@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -41,8 +41,8 @@ public sealed class MonitorPage : PageBase
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.15, GridUnitType.Star) });
 
-        _table = Table(new[] { "点位", "名称", "单元", "当前值", "质量", "更新" },
-            new double[] { 150, 0, 52, 86, 46, 74 });
+        _table = Table(new[] { "点位", "名称", "单元", "当前值", "质量", "状态", "更新" },
+            new double[] { 150, 0, 52, 86, 46, 52, 74 });
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is Reading r)
@@ -100,6 +100,10 @@ public sealed class MonitorPage : PageBase
         _liveInfo.Text = $"点位 {readings.Count} 个 · 正常 {online} 个 · 采集于 {Svc.Data.LastUpdated:HH:mm:ss}";
 
         var selectedCode = _selected;
+        // 与告警中心对齐：该点位存在未恢复告警时，状态列显示「告警」而不是「正常」
+        var alarmPoints = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var a in Svc.Data.Alarms("open"))
+            if (!string.IsNullOrEmpty(a.DeviceName)) alarmPoints.Add(a.DeviceName);
         var unitNames = Svc.Data.Units.GroupBy(u => u.Code).ToDictionary(g => g.Key, g => g.First().Short.Length > 0 ? g.First().Short : g.First().Name);
         var rows = readings.Select(r => new UiRow
         {
@@ -110,6 +114,7 @@ public sealed class MonitorPage : PageBase
                 unitNames.TryGetValue(r.UnitCode, out var unitName) ? unitName : r.UnitCode,
                 ValueOf(r),
                 r.Stale ? "超时" : r.Quality == "good" ? "正常" : r.Quality,
+                alarmPoints.Contains(r.Name) ? "告警" : "正常",
                 Kit.FormatClock(r.T),
             },
             Fgs = new[]
@@ -119,6 +124,7 @@ public sealed class MonitorPage : PageBase
                 Pal.Muted,
                 r.Quality == "good" ? Pal.Ink : Pal.Warn,
                 r.Quality == "good" ? Pal.Good : Pal.Warn,
+                alarmPoints.Contains(r.Name) ? Pal.Bad : Pal.Good,
                 Pal.Muted2,
             },
             Data = r,

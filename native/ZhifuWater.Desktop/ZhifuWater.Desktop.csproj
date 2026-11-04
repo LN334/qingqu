@@ -3,6 +3,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- 托盘图标用 WinForms 的 NotifyIcon；下面移除它的全局 using，避免和 WPF 的 Application/MessageBox 撞名。 -->
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Qingqu</AssemblyName>
@@ -17,6 +19,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZhifuWater.Core\ZhifuWater.Core.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <!-- 首次运行的数据快照（安装包与开发输出都带上，Core 会复制到 %LOCALAPPDATA%\ZhifuWater）。 -->

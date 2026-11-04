@@ -217,7 +217,7 @@ public sealed class DashboardPage : PageBase
     private UIElement BuildDeviceCard()
     {
         _deviceTable = Table(new[] { "设备", "单元", "健康", "状态" }, new double[] { 0, 92, 78, 58 },
-            row => Host.ShowPage("devices"));
+            row => Host.ShowPage("devices", row.Key));
         _deviceSummary = Kit.T("", 10, Pal.Muted2);
         return Kit.Card("设备健康", _deviceTable,
             Kit.Row(8, _deviceSummary, Kit.Link("设备台账", () => Host.ShowPage("devices"))),
@@ -291,19 +291,24 @@ public sealed class DashboardPage : PageBase
             stack.Children.Add(stateRow);
             box.Child = stack;
             box.Margin = new Thickness(0, 0, 3, 0);
-            box.MouseLeftButtonUp += (_, _) => Host.ShowPage("process");
+            box.MouseLeftButtonUp += (_, _) => Host.ShowPage("process", unit.Code);
             _chainPanel.Children.Add(box);
         }
 
         RefreshTrend();
 
         _diagPanel.Children.Clear();
-        var diagnoses = Svc.Data.Diagnoses.Where(d => d.Level != "ok").Take(3).ToList();
+        var diagAll = Svc.Data.Diagnoses.Where(d => d.Level != "ok").ToList();
+        var diagnoses = diagAll.Take(3).ToList();
         if (diagnoses.Count == 0) diagnoses = Svc.Data.Diagnoses.Take(2).ToList();
         foreach (var d in diagnoses)
         {
             _diagPanel.Children.Add(BuildDiagnosisRow(d));
         }
+        // 家页只放最要紧的 3 条，其余条数明确写出来，避免「诊断 4 项但首页只看到 3 条」的错觉
+        if (diagAll.Count > diagnoses.Count)
+            _diagPanel.Children.Add(Kit.Link($"还有 {diagAll.Count - diagnoses.Count} 条，查看全部诊断",
+                () => Host.ShowPage("diagnosis")));
 
         var openAlarms = Svc.Data.Alarms("all").Where(a => a.Status is "active" or "acknowledged").OrderByDescending(a => a.At).ToList();
         Bind(_alarmTable, openAlarms.Take(6).Select(a => Kit.R(
@@ -326,7 +331,7 @@ public sealed class DashboardPage : PageBase
         var devices = Svc.Data.Devices;
         var risky = devices.Where(d => !d.Online || d.Health < 85).OrderBy(d => d.Health).ToList();
         var ranked = devices.OrderBy(d => d.Online ? 1 : 0).ThenBy(d => d.Health).Take(5).ToList();
-        Bind(_deviceTable, ranked.Select(d => Kit.R(
+        Bind(_deviceTable, ranked.Select(d => Kit.R(d.Id,
             Kit.C(d.Code + " " + d.Name, "normal"),
             Kit.C(d.UnitName, "muted"),
             Kit.C(d.Health + " · " + d.HealthText, d.Health >= 85 ? "good" : d.Health >= 60 ? "warn" : "bad"),

@@ -9,7 +9,7 @@ using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class ProcessPage : PageBase
+public sealed class ProcessPage : PageBase, IFocusablePage
 {
     private ProcessCanvas _canvas = null!;
     private UiTable _table = null!;
@@ -23,6 +23,12 @@ public sealed class ProcessPage : PageBase
     public override string Group => "总览";
 
     public ProcessPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
+
+    /// <summary>从驾驶舱点某个工艺单元进来时，直接选中它，而不是上次停留的那个。</summary>
+    public void FocusItem(string key)
+    {
+        if (!string.IsNullOrEmpty(key)) _selected = key;
+    }
 
     protected override void Build()
     {

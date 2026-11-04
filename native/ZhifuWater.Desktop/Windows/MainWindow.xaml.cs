@@ -117,6 +117,7 @@ public partial class MainWindow : Window
         Closed += OnClosed;
         Loaded += (_, _) => { UpdateBadges(); WatchAssignments(); ScheduleStartupUpdateCheck(); };
         WindowFit.Apply(this, 1440, 900);
+        TrayIcon.Ensure(this);
     }
 
     private void OnToastRequested(string message, bool ok) => Toast(message, ok);
@@ -234,13 +235,17 @@ public partial class MainWindow : Window
         Toast("已切换到 " + site.Name + "（" + site.Id + "）");
     }
 
-    public void ShowPage(string id)
+    public void ShowPage(string id) => ShowPage(id, null);
+
+    /// <summary>跳转页面，并可指定要聚焦的对象（驾驶舱点某台设备/某个工艺单元时用）。</summary>
+    public void ShowPage(string id, string? focus)
     {
         if (!_pages.TryGetValue(id, out var page))
         {
             page = PageFactory.Create(id, _services, this);
             _pages[id] = page;
         }
+        if (!string.IsNullOrEmpty(focus) && page is IFocusablePage focusable) focusable.FocusItem(focus);
         _currentPage = page;
         PageHost.Content = page;
         page.RefreshPage();
@@ -321,7 +326,28 @@ public partial class MainWindow : Window
             MaxGlyph.Text = WindowState == WindowState.Maximized ? "" : "";
     }
 
-    private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
+    private void OnCloseClick(object sender, RoutedEventArgs e) => HideToTray();
+
+    /// <summary>点关闭只收进托盘；真正退出走托盘菜单，登出时也放行。</summary>
+    protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+    {
+        if (!_loggingOut && !TrayIcon.ExitRequested)
+        {
+            e.Cancel = true;
+            HideToTray();
+            return;
+        }
+        base.OnClosing(e);
+    }
+
+    private void HideToTray()
+    {
+        TrayIcon.Ensure(this);
+        if (IsVisible) Hide();
+        // 关闭流程里直接 Hide 有时会被 WPF 忽略，退到消息队列末尾再收一次
+        Dispatcher.BeginInvoke(new Action(() => { if (IsVisible) Hide(); }), DispatcherPriority.Background);
+        TrayIcon.ShowBalloon("清渠仍在后台运行", "双击托盘图标可重新打开窗口；要彻底退出请用托盘菜单。");
+    }
 
     private void OnRefreshClick(object sender, RoutedEventArgs e)
     {
