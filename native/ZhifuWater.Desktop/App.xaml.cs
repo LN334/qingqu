@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -15,19 +16,38 @@ public partial class App : Application
         base.OnStartup(e);
         ShutdownMode = ShutdownMode.OnExplicitShutdown;
         Services = AppServices.Create();
+        var uiErrorShown = false;
 
         DispatcherUnhandledException += (_, args) =>
         {
             args.Handled = true;
-            MessageBox.Show("界面发生未处理异常：\n" + args.Exception.Message + "\n\n" + args.Exception.GetType().Name,
-                "智赋乡水 · 错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            try
+            {
+                var dir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ZhifuWater");
+                Directory.CreateDirectory(dir);
+                File.AppendAllText(Path.Combine(dir, "ui-error.log"),
+                    "[" + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "] " + args.Exception + Environment.NewLine + Environment.NewLine);
+            }
+            catch
+            {
+                // 写日志失败不影响提示
+            }
+
+            // 同一个界面错误只提示一次，避免刷新时反复弹窗。
+            if (uiErrorShown) return;
+            uiErrorShown = true;
+            MessageBox.Show(
+                "界面发生未处理异常：" + Environment.NewLine + args.Exception.Message
+                + Environment.NewLine + Environment.NewLine + args.Exception.GetType().Name,
+                "清渠 · 错误", MessageBoxButton.OK, MessageBoxImage.Error);
         };
 
         var smoke = e.Args.Any(a => string.Equals(a, "--smoke", StringComparison.OrdinalIgnoreCase));
         var shots = e.Args.Any(a => string.Equals(a, "--shots", StringComparison.OrdinalIgnoreCase));
 
         var updateCheck = e.Args.FirstOrDefault(a => a.StartsWith("--update-check=", StringComparison.OrdinalIgnoreCase));
-        if (updateCheck != null)
+if (updateCheck != null)
         {
             var outPath = updateCheck.Substring("--update-check=".Length);
             try
