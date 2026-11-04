@@ -19,6 +19,7 @@ public sealed class AutomationPage : PageBase
     private Button _master = null!;
     private AutoRuleInfo? _selected;
     private bool _enabled = true;
+    private Border _stateDot = null!;
 
     public override string Id => "automation";
     public override string Title => "自动控制";
@@ -31,12 +32,17 @@ public sealed class AutomationPage : PageBase
         var root = new StackPanel();
 
         _info = Kit.T("", 12, Pal.Ink2);
+        _stateDot = new Border
+        {
+            Width = 8, Height = 8, CornerRadius = new CornerRadius(4),
+            Background = Pal.ToneFg("good"), VerticalAlignment = VerticalAlignment.Center,
+        };
         _master = Kit.Btn("暂停自动化", ToggleMaster, primary: true, small: true);
-        root.Children.Add(Kit.Card(null, Kit.Row(10, _info, Kit.Spacer(), _master), null, null,
+        root.Children.Add(Kit.Card(null, Kit.Row(8, _stateDot, _info, Kit.Spacer(), _master), null, null,
             new Thickness(12, 9, 12, 9)));
 
-        _rules = Table(new[] { "规则", "动作", "今日", "上次执行", "状态" },
-            new double[] { 0, 118, 52, 88, 56 }, row =>
+        _rules = Table(new[] { "规则", "触发条件", "动作", "状态" },
+            new double[] { 0, 206, 112, 56 }, row =>
             {
                 if (row.Data is AutoRuleInfo rule)
                 {
@@ -51,8 +57,11 @@ public sealed class AutomationPage : PageBase
         var right = new StackPanel();
         right.Children.Add(Kit.Card("规则详情", _detail, null, "选中一条规则查看动作与配额",
             new Thickness(12, 10, 12, 10)));
-        right.Children.Add(new Border { Height = 10 });
-        right.Children.Add(Kit.Card("最近执行", _events, Kit.Btn("全部执行记录", ShowAllEvents, small: true), null,
+
+        var left = new StackPanel();
+        left.Children.Add(Kit.Card("自动化规则", _rules, null, null, new Thickness(12, 10, 12, 10)));
+        left.Children.Add(new Border { Height = 10 });
+        left.Children.Add(Kit.Card("最近执行", _events, Kit.Btn("全部执行记录", ShowAllEvents, small: true), null,
             new Thickness(12, 10, 12, 10)));
 
         var grid = new Grid();
@@ -60,11 +69,9 @@ public sealed class AutomationPage : PageBase
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
 
-        var leftCard = Kit.Card("自动化规则", _rules, null, null, new Thickness(12, 10, 12, 10));
-        leftCard.VerticalAlignment = VerticalAlignment.Top;
-        Grid.SetColumn(leftCard, 0);
+        Grid.SetColumn(left, 0);
         Grid.SetColumn(right, 2);
-        grid.Children.Add(leftCard);
+        grid.Children.Add(left);
         grid.Children.Add(right);
         grid.Margin = new Thickness(0, 10, 0, 0);
         root.Children.Add(grid);
@@ -89,8 +96,12 @@ public sealed class AutomationPage : PageBase
         _master.Foreground = Brushes.White;
 
         var enabled = snap.Rules.Count(r => r.Enabled);
-        _info.Text = $"规则 {snap.Rules.Count} 条 · 已启用 {enabled} 条 · 今日执行 {snap.TodayRuns} 次 · " +
-                     $"告警联动规则 {snap.AlarmRuleEnabled}/{snap.AlarmRuleTotal} 条";
+        var ok = snap.Events.Count(e => e.Result.StartsWith("已", StringComparison.Ordinal));
+        var blocked = snap.Events.Count(e => e.Result.Contains("阻止"));
+        _stateDot.Background = _enabled ? Pal.ToneFg("good") : Pal.Muted2;
+        var head = _enabled ? "运行中" : "已暂停";
+        var blockedText = blocked > 0 ? $" · 被联锁阻止 {blocked} 次" : "";
+        _info.Text = $"{head} · 今日执行 {snap.TodayRuns} 次 · 成功 {ok} 次{blockedText} · 规则 {enabled}/{snap.Rules.Count} 启用";
 
         var rows = snap.Rules.Select(r => new UiRow
         {
@@ -98,17 +109,15 @@ public sealed class AutomationPage : PageBase
             Texts = new[]
             {
                 r.Name,
+                ShortConditions(r.Conditions),
                 r.ActionName,
-                r.TodayRuns > 0 ? r.TodayRuns + " 次" : "—",
-                Kit.FormatTime(r.LastAt),
                 r.Enabled ? "启用" : "停用",
             },
             Fgs = new[]
             {
-                Pal.Ink2,
-                r.Action == "workorder" ? Pal.ToneFg("warn") : Pal.Ink2,
-                Pal.Muted,
-                Pal.Muted,
+                r.Enabled ? Pal.Ink2 : Pal.Muted2,
+                r.Enabled ? Pal.Muted : Pal.Muted2,
+                r.Enabled ? (r.Action == "workorder" ? Pal.ToneFg("warn") : Pal.Ink2) : Pal.Muted2,
                 r.Enabled ? Pal.ToneFg("good") : Pal.ToneFg("muted"),
             },
         }).ToList();
@@ -140,21 +149,24 @@ public sealed class AutomationPage : PageBase
             Kit.Badge(rule.Enabled ? "已启用" : "已停用", rule.Enabled ? "good" : "muted"));
         _detail.Children.Add(head);
 
+        _detail.Children.Add(new Border { Height = 6 });
+        _detail.Children.Add(Kit.T(Tidy(rule.Conditions), 11.5, Pal.Muted, wrap: TextWrapping.Wrap));
         _detail.Children.Add(new Border { Height = 8 });
         var kv = new List<KeyValuePair<string, string>>
         {
-            new("触发条件", rule.Conditions),
             new("执行动作", rule.ActionName),
-            new("持续判定", rule.HoldSec > 0 ? $"{rule.HoldSec} 秒" : "—"),
-            new("冷却时间", rule.CooldownSec > 0 ? FormatSpan(rule.CooldownSec) : "不限制"),
-            new("当日上限", rule.MaxPerDay > 0 ? rule.MaxPerDay + " 次" : "不限制"),
-            new("今日已执行", rule.TodayRuns + " 次"),
-            new("累计执行", rule.Runs + " 次"),
-            new("上次执行", Kit.FormatTimeFull(rule.LastAt)),
+            new("触发判定", $"持续 {rule.HoldSec} 秒"),
+            new("冷却时间", rule.CooldownSec >= 60 ? $"{rule.CooldownSec / 60} 分钟" : $"{rule.CooldownSec} 秒"),
+            new("今日执行", $"{rule.TodayRuns}/{rule.MaxPerDay} 次"),
+            new("累计执行", $"{rule.Runs} 次"),
+            new("上次执行", rule.LastAt > 0 ? Kit.FormatTime(rule.LastAt) : "—"),
             new("上次结果", string.IsNullOrEmpty(rule.LastResult) ? "—" : rule.LastResult),
         };
-        if (!string.IsNullOrEmpty(rule.Reason)) kv.Insert(4, new KeyValuePair<string, string>("下发理由", rule.Reason));
         _detail.Children.Add(Kit.KvGrid(kv));
+
+        var reason = Kit.T(Tidy(rule.Reason), 11, Pal.Muted2, wrap: TextWrapping.Wrap);
+        reason.Margin = new Thickness(0, 8, 0, 0);
+        _detail.Children.Add(reason);
 
         _detail.Children.Add(new Border { Height = 10 });
         _detail.Children.Add(Kit.Row(6,
@@ -173,14 +185,36 @@ public sealed class AutomationPage : PageBase
 
         foreach (var e in events.Take(6))
         {
+            var tone = ResultTone(e.Result);
+            var dot = new Border
+            {
+                Width = 6, Height = 6, CornerRadius = new CornerRadius(3),
+                Background = tone, VerticalAlignment = VerticalAlignment.Center,
+            };
             var time = Kit.T(Kit.FormatTime(e.At), 11, Pal.Muted2);
             var name = Kit.T(e.RuleName, 12, Pal.Ink, wrap: TextWrapping.Wrap);
-            var result = Kit.T(e.Result, 11, ResultTone(e.Result));
-            var stack = new StackPanel { Margin = new Thickness(0, 0, 0, 8) };
-            stack.Children.Add(Kit.Row(8, name, Kit.Spacer(), time));
+            var result = Kit.T(e.Result, 11, tone);
+            var stack = new StackPanel { Margin = new Thickness(0, 0, 0, 7) };
+            stack.Children.Add(Kit.Row(7, dot, name, Kit.Spacer(), time));
             stack.Children.Add(result);
             _events.Children.Add(stack);
         }
+    }
+
+    private static string Tidy(string text) =>
+        (text ?? "").Replace(" >= ", " ≥ ").Replace(" <= ", " ≤ ");
+
+    /// <summary>表格里的条件只留关键项，单位与「持续 N 秒」放到详情里。</summary>
+    private static string ShortConditions(string text)
+    {
+        var t = System.Text.RegularExpressions.Regex.Replace(text ?? "", @"，持续\s*\d+\s*秒", "");
+        t = t.Replace("BAF 滤池压差 >= ", "压差 ≥ ").Replace("硫自养池压差 >= ", "压差 ≥ ")
+             .Replace("BAF 溶解氧 <= ", "溶解氧 ≤ ").Replace("原料罐液位 <= ", "液位 ≤ ")
+             .Replace("进水瞬时流量 <= ", "流量 ≤ ").Replace("，原料罐液位 >= ", "，液位 ≥ ")
+             .Replace("PAC 药箱液位 <= ", "药箱 ≤ ").Replace("PAM 药箱液位 <= ", "药箱 ≤ ")
+             .Replace("紧急告警持续未处理", "紧急告警未处理")
+             .Replace(" >= ", " ≥ ").Replace(" <= ", " ≤ ");
+        return t;
     }
 
     private static Brush ResultTone(string result)
