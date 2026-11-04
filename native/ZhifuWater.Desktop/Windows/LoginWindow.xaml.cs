@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using ZhifuWater.Desktop.Data;
+using ZhifuWater.Desktop.Services;
 
 namespace ZhifuWater.Desktop.Windows;
 
@@ -21,6 +22,7 @@ public partial class LoginWindow : Window
         InitializeComponent();
         NativeChrome.EnableCustomFrame(this);
         _services = services;
+        VersionText.Text = "v" + Services.UpdateService.CurrentVersionText;
         Loaded += (_, _) => AccountBox.Focus();
         AccountBox.Text = "admin";
         AccountBox.TextChanged += (_, _) => AccountHint.Visibility = AccountBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;

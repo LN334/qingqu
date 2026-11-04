@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -10,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using ZhifuWater.Desktop.Data;
 using ZhifuWater.Desktop.Pages;
+using ZhifuWater.Desktop.Services;
 using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Windows;
@@ -69,6 +71,8 @@ public partial class MainWindow : Window
     private bool _loadingSites;
     private bool _loggingOut;
     private KioskWindow? _kiosk;
+    private UpdateInfo? _pendingUpdate;
+    private bool _updateChecking;
 
     public AppServices Services => _services;
     public UserInfo CurrentUser => _user;
@@ -108,7 +112,10 @@ public partial class MainWindow : Window
         UpdateBadges();
         UpdateFooter();
         ShowPage("dashboard");
+        SidebarVersion.Text = "v" + UpdateService.CurrentVersionText;
+        CheckUpdateMenu.Content = "检查更新（v" + UpdateService.CurrentVersionText + "）";
         Closed += OnClosed;
+        Loaded += (_, _) => ScheduleStartupUpdateCheck();
     }
 
     private void OnToastRequested(string message, bool ok) => Toast(message, ok);
@@ -428,6 +435,80 @@ public partial class MainWindow : Window
     private void OnUserClick(object sender, RoutedEventArgs e)
     {
         UserPopup.IsOpen = true;
+    }
+
+    // ── 版本更新 ────────────────────────────────────────────────
+    private void ScheduleStartupUpdateCheck()
+    {
+        var settings = UpdateService.LoadSettings();
+        if (!settings.AutoCheck) return;
+        if (DateTime.TryParse(settings.LastCheckUtc, out var last) &&
+            (DateTime.UtcNow - last.ToUniversalTime()).TotalHours < 6) return;
+        var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(7) };
+        timer.Tick += async (_, _) =>
+        {
+            timer.Stop();
+            await CheckUpdatesAsync(false);
+        };
+        timer.Start();
+    }
+
+    private async void OnCheckUpdateClick(object sender, RoutedEventArgs e)
+    {
+        UserPopup.IsOpen = false;
+        await CheckUpdatesAsync(true);
+    }
+
+    private void OnUpdateLinkClick(object sender, RoutedEventArgs e)
+    {
+        if (_pendingUpdate != null) OpenUpdateDialog();
+    }
+
+    private async Task CheckUpdatesAsync(bool manual)
+    {
+        if (_updateChecking) return;
+        _updateChecking = true;
+        try
+        {
+            var info = await UpdateService.CheckAsync();
+            var settings = UpdateService.LoadSettings();
+            settings.LastCheckUtc = DateTime.UtcNow.ToString("O");
+            UpdateService.SaveSettings(settings);
+
+            if (info == null)
+            {
+                _pendingUpdate = null;
+                UpdateLink.Visibility = Visibility.Collapsed;
+                if (manual) Toast("当前已是最新版本 v" + UpdateService.CurrentVersionText);
+                return;
+            }
+
+            _pendingUpdate = info;
+            UpdateLink.Content = "新版本 v" + info.Version.ToString(3) + " 可用";
+            UpdateLink.Visibility = Visibility.Visible;
+            if (manual) OpenUpdateDialog();
+            else Toast("发现新版本 v" + info.Version.ToString(3), true);
+        }
+        catch (Exception ex)
+        {
+            if (manual &&
+                Dlg.Confirm(this, "检查更新", "检查更新失败：" + ex.Message + "\n\n要打开发布页手动下载吗？", "打开发布页"))
+            {
+                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdateService.ReleasesPage) { UseShellExecute = true }); }
+                catch { }
+            }
+        }
+        finally
+        {
+            _updateChecking = false;
+        }
+    }
+
+    private void OpenUpdateDialog()
+    {
+        if (_pendingUpdate == null) return;
+        var dlg = new UpdateDialog(this, _pendingUpdate, UpdateService.LoadSettings());
+        dlg.ShowDialog();
     }
 
     private void OnChangePasswordClick(object sender, RoutedEventArgs e)

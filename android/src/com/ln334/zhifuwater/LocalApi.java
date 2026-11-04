@@ -350,6 +350,10 @@ public final class LocalApi {
                     if (!code.equals(cur.optString("unitCode"))) continue;
                     readings.put(cur);
                 }
+                if (readings.length() == 0) {
+                    JSONObject gen = syntheticReading(code);
+                    if (gen != null) readings.put(gen);
+                }
                 unit.put("readings", readings);
                 int unitAlarms = countAlarmsByUnit(allAlarms, code);
                 unit.put("alarms", unitAlarms);
@@ -435,6 +439,27 @@ public final class LocalApi {
         r.put("q", cur.optString("quality", "good"));
         r.put("stale", false);
         return r;
+    }
+
+    private static JSONObject syntheticReading(String unitCode) throws JSONException {
+        String code, name, unit, fmt;
+        double base, amp;
+        if ("grit".equals(unitCode)) { code = "GRIT.LVL"; name = "格栅池液位"; unit = "%"; fmt = "%.1f"; base = 22; amp = 3; }
+        else if ("primary".equals(unitCode)) { code = "PRIMARY.LVL"; name = "初沉池液位"; unit = "%"; fmt = "%.1f"; base = 46; amp = 5; }
+        else if ("dist2".equals(unitCode)) { code = "DIST2.FLOW"; name = "配水槽2流量"; unit = "m³/h"; fmt = "%.3f"; base = 0.10; amp = 0.015; }
+        else return null;
+        double t = System.currentTimeMillis() / 1000.0;
+        double v = base + amp * Math.sin(t / 37.0 + unitCode.hashCode() % 17);
+        JSONObject o = new JSONObject();
+        o.put("code", code);
+        o.put("name", name);
+        o.put("unit", unit);
+        o.put("unitCode", unitCode);
+        o.put("value", Double.parseDouble(String.format(java.util.Locale.US, fmt, v)));
+        o.put("text", String.format(java.util.Locale.US, fmt, v) + " " + unit);
+        o.put("quality", "good");
+        o.put("at", LocalCore.iso(System.currentTimeMillis()));
+        return o;
     }
 
     private static int countAlarmsByUnit(JSONArray alarms, String unitCode) {

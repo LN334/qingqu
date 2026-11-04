@@ -157,7 +157,7 @@ public final class LocalEngine {
             double cur = values.optDouble(s.code, s.target);
             double target = s.target;
             if ("RAW.LVL".equals(s.code)) {
-                if (pumpRun == 1) target = 46;      // 抽水带走液位
+                target = pumpRun == 1 ? 30 : 66;    // 泵抽降、停泵回补，形成可见循环
             } else if ("FLOW.IN".equals(s.code)) {
                 target = pumpRun == 1 ? 0.35 : 0.0;
             } else if ("BAF.DP".equals(s.code)) {
@@ -241,9 +241,9 @@ public final class LocalEngine {
     }
 
     private int pumpRun(int current, double rawLvl) {
-        if (rawLvl < 15) return 0;          // 低液位保护
-        if (rawLvl > 30) return 1;
-        return current;                      // 中间区间保持原状态（滞回）
+        if (rawLvl <= 28) return 0;          // 低液位停泵
+        if (rawLvl >= 58) return 1;          // 高液位启泵
+        return current;                       // 中间区间保持原状态（滞回）
     }
 
     private int backwash(int current, double dp) {

@@ -36,7 +36,7 @@
 
                 <Border DockPanel.Dock="Bottom" Padding="16,8,14,12">
                     <Grid>
-                        <TextBlock Text="v2.0.11" FontSize="10" Foreground="#5F8580" VerticalAlignment="Center" />
+                        <TextBlock x:Name="SidebarVersion" Text="v2.0.12" FontSize="10" Foreground="#5F8580" VerticalAlignment="Center" />
                         <TextBlock Text="本机运行" FontSize="10" Foreground="#5F8580" HorizontalAlignment="Right" VerticalAlignment="Center" />
                     </Grid>
                 </Border>
@@ -143,8 +143,12 @@
                         <TextBlock x:Name="FooterSource" FontSize="10.5" Foreground="{DynamicResource Muted}"
                                    Margin="6,0,0,0" VerticalAlignment="Center" Text="运行正常" />
                     </StackPanel>
-                    <TextBlock x:Name="FooterRight" FontSize="10.5" Foreground="{DynamicResource Muted2}"
-                               VerticalAlignment="Center" HorizontalAlignment="Right" Text="最后更新 —" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Button x:Name="UpdateLink" Content="发现新版本" Style="{DynamicResource LinkButton}"
+                                Visibility="Collapsed" Click="OnUpdateLinkClick" Margin="0,0,12,0" />
+                        <TextBlock x:Name="FooterRight" FontSize="10.5" Foreground="{DynamicResource Muted2}"
+                                   VerticalAlignment="Center" Text="最后更新 —" />
+                    </StackPanel>
                 </Grid>
             </Border>
         </Grid>
@@ -180,6 +184,7 @@
                     <TextBlock x:Name="MenuRole" FontSize="10.5" Foreground="{DynamicResource Muted2}"
                                Margin="0,2,0,0" />
                     <Border Height="1" Background="{DynamicResource LineSoft}" Margin="0,8" />
+                    <Button x:Name="CheckUpdateMenu" Content="检查更新" Style="{DynamicResource MenuButton}" Click="OnCheckUpdateClick" />
                     <Button Content="修改密码" Style="{DynamicResource MenuButton}" Click="OnChangePasswordClick" />
                     <Button Content="退出登录" Style="{DynamicResource MenuButton}" Click="OnLogoutClick" />
                 </StackPanel>

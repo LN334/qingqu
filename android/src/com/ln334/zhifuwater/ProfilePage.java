@@ -1,6 +1,7 @@
 package com.ln334.zhifuwater;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -127,6 +128,25 @@ public class ProfilePage extends BasePage {
         LinearLayout account = U.card(ctx);
         account.addView(U.kv(ctx, "登录账号", session.username().length() == 0 ? "--" : session.username()));
         account.addView(U.kv(ctx, "应用版本", U.appVersion(ctx)));
+        LinearLayout updateRow = U.linear(ctx, LinearLayout.HORIZONTAL);
+        updateRow.setGravity(Gravity.CENTER_VERTICAL);
+        updateRow.setPadding(0, U.dp(ctx, 10), 0, U.dp(ctx, 2));
+        TextView updateLabel = U.tv(ctx, "检查更新", 13, U.BRAND, true);
+        updateRow.addView(updateLabel, U.lp(0, U.WRAP, 1f));
+        updateRow.addView(U.tv(ctx, "v" + U.appVersion(ctx), 11.5f, U.MUTED2, false));
+        updateRow.setClickable(true);
+        updateRow.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    ctx.startActivity(new Intent(Intent.ACTION_VIEW,
+                            Uri.parse("https://github.com/LN334/qingqu/releases/latest")));
+                } catch (Exception ignored) {
+                    U.toast(ctx, "打不开发布页，请手动访问 github.com/LN334/qingqu/releases");
+                }
+            }
+        });
+        account.addView(updateRow);
         addCard(account);
 
         // 连接设置

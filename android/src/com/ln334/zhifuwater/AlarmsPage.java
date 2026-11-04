@@ -41,7 +41,7 @@ public class AlarmsPage extends BasePage {
     @Override
     void load() {
         setBusy(true);
-        Api.get(ctx, "/api/alarms?siteId=" + siteId() + "&status=open", new Api.Cb() {
+        Api.get(ctx, "/api/alarms?siteId=" + siteId() + "&status=all", new Api.Cb() {
             @Override
             public void done(JSONObject root, String error) {
                 if (!alive()) return;
@@ -64,7 +64,7 @@ public class AlarmsPage extends BasePage {
 
         int active = counts == null ? 0 : counts.optInt("active", 0);
         int acked = counts == null ? 0 : counts.optInt("acknowledged", 0);
-        body.addView(U.segmented(ctx, new String[]{"全部", "未确认 " + active, "已确认 " + acked}, filter, new U.SegmentCb() {
+        body.addView(U.segmented(ctx, new String[]{"待处理", "未确认 " + active, "已确认 " + acked, "归档"}, filter, new U.SegmentCb() {
             @Override
             public void onSelect(int index) {
                 filter = index;
@@ -78,8 +78,10 @@ public class AlarmsPage extends BasePage {
                 JSONObject a = items.optJSONObject(i);
                 if (a == null) continue;
                 String status = a.optString("status", "active");
+                if (filter == 0 && !"active".equals(status) && !"acknowledged".equals(status)) continue;
                 if (filter == 1 && !"active".equals(status)) continue;
                 if (filter == 2 && !"acknowledged".equals(status)) continue;
+                if (filter == 3 && !"resolved".equals(status) && !"closed".equals(status)) continue;
                 filtered.add(a);
             }
         }
