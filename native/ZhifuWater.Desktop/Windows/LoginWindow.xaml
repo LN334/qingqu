@@ -101,6 +101,10 @@
                                VerticalAlignment="Center" Margin="10,0,0,0" />
                 </Grid>
 
+                <CheckBox x:Name="RememberBox" Content="记住密码" FontSize="11.5"
+                          Foreground="{DynamicResource Muted}" Margin="0,7,0,0"
+                          HorizontalAlignment="Left" VerticalContentAlignment="Center" />
+
                 <TextBlock x:Name="ErrorText" FontSize="12" Foreground="{DynamicResource Bad}"
                            TextWrapping="Wrap" Visibility="Collapsed" Margin="0,8,0,0" />
 

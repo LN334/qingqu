@@ -116,6 +116,7 @@ public partial class MainWindow : Window
         CheckUpdateMenu.Content = "检查更新（v" + UpdateService.CurrentVersionText + "）";
         Closed += OnClosed;
         Loaded += (_, _) => { UpdateBadges(); WatchAssignments(); ScheduleStartupUpdateCheck(); };
+        WindowFit.Apply(this, 1440, 900);
     }
 
     private void OnToastRequested(string message, bool ok) => Toast(message, ok);

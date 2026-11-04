@@ -112,7 +112,20 @@ public static class Smoke
         element.Measure(new Size(width, height));
         element.Arrange(new Rect(0, 0, width, height));
         element.UpdateLayout();
-        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+
+        // 150% / 200% 缩放下按窗口实际 DPI 放大像素，截图才不会糊（尺寸仍是同一套布局）。
+        double scaleX = 1, scaleY = 1;
+        try
+        {
+            var dpi = VisualTreeHelper.GetDpi(element);
+            if (dpi.DpiScaleX > 0) scaleX = dpi.DpiScaleX;
+            if (dpi.DpiScaleY > 0) scaleY = dpi.DpiScaleY;
+        }
+        catch { }
+
+        var pixelWidth = Math.Max(1, (int)Math.Round(width * scaleX));
+        var pixelHeight = Math.Max(1, (int)Math.Round(height * scaleY));
+        var bitmap = new RenderTargetBitmap(pixelWidth, pixelHeight, 96 * scaleX, 96 * scaleY, PixelFormats.Pbgra32);
         bitmap.Render(element);
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(bitmap));

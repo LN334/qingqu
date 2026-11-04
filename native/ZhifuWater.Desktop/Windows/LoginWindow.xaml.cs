@@ -22,12 +22,25 @@ public partial class LoginWindow : Window
         InitializeComponent();
         NativeChrome.EnableCustomFrame(this);
         _services = services;
+        WindowFit.Apply(this, 1080, 720);
         VersionText.Text = "v" + Services.UpdateService.CurrentVersionText;
-        Loaded += (_, _) => AccountBox.Focus();
-        AccountBox.Text = "admin";
+        var saved = CredentialStore.Load();
+        AccountBox.Text = saved?.Account ?? "admin";
+        if (saved is not null)
+        {
+            PasswordBox.Password = saved.Password;
+            RememberBox.IsChecked = true;
+        }
+
+        Loaded += (_, _) =>
+        {
+            if (PasswordBox.Password.Length > 0) PasswordBox.Focus();
+            else AccountBox.Focus();
+        };
         AccountBox.TextChanged += (_, _) => AccountHint.Visibility = AccountBox.Text.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         PasswordBox.PasswordChanged += (_, _) => PasswordHint.Visibility = PasswordBox.Password.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         AccountHint.Visibility = Visibility.Collapsed;
+        PasswordHint.Visibility = PasswordBox.Password.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void OnShellMouseDown(object sender, MouseButtonEventArgs e)
@@ -77,6 +90,9 @@ public partial class LoginWindow : Window
                 ShowError("登录失败：未获取到会话信息");
                 return;
             }
+            if (RememberBox.IsChecked == true) CredentialStore.Save(account, password);
+            else CredentialStore.Clear();
+
             Succeeded = true;
             LoggedIn?.Invoke(user);
             Close();

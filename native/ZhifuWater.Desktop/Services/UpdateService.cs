@@ -225,7 +225,8 @@ public static class UpdateService
             "} catch {\r\n" +
             "  \"error=$($_.Exception.Message)\" | Out-File $log -Append -Encoding utf8\r\n" +
             "}\r\n" +
-            "Start-Process -FilePath " + PsQuote(exe) + "\r\n";
+            // 安装完成后由 explorer 拉起新版，避免新进程继承管理员令牌。
+            "Start-Process -FilePath 'explorer.exe' -ArgumentList " + PsQuote("\"" + exe + "\"") + "\r\n";
         File.WriteAllText(script, ps, new UTF8Encoding(true));
 
         try
