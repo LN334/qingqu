@@ -161,7 +161,7 @@ public sealed class CoreServices : IDisposable
             RuntimeInfo = RuntimeSnapshot,
         };
         Ops = new OpsService(Store, Auth, _audit, Notifier) { Publish = Publish };
-        Automation = new AutomationService(Store, Telemetry, Commands, Ops, Notifier, _audit) { Publish = Publish };
+        Automation = new AutomationService(Store, Telemetry, Commands, Ops, Notifier, _audit, Rules) { Publish = Publish };
         Params = new ParamsService(Store, Auth, Notifier, _audit) { Publish = Publish };
         Reports = new ReportsService(Store, Telemetry, Analytics, Auth, _audit) { Publish = Publish };
         Admin = new AdminService(Store, Auth, Notifier, _audit)

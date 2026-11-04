@@ -240,6 +240,9 @@ public partial class MainWindow : Window
         Toast("已切换到 " + site.Name + "（" + site.Id + "）");
     }
 
+    /// <summary>页面区当前可视高度，供内容较少的页面把主卡撑到底。</summary>
+    public double PageViewportHeight => PageHost.ActualHeight;
+
     public void ShowPage(string id) => ShowPage(id, null);
 
     /// <summary>跳转页面，并可指定要聚焦的对象（驾驶舱点某台设备/某个工艺单元时用）。</summary>

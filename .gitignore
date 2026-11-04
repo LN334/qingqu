@@ -47,3 +47,4 @@ native/.vs/
 *.user
 
 native/publish-kiosk/
+run.log
