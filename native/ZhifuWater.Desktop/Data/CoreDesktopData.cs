@@ -567,13 +567,17 @@ public sealed class CoreDesktopData : IDesktopData
         };
         var trend = J.O(k, "trend", false);
         var key = J.Str(k, "key");
-        var subject = key switch { "cod" => "COD ", "nh3n" => "氨氮 ", _ => "" };
         var trendValue = J.Num(trend, "value");
-        var delta = trendValue is { } tv
-            ? $"{subject}{J.Str(trend, "label")} {tv.ToString("F1", CultureInfo.InvariantCulture)}%"
-            : "";
+        // 去除率这类附注不进卡片正文（会破坏 8 张 KPI 的整齐），只在悬停提示里给出。
+        var delta = "";
         var hint = J.Str(k, "hint");
-        if (trendValue is not null && string.IsNullOrEmpty(hint)) hint = "按当日人工化验的进水与出水计算";
+        if (trendValue is { } tv)
+        {
+            var subject = key switch { "cod" => "COD", "nh3n" => "氨氮", _ => "" };
+            var trendText = (string.IsNullOrEmpty(subject) ? "" : subject + " ") + J.Str(trend, "label")
+                            + " " + tv.ToString("F1", CultureInfo.InvariantCulture) + "%（按当日人工化验进出水计算）";
+            hint = string.IsNullOrEmpty(hint) ? trendText : hint + " · " + trendText;
+        }
         return new KpiInfo
         {
             Key = J.Str(k, "key"),
