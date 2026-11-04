@@ -52,7 +52,7 @@ public sealed class AlarmsPage : PageBase
         var filter = new StackPanel { Orientation = Orientation.Horizontal };
         filter.Children.Add(Kit.T("状态", 11, Pal.Muted));
         _status = new ComboBox { Width = 112, Margin = new Thickness(6, 0, 12, 0) };
-        foreach (var t in new[] { "全部", "未处理", "已确认", "已恢复" }) _status.Items.Add(t);
+        foreach (var t in new[] { "待处理", "全部", "未处理", "已确认", "归档" }) _status.Items.Add(t);
         _status.SelectedIndex = 0;
         filter.Children.Add(_status);
         filter.Children.Add(Kit.T("级别", 11, Pal.Muted));
@@ -111,7 +111,7 @@ public sealed class AlarmsPage : PageBase
 
     private void Query()
     {
-        var status = _status.SelectedIndex switch { 1 => "active", 2 => "acknowledged", 3 => "resolved", _ => "all" };
+        var status = _status.SelectedIndex switch { 0 => "open", 2 => "active", 3 => "acknowledged", 4 => "archived", _ => "all" };
         var level = _level.SelectedIndex switch { 1 => "critical", 2 => "major", 3 => "minor", 4 => "info", _ => "all" };
         var rows = Svc.Data.Alarms(status, level, _keyword.Text ?? "")
             .Select(a => new UiRow

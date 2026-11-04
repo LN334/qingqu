@@ -57,10 +57,17 @@ public sealed class AutomationService
         }
         if (J.Get(auto, "rules") is not JsonArray rules) auto["rules"] = rules = new JsonArray();
         if (J.Get(auto, "events") is not JsonArray) auto["events"] = new JsonArray();
-        if (rules.Count > 0) return;
-
-        foreach (var rule in DefaultRules()) rules.Add(rule);
-        _store.SaveSoon();
+        var existing = new HashSet<string>(rules.Select(r => J.Str(r, "id")), StringComparer.Ordinal);
+        var changed = false;
+        foreach (var rule in DefaultRules())
+        {
+            var id = J.Str(rule, "id");
+            if (id is not ("auto-raw-refill" or "auto-raw-refill-stop" or "auto-raw-pump-high" or "auto-raw-pump-low" or "auto-do-high")) continue;
+            if (existing.Contains(id)) continue;
+            rules.Add(rule);
+            changed = true;
+        }
+        if (changed) _store.SaveSoon();
     }
 
     private static IEnumerable<JsonObject> DefaultRules()
@@ -91,14 +98,29 @@ public sealed class AutomationService
             reason: "进水调节池液位回升且进水流量中断 1.5 分钟，自动启动提升泵");
 
         yield return Rule("auto-raw-refill", "低液位自动补水", "pump", "raw",
-            new[] { Cond("RAW.LVL", "<=", 32) }, holdSec: 20, cooldownSec: 600, maxPerDay: 8,
+            new[] { Cond("RAW.LVL", "<=", 32) }, holdSec: 5, cooldownSec: 600, maxPerDay: 8,
             action: "command", command: "raw.refill.start",
             reason: "进水调节池液位低于 32%，自动开启补水阀");
 
         yield return Rule("auto-raw-refill-stop", "高液位自动停补水", "pump", "raw",
-            new[] { Cond("RAW.LVL", ">=", 56) }, holdSec: 20, cooldownSec: 600, maxPerDay: 8,
+            new[] { Cond("RAW.LVL", ">=", 56) }, holdSec: 5, cooldownSec: 600, maxPerDay: 8,
             action: "command", command: "raw.refill.stop",
             reason: "进水调节池液位高于 56%，自动关闭补水阀");
+
+        yield return Rule("auto-raw-pump-high", "高液位自动启泵", "level", "raw",
+            new[] { Cond("RAW.LVL", ">=", 60) }, holdSec: 5, cooldownSec: 300, maxPerDay: 12,
+            action: "command", command: "raw.pump.start",
+            reason: "进水调节池液位高于 60%，自动启动提升泵");
+
+        yield return Rule("auto-raw-pump-low", "低液位自动停泵", "level", "raw",
+            new[] { Cond("RAW.LVL", "<=", 30) }, holdSec: 5, cooldownSec: 300, maxPerDay: 12,
+            action: "command", command: "raw.pump.stop",
+            reason: "进水调节池液位低于 30%，自动停止提升泵");
+
+        yield return Rule("auto-do-high", "溶解氧过高自动停风机", "do", "baf",
+            new[] { Cond("BAF.DO", ">=", 3.0) }, holdSec: 10, cooldownSec: 600, maxPerDay: 6,
+            action: "command", command: "baf.blower.stop",
+            reason: "预氧化溶解氧高于 3.0 mg/L，自动停止曝气风机");
 
         yield return Rule("auto-pac-stop", "PAC 药箱低液位自动停加药", "dosing", "pac",
             new[] { Cond("PAC.LEVEL", "<=", 12) }, holdSec: 60, cooldownSec: 3600, maxPerDay: 2,
@@ -604,6 +626,8 @@ public sealed class AutomationService
         "raw.pump.start" => "启动提升泵",
         "raw.pump.stop" => "停止提升泵",
         "raw.pump.mode.set" => "切换提升泵模式",
+        "raw.refill.start" => "开启进水调节池补水阀",
+        "raw.refill.stop" => "关闭进水调节池补水阀",
         "pac.dose.set" => "调整 PAC 加药量",
         "pam.dose.set" => "调整 PAM 加药量",
         _ => action,

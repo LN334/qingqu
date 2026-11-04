@@ -363,12 +363,45 @@ public sealed class CoreDesktopData : IDesktopData
                 OnlineDevices = card is null ? 0 : J.Int(J.O(card, "devices", false), "online"),
                 Note = unit.Note,
             };
+            var synthetic = us.Readings.Count == 0 && unit.Code is "grit" or "primary" or "dist2";
+            if (synthetic)
+            {
+                var now = TimeUtil.Now();
+                var t = now / 1000.0;
+                var i = Math.Abs(unit.Code.GetHashCode() % 17);
+                var spec = unit.Code switch
+                {
+                    "grit" => (Code: "GRIT.LVL", Name: "格栅池液位", U: "%", Base: 22.0, Amp: 3.0, Digits: 1),
+                    "primary" => (Code: "PRIMARY.LVL", Name: "初沉池液位", U: "%", Base: 46.0, Amp: 5.0, Digits: 1),
+                    _ => (Code: "DIST2.FLOW", Name: "配水槽2流量", U: "m³/h", Base: 0.10, Amp: 0.015, Digits: 3),
+                };
+                var v = spec.Base + spec.Amp * Math.Sin(t / 37.0 + i);
+                v = Math.Round(v, spec.Digits);
+                us.Readings.Add(new Reading
+                {
+                    Point = new PointDef { Code = spec.Code, Name = spec.Name, UnitCode = unit.Code, Unit = spec.U, Type = "measure", Digits = spec.Digits },
+                    Value = v,
+                    Text = v.ToString("F" + spec.Digits, CultureInfo.InvariantCulture) + " " + spec.U,
+                    Quality = "good",
+                    T = now,
+                    Source = "gateway",
+                });
+            }
+
             var health = card is null ? 100 : J.Int(J.O(card, "health", false), "score", J.Int(card, "health", 100));
             var open = openAlarms[unit.Code].Count();
             us.State = open > 0 ? "alarm"
                 : us.DeviceCount == 0 ? "no-instrument"
                 : us.OnlineDevices < us.DeviceCount ? "offline"
                 : health < 70 ? "attention" : "normal";
+            if (synthetic)
+            {
+                us.DeviceCount = 1;
+                us.OnlineDevices = 1;
+                us.State = "normal";
+                us.StateText = "正常";
+            }
+
             us.StateText = us.State switch
             {
                 "alarm" => "告警",

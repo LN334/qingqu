@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 
 namespace ZhifuWater.Desktop.Ui;
 
@@ -23,6 +24,15 @@ public sealed class FormDialog : Window
         Width = 440;
         SizeToContent = SizeToContent.Height;
         ResizeMode = ResizeMode.NoResize;
+        WindowStyle = WindowStyle.None;
+        WindowChrome.SetWindowChrome(this, new WindowChrome
+        {
+            CaptionHeight = 0,
+            ResizeBorderThickness = new Thickness(0),
+            GlassFrameThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(0),
+            UseAeroCaptionButtons = false,
+        });
         WindowStartupLocation = owner == null ? WindowStartupLocation.CenterScreen : WindowStartupLocation.CenterOwner;
         Background = Pal.Bg;
         ShowInTaskbar = false;
@@ -34,11 +44,31 @@ public sealed class FormDialog : Window
         var root = new Border
         {
             Style = Kit.St("DialogCard"),
-            Margin = new Thickness(12),
-            Padding = new Thickness(18),
+            Margin = new Thickness(0),
+            Padding = new Thickness(18, 14, 18, 18),
         };
         var stack = new StackPanel();
-        stack.Children.Add(Kit.H2(title));
+        var head = new Grid { Margin = new Thickness(0, 0, 0, 8) };
+        head.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        head.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+        var headTitle = Kit.T(title, 14, Pal.Ink, bold: true);
+        headTitle.VerticalAlignment = VerticalAlignment.Center;
+        head.Children.Add(headTitle);
+        var close = new Button
+        {
+            Content = "\uE8BB",
+            Style = Kit.St("CaptionCloseButton"),
+            Width = 28,
+            Height = 24,
+            FontFamily = new FontFamily("Segoe MDL2 Assets"),
+            FontSize = 10,
+            HorizontalAlignment = HorizontalAlignment.Right,
+        };
+        close.Click += (_, _) => { DialogResult = false; Close(); };
+        Grid.SetColumn(close, 1);
+        head.Children.Add(close);
+        head.MouseLeftButtonDown += (_, e) => { if (e.ButtonState == MouseButtonState.Pressed) DragMove(); };
+        stack.Children.Add(head);
         if (!string.IsNullOrEmpty(hint))
             stack.Children.Add(new TextBlock
             {

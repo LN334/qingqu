@@ -85,6 +85,8 @@ public sealed partial class RulesEngine
         }
         if (status == "open")
             items = items.Where(a => J.Str(a, "status") is "active" or "acknowledged").ToList();
+        else if (status == "archived")
+            items = items.Where(a => J.Str(a, "status") is "resolved" or "closed").ToList();
         else if (!string.IsNullOrEmpty(status))
             items = items.Where(a => J.Str(a, "status") == status).ToList();
         if (!string.IsNullOrEmpty(level)) items = items.Where(a => J.Str(a, "level") == level).ToList();

@@ -328,8 +328,8 @@ public static class Kit
         {
             Content = text,
             Style = St("LinkButton"),
-            FontSize = 11,
-            Height = 20,
+            FontSize = 12,
+            Height = 24,
             Padding = new Thickness(0),
             MinWidth = 0,
             Cursor = System.Windows.Input.Cursors.Hand,
@@ -345,7 +345,7 @@ public static class Kit
             Content = text,
             Style = St(danger ? "DangerButton" : primary ? (small ? "PrimarySmallButton" : "PrimaryButton") : (small ? "SmallButton" : "BaseButton")),
             FontSize = small ? 11 : 12,
-            Padding = small ? new Thickness(8, 0, 8, 0) : new Thickness(12, 0, 12, 0),
+            Padding = small ? new Thickness(10, 0, 10, 0) : new Thickness(14, 0, 14, 0),
         };
         btn.Click += (_, _) => click();
         return btn;

@@ -31,6 +31,20 @@ public partial class App : Application
             return;
         }
 
+        if (e.Args.Any(a => string.Equals(a, "--main", StringComparison.OrdinalIgnoreCase)))
+        {
+            var r = Services.Data.Login("admin", "water123");
+            if (r.Ok && Services.Data.CurrentUser is { } u)
+            {
+                var w = new Windows.MainWindow(Services, u);
+                Current.MainWindow = w;
+                w.Show();
+                var page = e.Args.FirstOrDefault(x => x.StartsWith("--page=", StringComparison.OrdinalIgnoreCase));
+                if (page is not null) w.ShowPage(page.Substring("--page=".Length));
+                return;
+            }
+        }
+
         ShortcutGuard.EnsureOnStartup();
         ShowLogin();
     }

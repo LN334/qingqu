@@ -139,8 +139,8 @@
     <Style x:Key="BaseButton" TargetType="Button">
         <Setter Property="FontFamily" Value="{StaticResource UiFont}" />
         <Setter Property="FontSize" Value="12" />
-        <Setter Property="Height" Value="28" />
-        <Setter Property="Padding" Value="11,0" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Padding" Value="14,0" />
         <Setter Property="MinWidth" Value="0" />
         <Setter Property="Background" Value="{StaticResource Surface}" />
         <Setter Property="BorderBrush" Value="{StaticResource Line}" />
@@ -157,8 +157,8 @@
                         <Border x:Name="Bd" Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="2" />
-                        <Border x:Name="Tint" Background="#000000" Opacity="0" CornerRadius="2"
+                                CornerRadius="3" />
+                        <Border x:Name="Tint" Background="#000000" Opacity="0" CornerRadius="3"
                                 IsHitTestVisible="False" />
                         <ContentPresenter Margin="{TemplateBinding Padding}"
                                           HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
@@ -193,13 +193,13 @@
         <Setter Property="Foreground" Value="White" />
     </Style>
     <Style x:Key="SmallButton" TargetType="Button" BasedOn="{StaticResource BaseButton}">
-        <Setter Property="Height" Value="22" />
-        <Setter Property="Padding" Value="7,0" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="10,0" />
         <Setter Property="FontSize" Value="11" />
     </Style>
     <Style x:Key="PrimarySmallButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
-        <Setter Property="Height" Value="22" />
-        <Setter Property="Padding" Value="7,0" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Padding" Value="10,0" />
         <Setter Property="FontSize" Value="11" />
     </Style>
     <Style x:Key="CaptionButton" TargetType="Button">
@@ -262,8 +262,8 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Foreground" Value="{StaticResource Accent}" />
         <Setter Property="Padding" Value="4,0" />
-        <Setter Property="Height" Value="22" />
-        <Setter Property="FontSize" Value="11" />
+        <Setter Property="Height" Value="24" />
+        <Setter Property="FontSize" Value="12" />
     </Style>
 
     <!-- ========== 侧栏导航按钮：Tag=active 表示当前页 ========== -->
