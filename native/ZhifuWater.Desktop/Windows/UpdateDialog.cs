@@ -140,11 +140,17 @@ public sealed class UpdateDialog : Window
         if (_busy) return;
         if (_installer != null)
         {
-            _status.Text = "正在退出并安装，安装完成后会自动重新打开清渠…";
-            if (!UpdateService.ApplyAndRestart(_installer))
+            var installer = _installer;
+            _primary.IsEnabled = false;
+            _status.Foreground = Pal.Muted;
+            _status.Text = "即将退出并安装。系统会弹出「用户账户控制」，请点「是」授权，否则装不上。";
+            // 先把上面这句提示画出来，再申请管理员权限；否则 UAC 弹窗出现时用户不知道该点什么
+            await Task.Delay(900);
+            if (!UpdateService.ApplyAndRestart(installer))
             {
-                _status.Text = "需要管理员权限才能安装更新，已取消。可稍后以管理员身份运行安装包。";
+                _status.Text = "没有拿到管理员权限，安装已取消。可稍后以管理员身份运行安装包。";
                 _status.Foreground = Pal.ToneFg("danger");
+                _primary.IsEnabled = true;
             }
             return;
         }

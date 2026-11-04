@@ -209,16 +209,40 @@ public static class UpdateService
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
+    /// <summary>更新过程诊断日志，写到 %LOCALAPPDATA%\Qingqu\update.log，便于排查「点了没反应」。</summary>
+    public static void Log(string message)
+    {
+        try
+        {
+            var dir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Qingqu");
+            Directory.CreateDirectory(dir);
+            File.AppendAllText(Path.Combine(dir, "update.log"),
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + " " + message + Environment.NewLine,
+                new UTF8Encoding(false));
+        }
+        catch
+        {
+            // 日志失败不影响更新流程
+        }
+    }
+
     /// <summary>以管理员权限启动安装并退出当前程序：安装器静默升级，完成后重新拉起新版。</summary>
     public static bool ApplyAndRestart(string installerPath)
     {
         var exe = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Qingqu.exe");
         var script = Path.Combine(Path.GetTempPath(), "qingqu-update.ps1");
         var log = Path.Combine(Path.GetTempPath(), "qingqu-update.log");
+        Log("apply: 请求管理员权限，安装包=" + installerPath);
         var ps =
             "$ErrorActionPreference='Continue'\r\n" +
-            "Start-Sleep -Milliseconds 1200\r\n" +
             "$log = " + PsQuote(log) + "\r\n" +
+            "\"script-start\" | Out-File $log -Append -Encoding utf8\r\n" +
+            // 先等清渠自己退出，否则安装包会因文件被占用而失败
+            "for ($i = 0; $i -lt 60; $i++) {\r\n" +
+            "  if (-not (Get-Process Qingqu -ErrorAction SilentlyContinue)) { break }\r\n" +
+            "  Start-Sleep -Milliseconds 500\r\n" +
+            "}\r\n" +
             "try {\r\n" +
             "  $p = Start-Process -FilePath " + PsQuote(installerPath) + " -ArgumentList '/S' -PassThru -Wait -ErrorAction Stop\r\n" +
             "  \"exit=$($p.ExitCode)\" | Out-File $log -Append -Encoding utf8\r\n" +
@@ -242,6 +266,7 @@ public static class UpdateService
         }
         catch (System.ComponentModel.Win32Exception)
         {
+            Log("apply: 用户在系统弹窗中点取消，未获得管理员权限");
             return false;
         }
 

@@ -579,8 +579,9 @@ public partial class MainWindow : Window
     {
         var settings = UpdateService.LoadSettings();
         if (!settings.AutoCheck) return;
+        // 1 小时内查过就跳过；这个窗口只用来避免反复弹窗，不能像以前那样把失败也锁 6 小时
         if (DateTime.TryParse(settings.LastCheckUtc, out var last) &&
-            (DateTime.UtcNow - last.ToUniversalTime()).TotalHours < 6) return;
+            (DateTime.UtcNow - last.ToUniversalTime()).TotalHours < 1) return;
         var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(7) };
         timer.Tick += async (_, _) =>
         {
@@ -607,19 +608,38 @@ public partial class MainWindow : Window
         _updateChecking = true;
         try
         {
-            var info = await UpdateService.CheckAsync();
+            UpdateInfo? info;
+            try
+            {
+                info = await UpdateService.CheckAsync();
+            }
+            catch (Exception ex)
+            {
+                // 检查失败不写 LastCheckUtc：否则一次网络抖动就白白锁住后台检查
+                UpdateService.Log("检查失败：" + ex.Message);
+                if (manual &&
+                    Dlg.Confirm(this, "检查更新", "检查更新失败：" + ex.Message + "\n\n要打开发布页手动下载吗？", "打开发布页"))
+                {
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdateService.ReleasesPage) { UseShellExecute = true }); }
+                    catch { }
+                }
+                return;
+            }
+
             var settings = UpdateService.LoadSettings();
             settings.LastCheckUtc = DateTime.UtcNow.ToString("O");
             UpdateService.SaveSettings(settings);
 
             if (info == null)
             {
+                UpdateService.Log("检查成功：已是最新 v" + UpdateService.CurrentVersionText);
                 _pendingUpdate = null;
                 UpdateLink.Visibility = Visibility.Collapsed;
                 if (manual) Toast("当前已是最新版本 v" + UpdateService.CurrentVersionText);
                 return;
             }
 
+            UpdateService.Log("检查成功：发现新版本 v" + info.Version.ToString(3));
             _pendingUpdate = info;
             UpdateLink.Content = "新版本 v" + info.Version.ToString(3) + " 可用";
             UpdateLink.Visibility = Visibility.Visible;
@@ -629,15 +649,6 @@ public partial class MainWindow : Window
                 Toast("发现新版本 v" + info.Version.ToString(3), true);
                 // 启动时的自动检查也直接把更新窗弹出来，避免用户只看到角落里的小字而错过升级。
                 OpenUpdateDialog();
-            }
-        }
-        catch (Exception ex)
-        {
-            if (manual &&
-                Dlg.Confirm(this, "检查更新", "检查更新失败：" + ex.Message + "\n\n要打开发布页手动下载吗？", "打开发布页"))
-            {
-                try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(UpdateService.ReleasesPage) { UseShellExecute = true }); }
-                catch { }
             }
         }
         finally
