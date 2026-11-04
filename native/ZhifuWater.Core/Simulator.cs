@@ -477,10 +477,12 @@ public sealed class Simulator
         // —— 进水调节池与提升泵 ——
         var r = s.Raw;
         bool wasRun = r.PumpRun;
-        // 连续进水：来水一直进调节池，泵与补水阀决定液位方向
-        r.Level += 0.006 * dt;
-        if (r.PumpRun) r.Level -= 0.050 * dt;
-        if (r.Refill) r.Level += 0.060 * dt;
+        // 连续进水：来水一直进调节池，泵与补水阀决定液位方向。
+        // 按“池容 + 流量”积分：0.6 m³ 调节池、100 L/h 设计进水、
+        // 补水 0.36 m³/h、提升泵 0.16 m³/h；DemoSpeed 只用于让演示时变化可见。
+        const double RawVolumeM3 = 0.60, DesignFlowM3h = 0.10, RefillFlowM3h = 0.36, PumpFlowM3h = 0.16, DemoSpeed = 5;
+        double netFlowM3h = DesignFlowM3h + (r.Refill ? RefillFlowM3h : 0) - (r.PumpRun ? PumpFlowM3h : 0);
+        r.Level += netFlowM3h / RawVolumeM3 / 3600.0 * 100.0 * dt * DemoSpeed;
         // 补水阀滞环：低液位开、高液位关（自动化规则也会下发同名命令，写执行记录）
         if (r.Level <= 32) r.Refill = true;
         if (r.Refill && r.Level >= 64) r.Refill = false;
@@ -559,7 +561,9 @@ public sealed class Simulator
         }
 
         // —— 液位与能耗 ——
-        s.ClearLevel = JsMath.Clamp(s.ClearLevel + (s.Raw.PumpRun ? 0.004 : -0.002) * dt, 0, 100);
+        const double ClearVolumeM3 = 0.40, PumpOutM3h = 0.16, TreatedOutM3h = 0.10;
+        double clearNet = s.Raw.PumpRun ? (PumpOutM3h - TreatedOutM3h) : -TreatedOutM3h;
+        s.ClearLevel = JsMath.Clamp(s.ClearLevel + clearNet / ClearVolumeM3 / 3600.0 * 100.0 * dt * 5, 0, 100);
         s.WasteLevel = JsMath.Clamp(s.WasteLevel + (s.Baf.BwPhase != 0 ? 0.02 : -0.003) * dt, 0, 100);
         double baseKw = 0.55 + (s.Baf.Blower ? 0.38 : 0) + (s.Pac.Run ? 0.12 : 0) + (s.Pam.Run ? 0.1 : 0);
         double bwKw = (s.Baf.BwPhase != 0 || s.Sulfur.BwPhase != 0) ? 0.35 : 0;

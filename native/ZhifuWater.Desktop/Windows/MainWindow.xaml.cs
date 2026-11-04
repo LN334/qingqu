@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -392,7 +392,7 @@ public partial class MainWindow : Window
     {
         try
         {
-            var alarms = _services.Data.Alarms("active").Count;
+            var alarms = _services.Data.Alarms("open").Count;
             var workorders = _services.Data.WorkOrders("all").Count(w => w.Status is "pending" or "accepted" or "processing");
             SetNavBadge("alarms", alarms);
             SetNavBadge("workorders", workorders);
@@ -400,12 +400,71 @@ public partial class MainWindow : Window
             BellBadge.Visibility = unread > 0 ? Visibility.Visible : Visibility.Collapsed;
             BellBadgeText.Text = unread > 99 ? "99+" : unread.ToString();
             FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
+            CheckNewAlarms();
             WatchAssignments();
         }
         catch
         {
             // 徽标刷新失败不打断主界面
         }
+    }
+
+    private readonly HashSet<string> _knownAlarms = new(StringComparer.Ordinal);
+    private readonly Queue<AlarmInfo> _alarmQueue = new();
+    private DispatcherTimer? _alarmToastTimer;
+
+    /// <summary>新出现的告警弹一条通知；首次加载只记录不弹，避免启动时刷屏。</summary>
+    private void CheckNewAlarms()
+    {
+        var open = _services.Data.Alarms("open");
+        var ids = open.Select(a => a.Id).ToHashSet(StringComparer.Ordinal);
+        if (_knownAlarms.Count == 0)
+        {
+            foreach (var id in ids) _knownAlarms.Add(id);
+            return;
+        }
+        foreach (var a in open.Where(a => !_knownAlarms.Contains(a.Id)).OrderBy(a => a.At).Take(3))
+            _alarmQueue.Enqueue(a);
+        _knownAlarms.IntersectWith(ids);
+        foreach (var id in ids) _knownAlarms.Add(id);
+        if (AlarmToastPanel.Visibility != Visibility.Visible) ShowNextAlarmToast();
+    }
+
+    private void ShowNextAlarmToast()
+    {
+        if (_alarmQueue.Count == 0)
+        {
+            AlarmToastPanel.Visibility = Visibility.Collapsed;
+            return;
+        }
+        var a = _alarmQueue.Dequeue();
+        var tone = Pal.AlarmLevelTone(a.Level);
+        AlarmToastBar.Background = Pal.ToneFg(tone);
+        AlarmToastTitle.Text = $"新告警 · {Pal.AlarmLevelText(a.Level)}";
+        AlarmToastTitle.Foreground = Pal.ToneFg(tone);
+        var at = DateTimeOffset.FromUnixTimeMilliseconds(a.At).LocalDateTime;
+        AlarmToastBody.Text = a.UnitName.Length > 0
+            ? $"{a.Title}（{a.UnitName} · {at:HH:mm:ss}）"
+            : $"{a.Title}（{at:HH:mm:ss}）";
+        AlarmToastPanel.Visibility = Visibility.Visible;
+        _alarmToastTimer ??= new DispatcherTimer { Interval = TimeSpan.FromSeconds(6) };
+        _alarmToastTimer.Tick -= AlarmToastTick;
+        _alarmToastTimer.Tick += AlarmToastTick;
+        _alarmToastTimer.Stop();
+        _alarmToastTimer.Start();
+    }
+
+    private void AlarmToastTick(object? sender, EventArgs e)
+    {
+        _alarmToastTimer?.Stop();
+        ShowNextAlarmToast();
+    }
+
+    private void OnAlarmToastClick(object sender, MouseButtonEventArgs e)
+    {
+        AlarmToastPanel.Visibility = Visibility.Collapsed;
+        _alarmToastTimer?.Stop();
+        ShowPage("alarms");
     }
 
     private void SetNavBadge(string id, int count)
