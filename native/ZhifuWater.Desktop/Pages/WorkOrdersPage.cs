@@ -217,6 +217,8 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
         if (w.Status == "accepted") actions.Children.Add(ActionButton("开始处理", () => { Advance(w, "process", false); close?.Invoke(); }));
         if (w.Status is "accepted" or "processing") actions.Children.Add(ActionButton("完成", () => { Advance(w, "done", true); close?.Invoke(); }));
         if (w.Status == "done") actions.Children.Add(ActionButton("验收关闭", () => { Advance(w, "close", null); close?.Invoke(); }));
+        if (!string.IsNullOrEmpty(w.AlarmId)) actions.Children.Add(ActionButton("看来源告警", () => { close?.Invoke(); Host.ShowPage("alarms", w.AlarmId); }));
+        if (!string.IsNullOrEmpty(w.UnitCode)) actions.Children.Add(ActionButton("看工艺流程", () => { close?.Invoke(); Host.ShowPage("process", w.UnitCode); }));
         if (actions.Children.Count == 0) actions.Children.Add(Kit.T("该工单已结束，无可用操作", 10, Pal.Muted2));
         foreach (UIElement child in actions.Children) ((FrameworkElement)child).Margin = new Thickness(0, 0, 5, 4);
         target.Children.Add(actions);

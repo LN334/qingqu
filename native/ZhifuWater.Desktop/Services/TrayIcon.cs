@@ -21,12 +21,15 @@ public static class TrayIcon
     private static WF.ToolStripMenuItem? _status;
     private static WF.ToolStripMenuItem? _autoStart;
 
-    private static readonly Color MenuBack = Color.FromArgb(24, 38, 45);
-    private static readonly Color MenuInk = Color.FromArgb(231, 239, 242);
-    private static readonly Color MenuMuted = Color.FromArgb(143, 166, 175);
-    private static readonly Color MenuHover = Color.FromArgb(23, 67, 63);
-    private static readonly Color MenuDanger = Color.FromArgb(219, 110, 103);
-    private static readonly Color MenuDangerHover = Color.FromArgb(58, 36, 38);
+    private static readonly Color MenuBack = Color.FromArgb(255, 255, 255);
+    private static readonly Color MenuInk = Color.FromArgb(31, 35, 41);
+    private static readonly Color MenuMuted = Color.FromArgb(138, 147, 158);
+    private static readonly Color MenuIcon = Color.FromArgb(90, 102, 115);
+    private static readonly Color MenuAccent = Color.FromArgb(14, 124, 116);
+    private static readonly Color MenuHover = Color.FromArgb(242, 244, 247);
+    private static readonly Color MenuDanger = Color.FromArgb(214, 69, 69);
+    private static readonly Color MenuDangerHover = Color.FromArgb(251, 236, 236);
+    private static readonly Color MenuLine = Color.FromArgb(233, 236, 240);
 
     /// <summary>用户从托盘菜单选择了「退出」：主窗的关闭拦截要放行。</summary>
     public static bool ExitRequested { get; private set; }
@@ -42,11 +45,12 @@ public static class TrayIcon
         {
             BackColor = MenuBack,
             ForeColor = MenuInk,
-            Font = new Font("Microsoft YaHei UI", 9.5f),
+            Font = new Font("Microsoft YaHei UI", 11f),
             ShowImageMargin = true,
             ShowCheckMargin = false,
-            ImageScalingSize = new System.Drawing.Size(16, 16),
-            Padding = new WF.Padding(4, 6, 4, 6),
+            ImageScalingSize = new System.Drawing.Size(20, 20),
+            MinimumSize = new System.Drawing.Size(268, 0),
+            Padding = new WF.Padding(6, 6, 6, 6),
             Renderer = new MenuRenderer()
         };
 
@@ -54,7 +58,7 @@ public static class TrayIcon
         {
             Enabled = false,
             ForeColor = MenuMuted,
-            Padding = new WF.Padding(6, 2, 10, 4)
+            Padding = new WF.Padding(14, 8, 16, 8)
         };
         menu.Items.Add(_status);
         menu.Items.Add(new WF.ToolStripSeparator());
@@ -78,6 +82,7 @@ public static class TrayIcon
                 ShowBalloon("设置开机启动失败", ex.Message);
             }
             _autoStart.Checked = IsAutoStartEnabled();
+            _autoStart.Image = Glyph(_autoStart.Checked ? "" : "", _autoStart.Checked ? MenuAccent : MenuIcon);
         };
         menu.Items.Add(_autoStart);
 
@@ -89,8 +94,11 @@ public static class TrayIcon
 
         menu.Opening += (_, _) =>
         {
-            _autoStart!.Checked = IsAutoStartEnabled();
+            var on = IsAutoStartEnabled();
+            _autoStart!.Checked = on;
+            _autoStart.Image = Glyph(on ? "" : "", on ? MenuAccent : MenuIcon);
             _status!.Text = "清渠  ·  运行中  ·  v" + AppVersion();
+            RoundMenu(menu);
         };
         _menu = menu;
 
@@ -122,11 +130,28 @@ public static class TrayIcon
         var bmp = new Bitmap(20, 20);
         using var g = Graphics.FromImage(bmp);
         g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-        using var font = new Font("Segoe MDL2 Assets", 11f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+        using var font = new Font("Segoe MDL2 Assets", 14f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
         using var brush = new SolidBrush(color);
         var size = g.MeasureString(glyph, font);
         g.DrawString(glyph, font, brush, (20 - size.Width) / 2f, (20 - size.Height) / 2f);
         return bmp;
+    }
+
+    private static void RoundMenu(WF.ContextMenuStrip menu)
+    {
+        try
+        {
+            using var path = new GraphicsPath();
+            var r = new Rectangle(0, 0, menu.Width, menu.Height);
+            const int d = 20;
+            path.AddArc(r.X, r.Y, d, d, 180, 90);
+            path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
+            path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+            path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
+            path.CloseFigure();
+            menu.Region = new Region(path);
+        }
+        catch { }
     }
 
     private static string AppVersion()

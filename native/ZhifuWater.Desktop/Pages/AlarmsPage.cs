@@ -9,7 +9,7 @@ using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class AlarmsPage : PageBase
+public sealed class AlarmsPage : PageBase, IFocusablePage
 {
     private UniformGrid _kpiHost = null!;
     private UiTable _table = null!;
@@ -20,6 +20,15 @@ public sealed class AlarmsPage : PageBase
     private TextBox _keyword = null!;
     private TextBlock _listInfo = null!;
     private AlarmInfo? _selected;
+
+    /// <summary>从工单页跳过来时聚焦指定告警。</summary>
+    public void FocusItem(string key)
+    {
+        if (string.IsNullOrEmpty(key)) return;
+        _pendingFocus = key;
+    }
+
+    private string? _pendingFocus;
     private UiTable _ruleTable = null!;
     private AlarmRuleInfo? _ruleSelected;
 
@@ -85,6 +94,7 @@ public sealed class AlarmsPage : PageBase
         var infoRow = Kit.Row(8, _listInfo, Kit.Spacer(),
             Kit.Btn("看点位曲线", FocusPoint, small: true),
                 Kit.Btn("派工单", DispatchOrder, small: true),
+                Kit.Btn("看设备", FocusDevice, small: true),
             Kit.Btn("确认告警", AckSelected, primary: true, small: true),
             Kit.Btn("标记恢复", ResolveSelected, small: true));
         infoRow.Margin = new Thickness(0, 6, 0, 6);
@@ -145,6 +155,13 @@ public sealed class AlarmsPage : PageBase
             }).ToList();
         _table.ItemsSource = rows;
         _listInfo.Text = $"共 {rows.Count} 条 · 待确认 {rows.Count(r => r.Data is AlarmInfo { Status: "active" })} 条";
+
+        if (_pendingFocus is { } focusId)
+        {
+            _pendingFocus = null;
+            var hit = rows.FirstOrDefault(r => r.Key == focusId);
+            if (hit is not null) _table.SelectedItem = hit;
+        }
         RefreshStats();
     }
 
@@ -225,6 +242,14 @@ public sealed class AlarmsPage : PageBase
         "info" or "提示" => "#8A979F",
         _ => "#6C7B84",
     };
+
+    private void FocusDevice()
+    {
+        if (_selected is not { } a || string.IsNullOrEmpty(a.PointCode)) { Toast("这条告警没有关联点位", false); return; }
+        var deviceId = Svc.Data.DeviceIdOfPoint(a.PointCode);
+        if (string.IsNullOrEmpty(deviceId)) { Toast("这个点位没有登记设备", false); return; }
+        Host.ShowPage("devices", deviceId);
+    }
 
     private void DispatchOrder()
     {
