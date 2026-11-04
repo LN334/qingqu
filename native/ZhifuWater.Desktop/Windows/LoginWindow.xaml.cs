@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
+using System.Windows.Media;
 using ZhifuWater.Desktop.Data;
 
 namespace ZhifuWater.Desktop.Windows;
@@ -16,7 +19,7 @@ public partial class LoginWindow : Window
     public LoginWindow(AppServices services)
     {
         InitializeComponent();
-        NativeChrome.Apply(this);
+        NativeChrome.EnableCustomFrame(this);
         _services = services;
         Loaded += (_, _) => AccountBox.Focus();
         AccountBox.Text = "admin";
@@ -24,6 +27,26 @@ public partial class LoginWindow : Window
         PasswordBox.PasswordChanged += (_, _) => PasswordHint.Visibility = PasswordBox.Password.Length == 0 ? Visibility.Visible : Visibility.Collapsed;
         AccountHint.Visibility = Visibility.Collapsed;
     }
+
+    private void OnShellMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject d && HasInteractiveParent(d)) return;
+        if (e.ButtonState == MouseButtonState.Pressed)
+        {
+            try { DragMove(); } catch (InvalidOperationException) { }
+        }
+    }
+
+    private static bool HasInteractiveParent(DependencyObject d)
+    {
+        for (var cur = d; cur is not null; cur = VisualTreeHelper.GetParent(cur))
+        {
+            if (cur is ButtonBase or TextBox) return true;
+        }
+        return false;
+    }
+
+    private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
 
     private void OnLoginClick(object sender, RoutedEventArgs e) => TryLogin();
 

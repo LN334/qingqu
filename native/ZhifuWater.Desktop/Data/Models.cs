@@ -505,3 +505,47 @@ public sealed class DataHealthInfo
     public long LatestAt { get; set; }
     public string Notice { get; set; } = "";
 }
+
+/// <summary>自动化规则（桌面端展示用）。</summary>
+public sealed class AutoRuleInfo
+{
+    public string Id { get; set; } = "";
+    public string Name { get; set; } = "";
+    public string Group { get; set; } = "";
+    public string UnitCode { get; set; } = "";
+    public string Action { get; set; } = "command"; // command / workorder
+    public string ActionName { get; set; } = "";
+    public string Conditions { get; set; } = "";
+    public string Reason { get; set; } = "";
+    public bool Enabled { get; set; } = true;
+    public int HoldSec { get; set; }
+    public int CooldownSec { get; set; }
+    public int MaxPerDay { get; set; }
+    public int Runs { get; set; }
+    public int TodayRuns { get; set; }
+    public long LastAt { get; set; }
+    public string LastResult { get; set; } = "";
+}
+
+/// <summary>自动化执行事件。</summary>
+public sealed class AutoEventInfo
+{
+    public string Id { get; set; } = "";
+    public string RuleId { get; set; } = "";
+    public string RuleName { get; set; } = "";
+    public string Action { get; set; } = "command";
+    public string Result { get; set; } = "";
+    public long At { get; set; }
+}
+
+/// <summary>自动化总览。</summary>
+public sealed class AutoSnapshot
+{
+    public bool Enabled { get; set; } = true;
+    public List<AutoRuleInfo> Rules { get; set; } = new();
+    public List<AutoEventInfo> Events { get; set; } = new();
+    public int TodayRuns { get; set; }
+    public int AlarmRuleTotal { get; set; }
+    public int AlarmRuleEnabled { get; set; }
+    public long LastAt { get; set; }
+}

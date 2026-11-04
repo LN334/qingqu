@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Shell;
 using System.Windows.Interop;
 
 namespace ZhifuWater.Desktop.Windows;
@@ -46,4 +47,19 @@ internal static class NativeChrome
     }
 
     private static int ColorRef(byte r, byte g, byte b) => r | (g << 8) | (b << 16);
+
+    /// <summary>去掉系统标题栏，文字/按钮全部由应用自绘（WindowChrome 只保留缩放边框）。</summary>
+    public static void EnableCustomFrame(Window window)
+    {
+        window.WindowStyle = WindowStyle.None;
+        var chrome = new WindowChrome
+        {
+            CaptionHeight = 0,
+            ResizeBorderThickness = new Thickness(6),
+            GlassFrameThickness = new Thickness(0),
+            CornerRadius = new CornerRadius(0),
+            UseAeroCaptionButtons = false,
+        };
+        WindowChrome.SetWindowChrome(window, chrome);
+    }
 }

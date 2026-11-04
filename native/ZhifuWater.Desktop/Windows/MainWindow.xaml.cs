@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using ZhifuWater.Desktop.Data;
@@ -72,7 +74,7 @@ public partial class MainWindow : Window
     public MainWindow(AppServices services, UserInfo user)
     {
         InitializeComponent();
-        NativeChrome.Apply(this);
+        NativeChrome.EnableCustomFrame(this);
         _services = services;
         _user = user;
 
@@ -278,6 +280,38 @@ public partial class MainWindow : Window
             Toast("自动刷新失败：" + ex.Message, false);
         }
     }
+
+    private void OnTopBarMouseDown(object sender, MouseButtonEventArgs e)
+    {
+        if (e.OriginalSource is DependencyObject d && HasInteractiveParent(d)) return;
+        if (e.ClickCount == 2) { ToggleMaximize(); return; }
+        if (e.ButtonState == MouseButtonState.Pressed)
+        {
+            try { DragMove(); } catch (InvalidOperationException) { }
+        }
+    }
+
+    private static bool HasInteractiveParent(DependencyObject d)
+    {
+        for (var cur = d; cur is not null; cur = VisualTreeHelper.GetParent(cur))
+        {
+            if (cur is ButtonBase or ComboBox or TextBox) return true;
+        }
+        return false;
+    }
+
+    private void OnMinimizeClick(object sender, RoutedEventArgs e) => WindowState = WindowState.Minimized;
+
+    private void OnMaximizeClick(object sender, RoutedEventArgs e) => ToggleMaximize();
+
+    private void ToggleMaximize()
+    {
+        WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
+        if (MaxGlyph is not null)
+            MaxGlyph.Text = WindowState == WindowState.Maximized ? "" : "";
+    }
+
+    private void OnCloseClick(object sender, RoutedEventArgs e) => Close();
 
     private void OnRefreshClick(object sender, RoutedEventArgs e)
     {

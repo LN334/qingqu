@@ -117,6 +117,12 @@ public interface IDesktopData
     OpResult ResetPassword(string userId);
     OpResult SetUserStatus(string userId, bool active);
 
+    // ---------- 自动控制 ----------
+    AutoSnapshot Automation();
+    OpResult SetAutomationEnabled(bool enabled);
+    OpResult ToggleAutomationRule(string id, bool enabled);
+    OpResult RunAutomationRule(string id);
+
     // ---------- 通知 / 现场屏 ----------
     IReadOnlyList<NotificationInfo> Notifications { get; }
     int UnreadNotifications { get; }

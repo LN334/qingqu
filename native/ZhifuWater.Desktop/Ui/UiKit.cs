@@ -316,7 +316,7 @@ public static class Kit
     {
         return new ScrollViewer
         {
-            VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Hidden,
             HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
             Content = new Border { Padding = new Thickness(padding), Child = content },
         };
@@ -532,7 +532,6 @@ public static class Kit
             else if (flex.Length > 0 && need.Sum() - flex.Sum(i => need[i]) + 84 * flex.Length <= avail)
             {
                 // 固定列放得下、只是弹性列内容长：固定列按内容给足，剩下的全给弹性列。
-                const double flexMin = 84;
                 final = (double[])need.Clone();
                 var fixedNeed = need.Sum() - flex.Sum(i => need[i]);
                 var share = (avail - fixedNeed) / flex.Length;

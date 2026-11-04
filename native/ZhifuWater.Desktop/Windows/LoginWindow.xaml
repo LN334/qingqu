@@ -5,12 +5,13 @@
         Width="1080" Height="720"
         MinWidth="960" MinHeight="640"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None" ResizeMode="NoResize"
         Background="#FFFFFF"
         FontFamily="{DynamicResource UiFont}"
         Foreground="{DynamicResource Ink2}"
         UseLayoutRounding="True"
         SnapsToDevicePixels="True">
-    <Grid>
+    <Grid MouseLeftButtonDown="OnShellMouseDown">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="1.15*" />
             <ColumnDefinition Width="0.85*" />
@@ -110,5 +111,9 @@
             <TextBlock Text="v2.0.10" FontSize="11" Foreground="{DynamicResource Muted2}"
                        HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,20,16" />
         </Grid>
+        <Button Style="{DynamicResource CaptionCloseButton}" HorizontalAlignment="Right" VerticalAlignment="Top"
+                Margin="0,8,8,0" Click="OnCloseClick" ToolTip="关闭" Panel.ZIndex="10">
+            <TextBlock Text="&#xE8BB;" FontFamily="Segoe MDL2 Assets" FontSize="10" Foreground="{DynamicResource Ink2}" />
+        </Button>
     </Grid>
 </Window>
