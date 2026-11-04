@@ -47,7 +47,7 @@ public sealed class MonitorPage : PageBase, IFocusablePage
         columns.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.15, GridUnitType.Star) });
 
         _table = Table(new[] { "点位", "名称", "单元", "当前值", "质量", "状态", "更新" },
-            new double[] { 150, 0, 52, 86, 46, 52, 74 });
+            new double[] { 150, 0, 80, 86, 46, 56, 74 });
         _table.SelectionChanged += (_, _) =>
         {
             if (_table.SelectedItem is UiRow row && row.Data is Reading r)
@@ -73,6 +73,15 @@ public sealed class MonitorPage : PageBase, IFocusablePage
             ShowSelected();
         };
         chartHead.Children.Add(_hours);
+        var deviceBtn = Kit.Btn("看设备", () =>
+        {
+            if (string.IsNullOrEmpty(_selected)) { Toast("请先选中一个点位", false); return; }
+            var deviceId = Svc.Data.DeviceIdOfPoint(_selected);
+            if (string.IsNullOrEmpty(deviceId)) { Toast("这个点位没有登记设备", false); return; }
+            Host.ShowPage("devices", deviceId);
+        }, small: true);
+        deviceBtn.Margin = new Thickness(8, 0, 0, 0);
+        chartHead.Children.Add(deviceBtn);
 
         _chart = new LineChart { Height = 320, NormalizePerSeries = false, ShowYLabels = true, EnablePan = true, ViewWindow = TimeSpan.FromHours(6), ToolTip = "左右拖动查看历史 · 滚轮缩放 · 双击回到最新" };
         _pointMeta = Kit.T("", 11, Pal.Muted2, wrap: TextWrapping.Wrap);

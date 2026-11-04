@@ -1,167 +1,84 @@
-﻿using System;
+using System;
 using System.Diagnostics;
-using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Effects;
+using System.Windows.Media.Imaging;
+using System.IO;
 using Microsoft.Win32;
 using WF = System.Windows.Forms;
 
 namespace ZhifuWater.Desktop.Services;
 
-/// <summary>
-/// 托盘常驻：点关闭时窗口收进通知区而不是退出，双击图标唤回，菜单里可以真正退出。
-/// 托盘图标从程序自身的 exe 图标提取，不额外带资源。
-/// </summary>
+/// <summary>托盘常驻：关闭窗口收进通知区，右键弹出应用风格的菜单，双击唤回。</summary>
 public static class TrayIcon
 {
     private static WF.NotifyIcon? _icon;
-    private static WF.ContextMenuStrip? _menu;
     private static Window? _main;
-    private static WF.ToolStripMenuItem? _status;
-    private static WF.ToolStripMenuItem? _autoStart;
+    private static TrayMenuWindow? _menu;
 
-    private static readonly Color MenuBack = Color.FromArgb(255, 255, 255);
-    private static readonly Color MenuInk = Color.FromArgb(31, 35, 41);
-    private static readonly Color MenuMuted = Color.FromArgb(138, 147, 158);
-    private static readonly Color MenuIcon = Color.FromArgb(90, 102, 115);
-    private static readonly Color MenuAccent = Color.FromArgb(14, 124, 116);
-    private static readonly Color MenuHover = Color.FromArgb(242, 244, 247);
-    private static readonly Color MenuDanger = Color.FromArgb(214, 69, 69);
-    private static readonly Color MenuDangerHover = Color.FromArgb(251, 236, 236);
-    private static readonly Color MenuLine = Color.FromArgb(233, 236, 240);
+    private static readonly Brush Ink = new SolidColorBrush(Color.FromRgb(31, 35, 41));
+    private static readonly Brush Muted = new SolidColorBrush(Color.FromRgb(90, 102, 115));
+    private static readonly Brush Hover = new SolidColorBrush(Color.FromRgb(243, 245, 247));
+    private static readonly Brush Danger = new SolidColorBrush(Color.FromRgb(214, 69, 69));
+    private static readonly Brush DangerHover = new SolidColorBrush(Color.FromRgb(253, 241, 241));
+    private static readonly Brush Accent = new SolidColorBrush(Color.FromRgb(14, 124, 116));
 
-    /// <summary>用户从托盘菜单选择了「退出」：主窗的关闭拦截要放行。</summary>
     public static bool ExitRequested { get; private set; }
 
-    public static void ShowMenuAt(int x, int y) => _menu?.Show(new System.Drawing.Point(x, y));
+    public static void ShowMenuAt(int x, int y)
+    {
+        try
+        {
+            _menu ??= new TrayMenuWindow(ShowMain, ToggleAutoStart, IsAutoStartEnabled, Exit);
+            _menu.ShowAt(x, y);
+        }
+        catch { }
+    }
+
+    public static void RenderPreview(string path)
+    {
+        var w = new TrayMenuWindow(ShowMain, ToggleAutoStart, IsAutoStartEnabled, Exit);
+        var root = (FrameworkElement)w.Content;
+        root.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+        root.Arrange(new Rect(new Point(0, 0), root.DesiredSize));
+        root.UpdateLayout();
+        var bmp = new RenderTargetBitmap((int)Math.Ceiling(root.ActualWidth), (int)Math.Ceiling(root.ActualHeight), 96, 96, PixelFormats.Pbgra32);
+        bmp.Render(root);
+        var enc = new PngBitmapEncoder();
+        enc.Frames.Add(BitmapFrame.Create(bmp));
+        using var fs = File.Create(path);
+        enc.Save(fs);
+    }
 
     public static void Ensure(Window main)
     {
         _main = main;
         if (_icon is not null) return;
 
-        var menu = new WF.ContextMenuStrip
-        {
-            BackColor = MenuBack,
-            ForeColor = MenuInk,
-            Font = new Font("Microsoft YaHei UI", 11f),
-            ShowImageMargin = true,
-            ShowCheckMargin = false,
-            ImageScalingSize = new System.Drawing.Size(20, 20),
-            MinimumSize = new System.Drawing.Size(268, 0),
-            Padding = new WF.Padding(6, 6, 6, 6),
-            Renderer = new MenuRenderer()
-        };
-
-        _status = new WF.ToolStripMenuItem
-        {
-            Enabled = false,
-            ForeColor = MenuMuted,
-            Padding = new WF.Padding(14, 8, 16, 8)
-        };
-        menu.Items.Add(_status);
-        menu.Items.Add(new WF.ToolStripSeparator());
-
-        var open = Item("打开主界面", "\uE8A7", MenuInk, bold: true);
-        open.Click += (_, _) => ShowMain();
-        menu.Items.Add(open);
-
-        _autoStart = Item("开机自动启动", "\uE7E8", MenuInk);
-        _autoStart.CheckOnClick = false;
-        _autoStart.Click += (_, _) =>
-        {
-            var next = !IsAutoStartEnabled();
-            try
-            {
-                SetAutoStart(next);
-                _autoStart.Checked = next;
-            }
-            catch (Exception ex)
-            {
-                ShowBalloon("设置开机启动失败", ex.Message);
-            }
-            _autoStart.Checked = IsAutoStartEnabled();
-            _autoStart.Image = Glyph(_autoStart.Checked ? "" : "", _autoStart.Checked ? MenuAccent : MenuIcon);
-        };
-        menu.Items.Add(_autoStart);
-
-        menu.Items.Add(new WF.ToolStripSeparator());
-
-        var exit = Item("退出清渠", "\uE711", MenuDanger);
-        exit.Click += (_, _) => Exit();
-        menu.Items.Add(exit);
-
-        menu.Opening += (_, _) =>
-        {
-            var on = IsAutoStartEnabled();
-            _autoStart!.Checked = on;
-            _autoStart.Image = Glyph(on ? "" : "", on ? MenuAccent : MenuIcon);
-            _status!.Text = "清渠  ·  运行中  ·  v" + AppVersion();
-            RoundMenu(menu);
-        };
-        _menu = menu;
-
         _icon = new WF.NotifyIcon
         {
             Icon = LoadIcon(),
             Text = "清渠 · 村镇水处理站智能运维平台",
-            Visible = true,
-            ContextMenuStrip = menu
+            Visible = true
+        };
+        _icon.MouseUp += (_, e) =>
+        {
+            if (e.Button != WF.MouseButtons.Right) return;
+            var p = WF.Cursor.Position;
+            ShowMenuAt(p.X, p.Y);
         };
         _icon.DoubleClick += (_, _) => ShowMain();
     }
 
-    private static WF.ToolStripMenuItem Item(string text, string glyph, Color color, bool bold = false)
+    private static void ToggleAutoStart()
     {
-        var item = new WF.ToolStripMenuItem(text)
-        {
-            ForeColor = color,
-            Image = Glyph(glyph, color == MenuDanger ? MenuDanger : MenuIcon),
-            ImageScaling = WF.ToolStripItemImageScaling.None,
-            Padding = new WF.Padding(2, 4, 10, 4)
-        };
-        
-        return item;
-    }
-
-    private static Bitmap Glyph(string glyph, Color color)
-    {
-        var bmp = new Bitmap(20, 20);
-        using var g = Graphics.FromImage(bmp);
-        g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-        using var font = new Font("Segoe MDL2 Assets", 14f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-        using var brush = new SolidBrush(color);
-        var size = g.MeasureString(glyph, font);
-        g.DrawString(glyph, font, brush, (20 - size.Width) / 2f, (20 - size.Height) / 2f);
-        return bmp;
-    }
-
-    private static void RoundMenu(WF.ContextMenuStrip menu)
-    {
-        try
-        {
-            using var path = new GraphicsPath();
-            var r = new Rectangle(0, 0, menu.Width, menu.Height);
-            const int d = 20;
-            path.AddArc(r.X, r.Y, d, d, 180, 90);
-            path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
-            path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
-            path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            menu.Region = new Region(path);
-        }
-        catch { }
-    }
-
-    private static string AppVersion()
-    {
-        try
-        {
-            var v = typeof(TrayIcon).Assembly.GetName().Version;
-            return v is null ? "2.0.12" : $"{v.Major}.{v.Minor}.{v.Build}";
-        }
-        catch { return "2.0.12"; }
+        var next = !IsAutoStartEnabled();
+        try { SetAutoStart(next); }
+        catch (Exception ex) { ShowBalloon("设置开机启动失败", ex.Message); }
+        _menu?.RefreshAutoStart();
     }
 
     public static void ShowMain()
@@ -176,10 +93,7 @@ public static class TrayIcon
             _main.Topmost = false;
             _main.Focus();
         }
-        catch
-        {
-            // 唤回失败不影响后台继续运行
-        }
+        catch { }
     }
 
     private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
@@ -190,16 +104,14 @@ public static class TrayIcon
         try
         {
             using var key = Registry.CurrentUser.OpenSubKey(RunKey);
-            var value = key?.GetValue(RunName) as string;
-            return !string.IsNullOrEmpty(value);
+            return !string.IsNullOrEmpty(key?.GetValue(RunName) as string);
         }
         catch { return false; }
     }
 
     public static void SetAutoStart(bool enabled)
     {
-        using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true)
-                        ?? Registry.CurrentUser.CreateSubKey(RunKey);
+        using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true) ?? Registry.CurrentUser.CreateSubKey(RunKey);
         if (key is null) return;
         if (enabled)
         {
@@ -240,94 +152,134 @@ public static class TrayIcon
         _icon = null;
     }
 
-    private static Icon LoadIcon()
+    private static System.Drawing.Icon LoadIcon()
     {
         try
         {
             var path = Environment.ProcessPath;
             if (!string.IsNullOrEmpty(path))
             {
-                var ico = Icon.ExtractAssociatedIcon(path);
+                var ico = System.Drawing.Icon.ExtractAssociatedIcon(path);
                 if (ico is not null) return ico;
             }
         }
         catch { }
-        return SystemIcons.Application;
+        return System.Drawing.SystemIcons.Application;
     }
 
-    /// <summary>深色菜单：与主界面同一套墨绿/青灰，去掉系统默认灰白渐变。</summary>
-    private sealed class MenuRenderer : WF.ToolStripProfessionalRenderer
+    /// <summary>与主界面同一套视觉：白卡片、圆角、13px 文字、42 行高。</summary>
+    private sealed class TrayMenuWindow : Window
     {
-        public MenuRenderer() : base(new MenuColors()) { RoundedEdges = false; }
+        private readonly TextBlock _autoGlyph;
+        private readonly Func<bool> _autoOn;
 
-        protected override void OnRenderToolStripBackground(WF.ToolStripRenderEventArgs e)
+        public TrayMenuWindow(Action open, Action toggleAuto, Func<bool> autoOn, Action exit)
         {
-            using var b = new SolidBrush(MenuBack);
-            e.Graphics.FillRectangle(b, e.AffectedBounds);
+            _autoOn = autoOn;
+            WindowStyle = WindowStyle.None;
+            AllowsTransparency = true;
+            Background = Brushes.Transparent;
+            ShowInTaskbar = false;
+            Topmost = true;
+            SizeToContent = SizeToContent.WidthAndHeight;
+            ResizeMode = ResizeMode.NoResize;
+
+            var panel = new StackPanel { Margin = new Thickness(6, 6, 6, 6) };
+            panel.Children.Add(Row("\uE8A7", "打开主界面", Ink, open, out _));
+            panel.Children.Add(Row("\uE7E8", "开机自动启动", Ink, toggleAuto, out _autoGlyph));
+            panel.Children.Add(Separator());
+            panel.Children.Add(Row("\uE711", "退出清渠", Danger, exit, out _, danger: true));
+
+            Content = new Border
+            {
+                Background = Brushes.White,
+                Margin = new Thickness(10),
+                Width = 268,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(227, 231, 235)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                
+                Effect = new DropShadowEffect { BlurRadius = 16, ShadowDepth = 2, Opacity = 0.18, Color = Colors.Black },
+                Child = panel
+            };
+
+            Deactivated += (_, _) => Hide();
+            RefreshAutoStart();
         }
 
-        protected override void OnRenderImageMargin(WF.ToolStripRenderEventArgs e)
+        public void RefreshAutoStart()
         {
-            using var b = new SolidBrush(MenuBack);
-            e.Graphics.FillRectangle(b, e.AffectedBounds);
+            var on = _autoOn();
+            _autoGlyph.Text = on ? "\uE73E" : "\uE7E8";
+            _autoGlyph.Foreground = on ? Accent : Muted;
         }
 
-        protected override void OnRenderMenuItemBackground(WF.ToolStripItemRenderEventArgs e)
+        public void ShowAt(int screenX, int screenY)
         {
-            var item = e.Item;
-            if (!item.Selected && !item.Pressed) return;
-            var danger = item.ForeColor == MenuDanger;
-            using var b = new SolidBrush(danger ? MenuDangerHover : MenuHover);
-            var r = new Rectangle(4, 2, item.Width - 8, item.Height - 4);
-            using var path = Round(r, 6);
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.FillPath(b, path);
+            if (!IsVisible) Show();
+            UpdateLayout();
+            var source = PresentationSource.FromVisual(this);
+            var sx = source?.CompositionTarget?.TransformFromDevice.M11 ?? 1.0;
+            var sy = source?.CompositionTarget?.TransformFromDevice.M22 ?? 1.0;
+            Left = screenX * sx - ActualWidth - 6;
+            Top = screenY * sy - ActualHeight - 6;
+            Activate();
         }
 
-        protected override void OnRenderItemText(WF.ToolStripItemTextRenderEventArgs e)
+        private Border Row(string glyph, string label, Brush color, Action action, out TextBlock glyphBlock, bool danger = false)
         {
-            e.TextColor = e.Item.Enabled ? e.Item.ForeColor : MenuMuted;
-            base.OnRenderItemText(e);
+            var g = new TextBlock
+            {
+                Text = glyph,
+                FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                FontSize = 15,
+                Foreground = danger ? Danger : Muted,
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Center
+            };
+            glyphBlock = g;
+            var text = new TextBlock
+            {
+                Text = label,
+                FontFamily = new FontFamily("Microsoft YaHei UI"),
+                FontSize = 13,
+                Foreground = color,
+                VerticalAlignment = VerticalAlignment.Center,
+                Margin = new Thickness(10, 0, 0, 0)
+            };
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(32) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            Grid.SetColumn(g, 0);
+            Grid.SetColumn(text, 1);
+            grid.Children.Add(g);
+            grid.Children.Add(text);
+
+            var row = new Border
+            {
+                Background = Brushes.Transparent,
+                CornerRadius = new CornerRadius(6),
+                Height = 42,
+                Padding = new Thickness(10, 0, 18, 0),
+                Cursor = Cursors.Hand,
+                Child = grid,
+                Width = 252
+            };
+            row.MouseEnter += (_, _) => row.Background = danger ? DangerHover : Hover;
+            row.MouseLeave += (_, _) => row.Background = Brushes.Transparent;
+            row.MouseLeftButtonUp += (_, _) =>
+            {
+                Hide();
+                action();
+            };
+            return row;
         }
 
-        protected override void OnRenderSeparator(WF.ToolStripSeparatorRenderEventArgs e)
+        private static Border Separator() => new()
         {
-            using var pen = new Pen(Color.FromArgb(44, 62, 70));
-            var y = e.Item.Height / 2;
-            e.Graphics.DrawLine(pen, 12, y, e.Item.Width - 12, y);
-        }
-
-        protected override void OnRenderToolStripBorder(WF.ToolStripRenderEventArgs e)
-        {
-            using var pen = new Pen(Color.FromArgb(44, 62, 70));
-            e.Graphics.DrawRectangle(pen, 0, 0, e.ToolStrip.Width - 1, e.ToolStrip.Height - 1);
-        }
-
-        private static GraphicsPath Round(Rectangle r, int radius)
-        {
-            var path = new GraphicsPath();
-            var d = radius * 2;
-            path.AddArc(r.X, r.Y, d, d, 180, 90);
-            path.AddArc(r.Right - d, r.Y, d, d, 270, 90);
-            path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
-            path.AddArc(r.X, r.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-    }
-
-    private sealed class MenuColors : WF.ProfessionalColorTable
-    {
-        public override Color ToolStripDropDownBackground => MenuBack;
-        public override Color MenuBorder => Color.FromArgb(44, 62, 70);
-        public override Color MenuItemBorder => MenuHover;
-        public override Color MenuItemSelected => MenuHover;
-        public override Color MenuItemSelectedGradientBegin => MenuHover;
-        public override Color MenuItemSelectedGradientEnd => MenuHover;
-        public override Color ImageMarginGradientBegin => MenuBack;
-        public override Color ImageMarginGradientMiddle => MenuBack;
-        public override Color ImageMarginGradientEnd => MenuBack;
-        public override Color SeparatorDark => Color.FromArgb(44, 62, 70);
-        public override Color SeparatorLight => Color.FromArgb(44, 62, 70);
+            Height = 1,
+            Background = new SolidColorBrush(Color.FromRgb(230, 234, 239)),
+            Margin = new Thickness(12, 6, 12, 6)
+        };
     }
 }

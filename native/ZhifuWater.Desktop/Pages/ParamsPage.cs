@@ -208,7 +208,8 @@ public sealed class ParamsPage : PageBase, IFocusablePage
 
         var buttons = Kit.Row(6,
             Kit.Btn(p.WriteMode == "approval" ? "提交审批" : "编辑参数", EditSelected, primary: true, small: true),
-            Kit.Btn("回滚版本", RollbackSelected, small: true));
+            Kit.Btn("回滚版本", RollbackSelected, small: true),
+            Kit.Btn("看工艺流程", () => { if (_selected is { } sp && !string.IsNullOrEmpty(sp.Group)) Host.ShowPage("process", UnitCodeOf(sp.Group)); }, small: true));
         buttons.Margin = new Thickness(0, 8, 0, 6);
         _detail.Children.Add(buttons);
 
@@ -243,6 +244,12 @@ public sealed class ParamsPage : PageBase, IFocusablePage
             _detail.Children.Add(item);
             _detail.Children.Add(Kit.Divider(0, 0));
         }
+    }
+
+    private string UnitCodeOf(string group)
+    {
+        var unit = Svc.Data.Units.FirstOrDefault(u => u.Name == group);
+        return unit?.Code ?? "";
     }
 
     private void EditSelected()

@@ -15,6 +15,7 @@ public sealed class ReportsPage : PageBase
 {
     private UiTable _list = null!;
     private StackPanel _preview = null!;
+    private ScrollViewer _previewScroll = null!;
     private TextBlock _info = null!;
     private TextBlock _previewTitle = null!;
     private ReportInfo? _selected;
@@ -61,15 +62,15 @@ public sealed class ReportsPage : PageBase
         _preview = new StackPanel();
         var previewBody = new StackPanel();
         previewBody.Children.Add(_previewTitle);
-        var previewScroll = new ScrollViewer
+        _previewScroll = new ScrollViewer
         {
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             MaxHeight = 520,
             Content = _preview,
             Margin = new Thickness(0, 6, 0, 0),
         };
-        previewBody.Children.Add(previewScroll);
+        previewBody.Children.Add(_previewScroll);
         var previewLinks = Kit.Row(10,
             Kit.Link("看运行分析", () => Host.ShowPage("analysis")),
             Kit.Link("看告警", () => Host.ShowPage("alarms")),
@@ -132,7 +133,8 @@ public sealed class ReportsPage : PageBase
                         if (need > widths[i]) widths[i] = need;
                     }
                 }
-                const double total = 608;
+                var viewport = _previewScroll?.ActualWidth ?? 0;
+                var total = viewport > 320 ? Math.Min(viewport - 62, 740) : 690;
                 var sum = widths.Sum();
                 if (sum < total)
                 {
@@ -143,7 +145,7 @@ public sealed class ReportsPage : PageBase
                 {
                     for (var i = 0; i < count; i++)
                     {
-                        var floor = i == 0 ? 108 : 56;
+                        var floor = i == 0 ? 138 : i == 1 ? 96 : 56;
                         widths[i] = Math.Max(floor, widths[i] * total / sum);
                     }
                 }

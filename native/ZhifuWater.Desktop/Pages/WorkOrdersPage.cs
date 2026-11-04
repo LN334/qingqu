@@ -16,6 +16,7 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
     private bool _suppressOpen;
     private TextBlock _info = null!;
     private WorkOrderInfo? _selected;
+    private StackPanel _detailHost = null!;
     private string _filter = "all";
     private string _keyword = "";
     private string? _pendingSeed;
@@ -106,14 +107,13 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
 
         _table = Table(new[] { "工单号", "标题", "类型", "优先级", "状态", "负责人", "创建时间" },
             new double[] { 150, 0, 54, 58, 66, 64, 94 });
-        _table.MinHeight = 520;
+        _table.MinHeight = 372;
         _table.SelectionChanged += (_, _) =>
         {
-            if (_suppressOpen) return;
             if (_table.SelectedItem is UiRow row && row.Data is WorkOrderInfo wo)
             {
                 _selected = wo;
-                OpenDetail(wo);
+                ShowDetail(_detailHost);
             }
         };
         var tableHost = new Grid();
@@ -130,7 +130,17 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
         var tableCard = Kit.Card("工单列表", tableHost,
             Kit.Btn("新建工单", () => CreateOrder(), primary: true, small: true), null, new Thickness(10, 8, 10, 8));
 
+        _detailHost = new StackPanel();
+        _detailHost.Children.Add(Kit.T("选择左侧工单查看详情", 12, Pal.Muted2));
+        var detailCard = Kit.Card("工单详情", Kit.Scroll(_detailHost, 0), null, null, new Thickness(10, 8, 10, 8));
+
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1.6, GridUnitType.Star) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(10) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+        Grid.SetColumn(tableCard, 0);
+        Grid.SetColumn(detailCard, 2);
         grid.Children.Add(tableCard);
+        grid.Children.Add(detailCard);
         root.Children.Add(grid);
         Install(Kit.Scroll(root));
     }
@@ -209,8 +219,6 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
             target.Children.Add(Kit.T("处理结果", 11, Pal.Muted2, bold: true));
             target.Children.Add(Kit.T(w.Result, 11, Pal.Good, wrap: TextWrapping.Wrap));
         }
-        target.Children.Add(Kit.T($"时限 {Kit.FormatTimeFull(w.DueAt ?? 0)} · 完成 {Kit.FormatTimeFull(w.DoneAt ?? 0)}", 10, Pal.Muted2, wrap: TextWrapping.Wrap));
-
         var actions = new WrapPanel { Margin = new Thickness(0, 8, 0, 4) };
         if (w.Status is "pending" or "accepted" or "processing") actions.Children.Add(ActionButton("派发", () => { Assign(w); close?.Invoke(); }));
         if (w.Status == "pending") actions.Children.Add(ActionButton("接单", () => { Advance(w, "accept", null); close?.Invoke(); }));
@@ -223,7 +231,7 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
         foreach (UIElement child in actions.Children) ((FrameworkElement)child).Margin = new Thickness(0, 0, 5, 4);
         target.Children.Add(actions);
 
-        target.Children.Add(Kit.Divider(4, 4));
+        target.Children.Add(Kit.T("", 6));
         target.Children.Add(Kit.T("处理时间线", 11, Pal.Ink, bold: true));
         foreach (var entry in w.Timeline.OrderBy(t => t.At))
         {
