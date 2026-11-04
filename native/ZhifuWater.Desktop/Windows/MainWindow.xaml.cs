@@ -591,7 +591,12 @@ public partial class MainWindow : Window
             UpdateLink.Content = "新版本 v" + info.Version.ToString(3) + " 可用";
             UpdateLink.Visibility = Visibility.Visible;
             if (manual) OpenUpdateDialog();
-            else Toast("发现新版本 v" + info.Version.ToString(3), true);
+            else
+            {
+                Toast("发现新版本 v" + info.Version.ToString(3), true);
+                // 启动时的自动检查也直接把更新窗弹出来，避免用户只看到角落里的小字而错过升级。
+                OpenUpdateDialog();
+            }
         }
         catch (Exception ex)
         {
