@@ -72,6 +72,7 @@ public partial class MainWindow : Window
     public MainWindow(AppServices services, UserInfo user)
     {
         InitializeComponent();
+        NativeChrome.Apply(this);
         _services = services;
         _user = user;
 

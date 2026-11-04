@@ -16,6 +16,7 @@ public partial class LoginWindow : Window
     public LoginWindow(AppServices services)
     {
         InitializeComponent();
+        NativeChrome.Apply(this);
         _services = services;
         Loaded += (_, _) => AccountBox.Focus();
         AccountBox.Text = "admin";

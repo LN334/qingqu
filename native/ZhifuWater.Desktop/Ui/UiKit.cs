@@ -392,6 +392,30 @@ public static class Kit
     }
 
     /// <summary>表格列宽测量用：按界面字体算一行文字的像素宽度。</summary>
+    private static T? FindDescendant<T>(DependencyObject root) where T : DependencyObject
+    {
+        var count = VisualTreeHelper.GetChildrenCount(root);
+        for (var i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(root, i);
+            if (child is T match) return match;
+            var deeper = FindDescendant<T>(child);
+            if (deeper != null) return deeper;
+        }
+        return null;
+    }
+
+    private static T? FindAncestor<T>(DependencyObject start) where T : DependencyObject
+    {
+        var current = VisualTreeHelper.GetParent(start);
+        while (current != null)
+        {
+            if (current is T match) return match;
+            current = VisualTreeHelper.GetParent(current);
+        }
+        return null;
+    }
+
     private static double TextWidth(string text, double size, bool semiBold, Visual visual)
     {
         if (string.IsNullOrEmpty(text)) return 0;
@@ -426,8 +450,9 @@ public static class Kit
             IsReadOnly = true,
             SelectionMode = DataGridSelectionMode.Single,
             HeadersVisibility = DataGridHeadersVisibility.Column,
-            HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled,
+            HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
             RowHeight = rowHeight,
+            MaxHeight = 560,
             ItemsSource = rows.ToList(),
         };
         for (var i = 0; i < headers.Length; i++)
@@ -455,10 +480,14 @@ public static class Kit
         var lastAvail = -1.0;
         void Fit()
         {
-            // 行数超出可视高度时扣除竖向滚动条，避免最后一列被裁掉。
+            // 用内部滚动容器的可视宽度算列宽：它已经把竖向滚动条扣掉了，
+            // 否则「列宽=整表宽 → 出现竖滚动条 → 挤掉最后一列 → 又冒出横向滚动条」会连环发生。
+            var scroller = FindDescendant<ScrollViewer>(grid);
             var chrome = grid.Items.Count * grid.RowHeight + grid.ColumnHeaderHeight + 4 > grid.ActualHeight
                 ? SystemParameters.VerticalScrollBarWidth : 0;
-            var avail = grid.ActualWidth - 2 - chrome;
+            var avail = scroller != null && scroller.ViewportWidth > 80
+                ? scroller.ViewportWidth - 6
+                : grid.ActualWidth - 6 - chrome;
             if (avail < 80 || headers.Length == 0 || Math.Abs(avail - lastAvail) < 0.5) return;
             lastAvail = avail;
 
@@ -484,29 +513,9 @@ public static class Kit
                 .Where(i => i >= widths.Length || widths[i] <= 0).ToArray();
             var sum = need.Sum();
             double[] final;
-            if (flex.Length > 0 && sum > avail)
+            if (sum <= avail)
             {
-                // 有弹性列时先让弹性列让位：固定列按内容给足，剩下的全给弹性列。
-                // 否则一张表里只要有一列长文本，Fit 会按比例把所有列一起压窄，出现「10-26 14:...」。
-                const double flexMin = 84;
-                var fixedNeed = need.Sum() - flex.Sum(i => need[i]);
-                if (fixedNeed + flexMin <= avail)
-                {
-                    final = (double[])need.Clone();
-                    var share = (avail - fixedNeed) / flex.Length;
-                    foreach (var i in flex) final[i] = share;
-                }
-                else
-                {
-                    var budget = Math.Max(avail - flexMin * flex.Length, avail * 0.4);
-                    var scale = budget / Math.Max(1, fixedNeed);
-                    final = new double[headers.Length];
-                    for (var i = 0; i < headers.Length; i++)
-                        final[i] = flex.Contains(i) ? flexMin : Math.Max(44, need[i] * scale);
-                }
-            }
-            else if (sum <= avail)
-            {
+                // 放得下：列宽按内容给足，余量给弹性列（没有弹性列就按比例分给各列）。
                 final = (double[])need.Clone();
                 var extra = avail - sum;
                 if (flex.Length > 0)
@@ -518,19 +527,44 @@ public static class Kit
                     var weights = final.Sum();
                     for (var i = 0; i < final.Length; i++) final[i] += extra * final[i] / weights;
                 }
+                grid.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
+            }
+            else if (flex.Length > 0 && need.Sum() - flex.Sum(i => need[i]) + 84 * flex.Length <= avail)
+            {
+                // 固定列放得下、只是弹性列内容长：固定列按内容给足，剩下的全给弹性列。
+                const double flexMin = 84;
+                final = (double[])need.Clone();
+                var fixedNeed = need.Sum() - flex.Sum(i => need[i]);
+                var share = (avail - fixedNeed) / flex.Length;
+                foreach (var i in flex) final[i] = share;
+                grid.HorizontalScrollBarVisibility = ScrollBarVisibility.Disabled;
             }
             else
             {
-                var scale = avail / sum;
-                final = need.Select(w => Math.Max(44, w * scale)).ToArray();
-                var total = final.Sum();
-                if (total < avail) final[final.Length - 1] += avail - total;
+                // 放不下：不再把所有列一起压成「10-26 14:...」，保留可读列宽，让表格横向滚动。
+                final = (double[])need.Clone();
+                grid.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto;
             }
 
             for (var i = 0; i < grid.Columns.Count; i++)
                 grid.Columns[i].Width = new DataGridLength(Math.Max(40, final[i]));
         }
         grid.FitRequested = () => { lastAvail = double.NaN; Fit(); };
+        // DataGrid 自带 ScrollViewer，会把滚轮事件吃掉；表格没得滚时把滚轮转给外层页面，
+        // 否则鼠标一停在表格上，整页就拖不动。
+        grid.PreviewMouseWheel += (_, e) =>
+        {
+            var inner = FindDescendant<ScrollViewer>(grid);
+            var innerCanScroll = inner != null && inner.ScrollableHeight > 0.5 &&
+                                 (e.Delta < 0
+                                     ? inner.VerticalOffset < inner.ScrollableHeight - 0.5
+                                     : inner.VerticalOffset > 0.5);
+            if (innerCanScroll) return;
+            var outer = FindAncestor<ScrollViewer>(grid);
+            if (outer == null || outer.ScrollableHeight <= 0.5) return;
+            outer.ScrollToVerticalOffset(outer.VerticalOffset - Math.Sign(e.Delta) * 56);
+            e.Handled = true;
+        };
         grid.Loaded += (_, _) => Fit();
         grid.SizeChanged += (_, _) => Fit();
         // ItemsSource 换一批数据后不会触发 SizeChanged，这里主动重排一次，否则列宽永远停在首次（空表）测量上。
