@@ -42,8 +42,8 @@ public sealed class AlarmsPage : PageBase
         _bar = new BarChart { Height = 190, BarBrush = Pal.Accent };
         var barCard = Kit.Card("按日告警数量", _bar, Kit.T("近 14 天", 10, Pal.Muted2), null, new Thickness(8, 4, 8, 6));
         Grid.SetColumn(barCard, 0);
-        _donut = new DonutChart { Height = 190, Width = double.NaN };
-        var donutCard = Kit.Card("按级别分布", _donut, null, null, new Thickness(8, 4, 8, 6));
+        _donut = new DonutChart { Height = 190, Width = double.NaN, CenterLabel = "近 14 天" };
+        var donutCard = Kit.Card("按级别分布", _donut, Kit.T("近 14 天", 10, Pal.Muted2), null, new Thickness(8, 4, 8, 6));
         Grid.SetColumn(donutCard, 2);
         charts.Children.Add(barCard);
         charts.Children.Add(donutCard);
@@ -52,7 +52,7 @@ public sealed class AlarmsPage : PageBase
         var filter = new StackPanel { Orientation = Orientation.Horizontal };
         filter.Children.Add(Kit.T("状态", 11, Pal.Muted));
         _status = new ComboBox { Width = 112, Margin = new Thickness(6, 0, 12, 0) };
-        foreach (var t in new[] { "待处理", "全部", "未处理", "已确认", "归档" }) _status.Items.Add(t);
+        foreach (var t in new[] { "未恢复", "全部", "待确认", "已确认", "已恢复" }) _status.Items.Add(t);
         _status.SelectedIndex = 0;
         filter.Children.Add(_status);
         filter.Children.Add(Kit.T("级别", 11, Pal.Muted));
@@ -142,7 +142,7 @@ public sealed class AlarmsPage : PageBase
                 Key = a.Id,
             }).ToList();
         _table.ItemsSource = rows;
-        _listInfo.Text = $"共 {rows.Count} 条 · 未处理 {rows.Count(r => r.Data is AlarmInfo { Status: "active" })} 条";
+        _listInfo.Text = $"共 {rows.Count} 条 · 待确认 {rows.Count(r => r.Data is AlarmInfo { Status: "active" })} 条";
         RefreshStats();
     }
 
@@ -192,8 +192,8 @@ public sealed class AlarmsPage : PageBase
         _kpiHost.Children.Clear();
         var kpis = new List<KpiInfo>
         {
-            new() { Label = "未处理告警", Value = active.ToString(), Unit = "条", Tone = "bad", Hint = "当前未确认的活动告警", Source = "告警规则引擎" },
-            new() { Label = "已确认待恢复", Value = ack.ToString(), Unit = "条", Tone = "warn", Hint = "已确认但尚未恢复", Source = "告警规则引擎" },
+            new() { Label = "待确认告警", Value = active.ToString(), Unit = "条", Tone = "bad", Hint = "触发后尚未确认的告警", Source = "告警规则引擎" },
+            new() { Label = "已确认未恢复", Value = ack.ToString(), Unit = "条", Tone = "warn", Hint = "已确认但参数尚未回到安全区", Source = "告警规则引擎" },
             new() { Label = "今日已恢复", Value = resolvedToday.ToString(), Unit = "条", Tone = "good", Hint = "今日 00:00 以来恢复的数量", Source = "告警规则引擎" },
             new() { Label = "平均确认 MTTA", Value = stats.MttaMin.ToString(), Unit = "分钟", Tone = "normal", Hint = "从触发到确认的平均时长", Source = "审计日志" },
             new() { Label = "平均恢复 MTTR", Value = stats.MttrMin.ToString(), Unit = "分钟", Tone = "normal", Hint = "从触发到恢复的平均时长", Source = "审计日志" },

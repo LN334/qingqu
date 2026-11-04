@@ -8,7 +8,7 @@ using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class DevicesPage : PageBase
+public sealed class DevicesPage : PageBase, IFocusablePage
 {
     private UiTable _table = null!;
     private StackPanel _detail = null!;
@@ -21,6 +21,13 @@ public sealed class DevicesPage : PageBase
     public override string Group => "运维";
 
     public DevicesPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
+
+    /// <summary>从驾驶舱点某台设备进来时，直接选中它。</summary>
+    public void FocusItem(string key)
+    {
+        var d = Svc.Data.Devices.FirstOrDefault(x => x.Id == key);
+        if (d is not null) _selected = d;
+    }
 
     protected override void Build()
     {
@@ -93,18 +100,24 @@ public sealed class DevicesPage : PageBase
             _ => true,
         });
         var list = query.ToList();
+        // 与本单元未恢复告警对齐：单元在告警时，台账里的设备也标「告警」，避免同一台设备两页说法不同
+        var alarmUnits = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var a in Svc.Data.Alarms("open"))
+            if (!string.IsNullOrEmpty(a.UnitCode)) alarmUnits.Add(a.UnitCode);
+        string StatusOf(DeviceInfo x) => x.Online ? (alarmUnits.Contains(x.UnitCode) ? "告警" : "在线") : "离线";
         _info.Text = $"{all.Count} 台设备 · 在线 {all.Count(d => d.Online)} · 需关注 {all.Count(d => d.Health < 85 || !d.Online)}";
         var keep = _selected?.Id;
         var rows = list.Select(d => new UiRow
         {
             Texts = new[]
             {
-                d.Code, d.Name, d.UnitName, Pal.DeviceTypeText(d.Type), d.Online ? "在线" : "离线",
+                d.Code, d.Name, d.UnitName, Pal.DeviceTypeText(d.Type), StatusOf(d),
                 d.Health + "%", d.RuntimeHours.ToString("F0") + " h", d.LastMaintAt,
             },
             Fgs = new[]
             {
-                Pal.Muted2, Pal.Ink2, Pal.Muted, Pal.Muted2, d.Online ? Pal.Good : Pal.Bad,
+                Pal.Muted2, Pal.Ink2, Pal.Muted, Pal.Muted2,
+                !d.Online ? Pal.Bad : alarmUnits.Contains(d.UnitCode) ? Pal.Bad : Pal.Good,
                 d.Health >= 85 ? Pal.Good : d.Health >= 60 ? Pal.Warn : Pal.Bad, Pal.Muted, Pal.Muted2,
             },
             Data = d,
@@ -126,7 +139,10 @@ public sealed class DevicesPage : PageBase
             return;
         }
         var d = _selected;
-        _detail.Children.Add(Kit.Row(7, Kit.T(d.Name, 13, Pal.Ink, bold: true), Kit.Badge(d.Online ? "在线" : "离线", d.Online ? "good" : "bad")));
+        var unitAlarm = Svc.Data.Alarms("open").Any(a => a.UnitCode == d.UnitCode);
+        var statusText = d.Online ? (unitAlarm ? "告警" : "在线") : "离线";
+        var statusTone = d.Online ? (unitAlarm ? "bad" : "good") : "bad";
+        _detail.Children.Add(Kit.Row(7, Kit.T(d.Name, 13, Pal.Ink, bold: true), Kit.Badge(statusText, statusTone)));
         _detail.Children.Add(Kit.T(d.Code + " · " + d.UnitName + " · " + Pal.DeviceTypeText(d.Type), 10, Pal.Muted2, wrap: TextWrapping.Wrap));
         _detail.Children.Add(Kit.Divider(5, 4));
 
