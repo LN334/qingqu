@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
@@ -176,10 +176,20 @@ public partial class App : Application
             CredentialStore.Clear();
             return false;
         }
+        StartMain(user);
+        return true;
+    }
+
+    /// <summary>带 --tray 启动（开机自启）时只留在托盘，不弹窗口。</summary>
+    private static bool StartHidden => Environment.GetCommandLineArgs()
+        .Any(a => string.Equals(a, "--tray", StringComparison.OrdinalIgnoreCase));
+
+    private static void StartMain(Data.UserInfo user)
+    {
         var main = new Windows.MainWindow(Services, user);
         Current.MainWindow = main;
         main.Show();
-        return true;
+        if (StartHidden) main.Hide();
     }
 
     /// <summary>显示登录窗；登录成功后由本方法创建主窗。</summary>
@@ -188,9 +198,7 @@ public partial class App : Application
         var login = new Windows.LoginWindow(Services);
         login.LoggedIn += user =>
         {
-            var main = new Windows.MainWindow(Services, user);
-            Current.MainWindow = main;
-            main.Show();
+            StartMain(user);
             login.Close();
         };
         login.Closed += (_, _) =>

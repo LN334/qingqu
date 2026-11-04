@@ -1,6 +1,9 @@
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Windows;
+using Microsoft.Win32;
 using WF = System.Windows.Forms;
 
 namespace ZhifuWater.Desktop.Services;
@@ -26,9 +29,17 @@ public static class TrayIcon
         var open = new WF.ToolStripMenuItem("打开清渠");
         open.Font = new Font(open.Font, System.Drawing.FontStyle.Bold);
         open.Click += (_, _) => ShowMain();
+        var autoStart = new WF.ToolStripMenuItem("开机自动启动") { CheckOnClick = true, Checked = IsAutoStartEnabled() };
+        autoStart.Click += (_, _) =>
+        {
+            try { SetAutoStart(autoStart.Checked); }
+            catch (Exception ex) { ShowBalloon("设置开机启动失败", ex.Message); autoStart.Checked = IsAutoStartEnabled(); }
+        };
         var exit = new WF.ToolStripMenuItem("退出");
         exit.Click += (_, _) => Exit();
         menu.Items.Add(open);
+        menu.Items.Add(new WF.ToolStripSeparator());
+        menu.Items.Add(autoStart);
         menu.Items.Add(new WF.ToolStripSeparator());
         menu.Items.Add(exit);
 
@@ -58,6 +69,43 @@ public static class TrayIcon
         {
             // 唤回失败不影响后台继续运行
         }
+    }
+
+    private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    private const string RunName = "Qingqu";
+
+    public static bool IsAutoStartEnabled()
+    {
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(RunKey);
+            var value = key?.GetValue(RunName) as string;
+            return !string.IsNullOrEmpty(value);
+        }
+        catch { return false; }
+    }
+
+    public static void SetAutoStart(bool enabled)
+    {
+        using var key = Registry.CurrentUser.OpenSubKey(RunKey, writable: true)
+                        ?? Registry.CurrentUser.CreateSubKey(RunKey);
+        if (key is null) return;
+        if (enabled)
+        {
+            var exe = Process.GetCurrentProcess().MainModule?.FileName;
+            if (string.IsNullOrEmpty(exe)) return;
+            key.SetValue(RunName, $"\"{exe}\" --tray", RegistryValueKind.String);
+        }
+        else if (key.GetValue(RunName) is not null)
+        {
+            key.DeleteValue(RunName, throwOnMissingValue: false);
+        }
+    }
+
+    public static void UpdateTooltip(string text)
+    {
+        if (_icon is null) return;
+        try { _icon.Text = text.Length > 63 ? text[..63] : text; } catch { }
     }
 
     public static void ShowBalloon(string title, string text)

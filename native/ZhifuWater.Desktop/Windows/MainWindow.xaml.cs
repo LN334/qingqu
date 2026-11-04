@@ -96,6 +96,10 @@ public partial class MainWindow : Window
         _refreshTimer.Tick += (_, _) => AutoRefresh();
         _refreshTimer.Start();
 
+        // 从托盘唤回后立刻拉一次，别等下一个刷新周期。
+        IsVisibleChanged += (_, _) => { if (IsVisible) AutoRefresh(); };
+        StateChanged += (_, _) => { if (WindowState != WindowState.Minimized) AutoRefresh(); };
+
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3.2) };
         _toastTimer.Tick += (_, _) =>
         {
@@ -281,14 +285,17 @@ public partial class MainWindow : Window
         UpdateFooter();
     }
 
+    /// <summary>收进托盘或最小化时按后台模式跑：照常推进数据与角标，跳过页面重绘。</summary>
+    private bool IsBackground => !IsVisible || WindowState == WindowState.Minimized;
+
     private void AutoRefresh()
     {
         try
         {
             _services.Data.Tick();
-            _currentPage?.RefreshPage();
+            if (!IsBackground) _currentPage?.RefreshPage();
             UpdateBadges();
-            UpdateFooter();
+            if (!IsBackground) UpdateFooter();
         }
         catch (Exception ex)
         {
@@ -380,6 +387,8 @@ public partial class MainWindow : Window
 
     private void UpdateClock()
     {
+        // 后台时不刷时间，省一次文本布局。
+        if (IsBackground) return;
         ClockText.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
     }
 
@@ -400,6 +409,9 @@ public partial class MainWindow : Window
             BellBadge.Visibility = unread > 0 ? Visibility.Visible : Visibility.Collapsed;
             BellBadgeText.Text = unread > 99 ? "99+" : unread.ToString();
             FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
+            TrayIcon.UpdateTooltip(alarms > 0
+                ? $"清渠 · 运行中 · 待处理告警 {alarms} 条"
+                : "清渠 · 运行中 · 无待处理告警");
             CheckNewAlarms();
             WatchAssignments();
         }
@@ -423,8 +435,11 @@ public partial class MainWindow : Window
             foreach (var id in ids) _knownAlarms.Add(id);
             return;
         }
-        foreach (var a in open.Where(a => !_knownAlarms.Contains(a.Id)).OrderBy(a => a.At).Take(3))
-            _alarmQueue.Enqueue(a);
+        var fresh = open.Where(a => !_knownAlarms.Contains(a.Id)).OrderBy(a => a.At).Take(3).ToList();
+        foreach (var a in fresh) _alarmQueue.Enqueue(a);
+        // 窗口收在托盘时用托盘气泡提醒，避免把窗口硬拉到前台。
+        if (fresh.Count > 0 && IsBackground)
+            TrayIcon.ShowBalloon($"新告警 · {Pal.AlarmLevelText(fresh[0].Level)}", fresh[0].Title);
         _knownAlarms.IntersectWith(ids);
         foreach (var id in ids) _knownAlarms.Add(id);
         if (AlarmToastPanel.Visibility != Visibility.Visible) ShowNextAlarmToast();
