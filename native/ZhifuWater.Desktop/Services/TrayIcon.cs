@@ -109,23 +109,23 @@ public static class TrayIcon
         var item = new WF.ToolStripMenuItem(text)
         {
             ForeColor = color,
-            Image = Glyph(glyph, color),
+            Image = Glyph(glyph, color == MenuDanger ? MenuDanger : MenuIcon),
             ImageScaling = WF.ToolStripItemImageScaling.None,
             Padding = new WF.Padding(2, 4, 10, 4)
         };
-        if (bold) item.Font = new Font(item.Font, System.Drawing.FontStyle.Bold);
+        
         return item;
     }
 
     private static Bitmap Glyph(string glyph, Color color)
     {
-        var bmp = new Bitmap(16, 16);
+        var bmp = new Bitmap(20, 20);
         using var g = Graphics.FromImage(bmp);
         g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
         using var font = new Font("Segoe MDL2 Assets", 11f, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
         using var brush = new SolidBrush(color);
         var size = g.MeasureString(glyph, font);
-        g.DrawString(glyph, font, brush, (16 - size.Width) / 2f, (16 - size.Height) / 2f);
+        g.DrawString(glyph, font, brush, (20 - size.Width) / 2f, (20 - size.Height) / 2f);
         return bmp;
     }
 
@@ -253,8 +253,8 @@ public static class TrayIcon
             if (!item.Selected && !item.Pressed) return;
             var danger = item.ForeColor == MenuDanger;
             using var b = new SolidBrush(danger ? MenuDangerHover : MenuHover);
-            var r = new Rectangle(4, 1, item.Width - 8, item.Height - 2);
-            using var path = Round(r, 3);
+            var r = new Rectangle(4, 2, item.Width - 8, item.Height - 4);
+            using var path = Round(r, 6);
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             e.Graphics.FillPath(b, path);
         }

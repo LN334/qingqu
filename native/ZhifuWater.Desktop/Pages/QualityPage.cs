@@ -79,7 +79,8 @@ public sealed class QualityPage : PageBase
         var buttons = Kit.Row(6,
             Kit.Btn("录入化验", CreateLab, primary: true, small: true),
             Kit.Btn("复核通过", () => Review(true), small: true),
-            Kit.Btn("退回重检", () => Review(false), small: true));
+            Kit.Btn("退回重检", () => Review(false), small: true),
+            Kit.Btn("派工单", DispatchOrder, small: true));
         var recBody = new DockPanel { LastChildFill = true };
         recBody.Children.Add(_records);
         var recCard = Kit.Card("化验记录", recBody, buttons, "人工化验 · 待复核", new Thickness(10, 8, 10, 8));
@@ -220,6 +221,12 @@ public sealed class QualityPage : PageBase
         var result = Svc.Data.CreateLab(keys[Math.Max(0, point.SelectedIndex)], map, string.IsNullOrWhiteSpace(method.Text) ? null : method.Text.Trim());
         Toast(result.Message, result.Ok);
         RefreshData();
+    }
+
+    private void DispatchOrder()
+    {
+        if (_selected is not { } rec) { Toast("请先选中一条化验记录", false); return; }
+        Host.ShowPage("workorders", "lab:" + rec.Id);
     }
 
     private void Review(bool approve)

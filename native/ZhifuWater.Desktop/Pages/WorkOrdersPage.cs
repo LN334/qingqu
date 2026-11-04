@@ -18,13 +18,48 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
     private WorkOrderInfo? _selected;
     private string _filter = "all";
     private string _keyword = "";
-    private string? _pendingAlarm;
+    private string? _pendingSeed;
 
-    /// <summary>从告警页跳过来时用 "alarm:{id}" 打开新建工单并预填。</summary>
+    /// <summary>从其他页面跳过来时用 "alarm:{id}" 或 "lab:{id}" 打开新建工单并预填。</summary>
     public void FocusItem(string key)
     {
-        if (key is not null && key.StartsWith("alarm:", StringComparison.Ordinal))
-            _pendingAlarm = key.Substring("alarm:".Length);
+        if (!string.IsNullOrEmpty(key)) _pendingSeed = key;
+    }
+
+    private sealed record OrderSeed(string Title, string Priority, string UnitName, string Desc, string? AlarmId);
+
+    private OrderSeed? BuildSeed(string key)
+    {
+        if (key.StartsWith("alarm:", StringComparison.Ordinal))
+        {
+            var id = key.Substring("alarm:".Length);
+            var alarm = Svc.Data.Alarms("open").FirstOrDefault(a => a.Id == id)
+                        ?? Svc.Data.Alarms().FirstOrDefault(a => a.Id == id);
+            if (alarm is null) return null;
+            return new OrderSeed(alarm.Title, "high", alarm.UnitName,
+                $"由告警「{alarm.Title}」转入。{alarm.Detail}", alarm.Id);
+        }
+        if (key.StartsWith("lab:", StringComparison.Ordinal))
+        {
+            var id = key.Substring("lab:".Length);
+            var rec = Svc.Data.Labs.FirstOrDefault(r => r.Id == id);
+            if (rec is null) return null;
+            var over = new List<string>();
+            foreach (var (metric, limit) in new[] { ("COD", 50d), ("NH3N", 5d), ("TN", 15d), ("TP", 0.5d), ("SS", 10d) })
+            {
+                if (rec.Metrics.TryGetValue(metric, out var v) && v is { } value && value > limit)
+                    over.Add($"{metric} {value:0.##} mg/L（一级 A 限值 {limit:0.##}）");
+            }
+            if (over.Count == 0)
+            {
+                var plain = $"化验记录 {rec.Id}（{rec.SamplePointName}）：各指标均在限值内，按复核要求留档。";
+                return new OrderSeed($"{rec.SamplePointName} 化验记录复核", "normal", rec.SamplePointName, plain, null);
+            }
+            var title = $"{rec.SamplePointName} 化验超标处置";
+            var desc = $"化验记录 {rec.Id}：{string.Join("；", over)}。请核查工艺与取样，必要时复检。";
+            return new OrderSeed(title, "high", rec.SamplePointName, desc, null);
+        }
+        return null;
     }
 
     public override string Id => "workorders";
@@ -131,12 +166,12 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
         }).ToList();
         _table.ItemsSource = rows;
 
-        if (_pendingAlarm is { } alarmId)
+        if (_pendingSeed is { } seedKey)
         {
-            _pendingAlarm = null;
-            var alarm = Svc.Data.Alarms("open").FirstOrDefault(a => a.Id == alarmId)
-                        ?? Svc.Data.Alarms().FirstOrDefault(a => a.Id == alarmId);
-            if (alarm is not null) Dispatcher.BeginInvoke(new Action(() => CreateOrder(alarm)));
+            _pendingSeed = null;
+            var seed = BuildSeed(seedKey);
+            if (seed is not null) Dispatcher.BeginInvoke(new Action(() => CreateOrder(seed)));
+            else Dispatcher.BeginInvoke(new Action(() => Toast("没有找到这条记录", false)));
         }
         if (_emptyPanel != null)
         {
@@ -208,19 +243,19 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
         return b;
     }
 
-    private void CreateOrder(AlarmInfo? from = null)
+    private void CreateOrder(OrderSeed? seed = null)
     {
         var types = new[] { ("repair", "维修"), ("maintain", "保养"), ("calibrate", "校准"), ("inspect", "巡检异常") };
         var prios = new[] { ("normal", "普通"), ("high", "高"), ("urgent", "紧急"), ("low", "低") };
         var units = Svc.Data.Units.ToList();
         var people = Svc.Data.Users.Where(u => u.IsActive).ToList();
         var dlg = new FormDialog(Host, "新建工单", "创建后为待接单；指定负责人则直接进入已接单。");
-        var title = dlg.AddText("标题", from?.Title ?? "", "例如：提升泵异响排查");
+        var title = dlg.AddText("标题", seed?.Title ?? "", "例如：提升泵异响排查");
         var type = dlg.AddCombo("类型", types.Select(t => t.Item2).ToList());
-        var prio = dlg.AddCombo("优先级", prios.Select(p => p.Item2).ToList(), from is null ? 0 : Math.Max(0, Array.FindIndex(prios, x => x.Item1 == "high")));
-        var unit = dlg.AddCombo("单元", units.Select(u => u.Name).ToList(), Math.Max(0, units.FindIndex(u => u.Name == from?.UnitName)));
+        var prio = dlg.AddCombo("优先级", prios.Select(p => p.Item2).ToList(), seed is null ? 1 : Math.Max(0, Array.FindIndex(prios, x => x.Item1 == seed.Priority)));
+        var unit = dlg.AddCombo("单元", units.Select(u => u.Name).ToList(), Math.Max(0, units.FindIndex(u => u.Name == seed?.UnitName)));
         var assign = dlg.AddCombo("负责人", new[] { "暂不指派" }.Concat(people.Select(u => u.User.Name + (string.IsNullOrWhiteSpace(u.User.Title) ? "" : " · " + u.User.Title))).ToList());
-        var desc = dlg.AddText("说明（可选）", from is null ? "" : $"由告警「{from.Title}」转入。{(string.IsNullOrWhiteSpace(from.Detail) ? "" : from.Detail)}");
+        var desc = dlg.AddText("说明（可选）", seed?.Desc ?? "");
         if (!dlg.Ask("创建", validate: () =>
             {
                 if (string.IsNullOrWhiteSpace(title.Text)) return "请填写工单标题";
@@ -236,7 +271,7 @@ public sealed class WorkOrdersPage : PageBase, IFocusablePage
             unitRow.Code,
             assignee,
             desc.Text.Trim(),
-            from?.Id);
+            seed?.AlarmId);
         Toast(r.Message, r.Ok);
         RefreshData();
         Host.RefreshShell();
