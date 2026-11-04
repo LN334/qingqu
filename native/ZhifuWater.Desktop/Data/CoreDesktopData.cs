@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -566,9 +566,14 @@ public sealed class CoreDesktopData : IDesktopData
             _ => "normal",
         };
         var trend = J.O(k, "trend", false);
-        var delta = J.Num(trend, "value") is { } tv
-            ? $"{J.Str(trend, "label")} {tv.ToString("F1", CultureInfo.InvariantCulture)}%"
+        var key = J.Str(k, "key");
+        var subject = key switch { "cod" => "COD ", "nh3n" => "氨氮 ", _ => "" };
+        var trendValue = J.Num(trend, "value");
+        var delta = trendValue is { } tv
+            ? $"{subject}{J.Str(trend, "label")} {tv.ToString("F1", CultureInfo.InvariantCulture)}%"
             : "";
+        var hint = J.Str(k, "hint");
+        if (trendValue is not null && string.IsNullOrEmpty(hint)) hint = "按当日人工化验的进水与出水计算";
         return new KpiInfo
         {
             Key = J.Str(k, "key"),
@@ -577,7 +582,7 @@ public sealed class CoreDesktopData : IDesktopData
             Unit = J.Str(k, "unit"),
             Delta = delta,
             Tone = tone,
-            Hint = J.Str(k, "hint"),
+            Hint = hint,
             Source = string.IsNullOrEmpty(J.Str(k, "source")) ? source : J.Str(k, "source"),
         };
     }
