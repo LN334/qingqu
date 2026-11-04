@@ -22,15 +22,17 @@
 
 | 端 | 安装包 | 说明 |
 | --- | --- | --- |
-| Windows 桌面版 | [`Qingqu-Setup-2.0.11.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.11/Qingqu-Setup-2.0.11.exe)（约 49 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
-| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.11/zhifu-water-mobile.apk)（约 190 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
+| Windows 桌面版 | [`Qingqu-Setup-2.0.12.exe`](https://github.com/LN334/qingqu/releases/download/v2.0.12/Qingqu-Setup-2.0.12.exe)（约 49 MB） | C# / WPF 原生程序，自包含 .NET 运行时，安装即用 |
+| 安卓 App | [`zhifu-water-mobile.apk`](https://github.com/LN334/qingqu/releases/download/v2.0.12/zhifu-water-mobile.apk)（约 190 KB） | 原生 Android（Java + 框架 API，非 WebView）；不填服务器也能用 |
 | Web 版 | 本仓库源码 | `node server/index.js`，浏览器打开 `http://127.0.0.1:8765` |
 
-> 全部版本与 SHA256 见 [Releases · v2.0.11](https://github.com/LN334/qingqu/releases/tag/v2.0.11)。仓库不提交二进制产物，也可按「构建」章节自行打包。
+> 桌面端内置自动更新：发布新版本后，已安装的旧版本会在启动时提示升级。
+>
+> 全部版本与 SHA256 见 [Releases · v2.0.12](https://github.com/LN334/qingqu/releases/tag/v2.0.12)。仓库不提交二进制产物，也可按「构建」章节自行打包。
 
-**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面端的程序集、安装包版本需与平台发布版本保持一致。Android 与 Windows 使用同一版本号，APK 版本以 `android/AndroidManifest.xml` 为准；当前源码为 **2.0.12（versionCode 8）**，v2.0.11 Release 内的 APK 仍是旧口径（2.2.0 / 6）。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
+**版本口径：** 平台发布版本以根目录 `package.json` 为准，服务端 API 和 Web 界面从该版本读取；Windows 桌面端的程序集、安装包版本需与平台发布版本保持一致。Android 与 Windows 使用同一版本号，APK 版本以 `android/AndroidManifest.xml` 为准；当前版本为 **2.0.12（versionCode 8）**。`desktop/` 下的 Electron 包为 v1.x 遗留项目，不属于当前 Windows 桌面版。
 
-**发布范围：** Releases 只提供 Windows 桌面版与 Android APK 两个可安装产物；Web 端以源码方式提供，不含托管服务。desktop/ 的 Electron 遗留壳与 _preview/、native/publish* 等构建产物不发布、不入库。当前版本 2.0.11（2026-11-04）。
+**发布范围：** Releases 只提供 Windows 桌面版与 Android APK 两个可安装产物；Web 端以源码方式提供，不含托管服务。desktop/ 的 Electron 遗留壳与 _preview/、native/publish* 等构建产物不发布、不入库。当前版本 2.0.12（2026-11-04）。
 
 各端实际能力、数据持久化位置和同步边界见 [当前架构与端能力](docs/ARCHITECTURE-STATUS.md)。
 
@@ -40,7 +42,7 @@
 
 ### 方式一：Windows 桌面版（推荐）
 
-1. 下载最新已发布的 `Qingqu-Setup-2.0.11.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
+1. 下载最新已发布的 `Qingqu-Setup-2.0.12.exe`，双击安装（可选择安装目录、创建桌面与开始菜单快捷方式）。
 2. 从桌面「清渠」启动。原生窗口，不需要浏览器、不需要 Node.js。
 3. 用演示账号登录；首次启动会把内置种子数据复制到 `%LOCALAPPDATA%\ZhifuWater\data\db.json`，之后的数据读写都在本机。
 
@@ -48,7 +50,7 @@
 
 ### 方式二：安卓 App（原生、可离线）
 
-1. 下载最新已发布的 `zhifu-water-mobile.apk`（Android 2.2.0），在手机上允许「安装未知来源应用」后安装。
+1. 下载最新已发布的 `zhifu-water-mobile.apk`（Android 2.0.12），在手机上允许「安装未知来源应用」后安装。
 2. 打开 App，点「**直接进入（本机演示）**」——不需要电脑、不需要填服务器地址。
    数据存在手机本地 SQLite；本机引擎在后台每 5 秒推进 site-1 的模拟遥测与告警（界面随之静默刷新）。告警确认、工单流转和巡检提交会持久化在手机上，重启 App 后仍保留。离线演示与电脑端数据彼此独立，也不会连接现场 PLC。
 3. 如果想看电脑上的平台数据：先在电脑上用 `node server/index.js --host 0.0.0.0` 启动服务，再在登录页展开「连接服务器」，填 `http://电脑IP:8765`，用同一套账号登录。服务默认只监听本机地址，局域网连接时需显式开启监听。
@@ -65,7 +67,7 @@ node server/index.js
 
 服务器默认只允许本机访问。需要让同一局域网的手机连接时，使用 `node server/index.js --host 0.0.0.0`，并在受控网络中运行。
 
-Web 端与桌面端同为 2.0.11：品牌、浅色水务蓝界面、数据模型一致。
+Web 端与桌面端同为 2.0.12：品牌、浅色水务蓝界面、数据模型一致。
 
 ### 演示账号
 
@@ -176,7 +178,7 @@ native\publish\Qingqu.exe --smoke
 
 # 安装包（NSIS）
 & "C:\Program Files (x86)\NSIS\makensis.exe" native\installer\setup.nsi
-# 产物：native/installer/Qingqu-Setup-2.0.11.exe
+# 产物：native/installer/Qingqu-Setup-2.0.12.exe
 ```
 
 ### 安卓端（需 JDK 17 + Android SDK build-tools/platform 34）
@@ -209,7 +211,7 @@ node scripts/smoke.js        # 78 项接口冒烟
 2. 文件存储（桌面 JSON / 安卓 SQLite）在单机单进程下可靠；多实例并发写需改用数据库。
 3. 报表 CSV 为 UTF-8 BOM 编码，适合 Excel；正式报表模板（Word/PDF）需按方案第 11 章扩展。
 4. 通知通道为「模拟发送」（站内通知必达，短信/微信/邮件记录发送结果），接入真实通道需配置供应商密钥。
-5. 桌面端为自包含单文件程序，启动时需解压运行时，首次打开约 2–4 秒；未做自动更新，升级需下载新安装包覆盖安装。
+5. 桌面端为自包含单文件程序，启动时需解压运行时，首次打开约 2–4 秒。桌面端会从 GitHub Releases 自动检查更新：发现新版本后可一键下载、校验、静默安装并重启，也可在用户菜单里手动检查。
 6. 安卓端本机模式的数据与告警由手机本地生成，与电脑端互不同步；需要同一份数据时改连服务器。当前构建未在真机上做过安装与触控验收（本机无安卓设备/模拟器），已完成编译、签名、包信息与逻辑自测。
 7. 本平台是方案 V2.2 的**演示实现**，用于评审、演示与后续开发基线，不替代现场 PLC 安全联锁。
 
