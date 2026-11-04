@@ -8,7 +8,7 @@
 | --- | --- |
 | APK | `dist/zhifu-water-mobile.apk` |
 | 包名 | `com.ln334.zhifuwater` |
-| 应用版本 | 2.0.16（versionCode 12） |
+| 应用版本 | 2.0.17（versionCode 12） |
 | 版本来源 | `AndroidManifest.xml`；构建脚本从 Manifest 读取版本 |
 | SDK | minSdk 24 / targetSdk 34 |
 | 启动页 | `com.ln334.zhifuwater.LoginActivity` |
