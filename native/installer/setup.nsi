@@ -1,6 +1,7 @@
 ﻿Unicode true
 !include "MUI2.nsh"
 !include "FileFunc.nsh"
+!include "LogicLib.nsh"
 
 !define APP_NAME "清渠"
 !define APP_FULL "清渠 · 村镇水处理站智能运维平台"
@@ -16,12 +17,27 @@ InstallDir "$PROGRAMFILES64\${APP_NAME}"
 InstallDirRegKey HKLM "${REG_KEY}" "InstallDir"
 RequestExecutionLevel admin
 SetCompressor /SOLID lzma
-BrandingText "${APP_FULL} ${APP_VERSION}"
+BrandingText "${APP_NAME} ${APP_VERSION}"
 
+; ---- 外观 ----
 !define MUI_ICON "..\..\desktop\build\icon.ico"
 !define MUI_UNICON "..\..\desktop\build\icon.ico"
 !define MUI_ABORTWARNING
+!define MUI_HEADERIMAGE
+!define MUI_HEADERIMAGE_BITMAP "branding\header.bmp"
+!define MUI_WELCOMEFINISHPAGE_BITMAP "branding\welcome.bmp"
+!define MUI_WELCOMEPAGE_TITLE "安装 ${APP_NAME}"
+!define MUI_WELCOMEPAGE_TEXT "本向导将把「${APP_FULL}」安装到这台电脑。$\r$\n$\r$\n安装内容包括：$\r$\n    · 运行总览与工艺流程画面$\r$\n    · 告警、工单、巡检与设备台账$\r$\n    · 自动控制与设备控制$\r$\n    · 水质化验、运行诊断与报表$\r$\n$\r$\n点击「下一步」开始安装。"
+!define MUI_FINISHPAGE_TITLE "安装完成"
+!define MUI_FINISHPAGE_TEXT "${APP_NAME} ${APP_VERSION} 已安装完成。$\r$\n演示账号 admin，密码 water123。$\r$\n关闭窗口后程序留在托盘，右键托盘图标可退出。"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${APP_EXE}"
+!define MUI_FINISHPAGE_RUN_TEXT "立即运行 ${APP_NAME}"
+!define MUI_FINISHPAGE_LINK "打开项目主页"
+!define MUI_FINISHPAGE_LINK_LOCATION "https://github.com/LN334/qingqu"
+
+!define MUI_COMPONENTSPAGE_TEXT_TOP "选择要安装的内容，然后点击「下一步」。"
 !insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -29,12 +45,13 @@ BrandingText "${APP_FULL} ${APP_VERSION}"
 !insertmacro MUI_UNPAGE_INSTFILES
 !insertmacro MUI_LANGUAGE "SimpChinese"
 
-Section "主程序" SecMain
+; ---- 安装 ----
+Section "主程序（必需）" SecMain
   SectionIn RO
   SetOutPath "$INSTDIR"
   File /r "..\publish\*.*"
 
-  ; 旧版本（智赋乡水 / ZhifuWater.exe）迁移清理，避免桌面出现两个图标、程序与卸载项并存
+  ; 旧版本迁移清理，避免桌面出现两个图标、程序与卸载项并存
   Delete "$DESKTOP\智赋乡水.lnk"
   Delete "$DESKTOP\智赋乡水 · 智慧水处理平台.lnk"
   Delete "$DESKTOP\智赋乡水·智慧水处理平台.lnk"
@@ -47,7 +64,6 @@ Section "主程序" SecMain
 
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 
-  CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
   CreateDirectory "$SMPROGRAMS\${APP_NAME}"
   CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
   CreateShortCut "$SMPROGRAMS\${APP_NAME}\卸载 ${APP_NAME}.lnk" "$INSTDIR\Uninstall.exe"
@@ -66,6 +82,16 @@ Section "主程序" SecMain
   WriteRegDWORD HKLM "${REG_KEY}" "EstimatedSize" "$0"
 SectionEnd
 
+Section "桌面快捷方式" SecDesktop
+  CreateShortCut "$DESKTOP\${APP_NAME}.lnk" "$INSTDIR\${APP_EXE}" "" "$INSTDIR\${APP_EXE}" 0
+SectionEnd
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecMain} "清渠桌面端主程序，包含运行总览、工艺流程、告警与工单等全部功能。"
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktop} "在桌面创建「清渠」快捷方式，方便直接打开。"
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; ---- 卸载 ----
 Section "Uninstall"
   Delete "$DESKTOP\${APP_NAME}.lnk"
   Delete "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk"
