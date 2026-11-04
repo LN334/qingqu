@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -19,8 +19,8 @@ public sealed class AnalysisPage : PageBase
     private int _days = 7;
 
     public override string Id => "analysis";
-    public override string Title => "数据分析";
-    public override string Group => "水质与诊断";
+    public override string Title => "运行分析";
+    public override string Group => "水质与分析";
 
     public AnalysisPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
 

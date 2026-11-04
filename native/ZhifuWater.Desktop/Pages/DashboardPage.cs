@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -28,7 +28,7 @@ public sealed class DashboardPage : PageBase
     private TextBlock _workSummary = null!;
 
     public override string Id => "dashboard";
-    public override string Title => "综合驾驶舱";
+    public override string Title => "运行总览";
     public override string Group => "总览";
 
     public DashboardPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
@@ -225,7 +225,7 @@ public sealed class DashboardPage : PageBase
             row => Host.ShowPage("alarms"));
         _alarmSummary = Kit.T("", 10, Pal.Muted2);
         return Kit.Card("活动告警", _alarmTable,
-            Kit.Row(8, _alarmSummary, Kit.Link("告警中心", () => Host.ShowPage("alarms"))),
+            Kit.Row(8, _alarmSummary, Kit.Link("告警管理", () => Host.ShowPage("alarms"))),
             null, new Thickness(8, 6, 8, 8));
     }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -21,8 +21,8 @@ public sealed class QualityPage : PageBase
     private LabRecord? _selected;
 
     public override string Id => "quality";
-    public override string Title => "水质与化验";
-    public override string Group => "水质与诊断";
+    public override string Title => "水质化验";
+    public override string Group => "水质与分析";
 
     public QualityPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
 

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -613,7 +613,7 @@ public sealed partial class DemoDesktopData : IDesktopData
         return OpResult.Done("规则状态已切换（演示环境不持久化）");
     }
 
-    // ---------------- 远程控制 ----------------
+    // ---------------- 设备控制 ----------------
     public IReadOnlyList<ActionInfo> Actions => DemoCatalog.Actions();
 
     public IReadOnlyList<CommandRecord> Commands(int limit = 30) => Rt.Commands.OrderByDescending(c => c.At).Take(limit).ToList();
@@ -621,7 +621,7 @@ public sealed partial class DemoDesktopData : IDesktopData
     public OpResult ExecuteAction(string key, string reason)
     {
         if (_user == null) return OpResult.Fail("请先登录");
-        if (!_user.Can("control")) return OpResult.Fail("当前账号无远程控制权限");
+        if (!_user.Can("control")) return OpResult.Fail("当前账号无设备控制权限");
         var action = Actions.FirstOrDefault(a => a.Key == key);
         if (action == null) return OpResult.Fail("未知动作");
         if (key is "baf.backwash" or "sulfur.backwash")

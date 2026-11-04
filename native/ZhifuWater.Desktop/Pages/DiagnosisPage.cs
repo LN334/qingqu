@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -16,8 +16,8 @@ public sealed class DiagnosisPage : PageBase
     private string _level = "all";
 
     public override string Id => "diagnosis";
-    public override string Title => "智能诊断";
-    public override string Group => "水质与诊断";
+    public override string Title => "运行诊断";
+    public override string Group => "水质与分析";
 
     public DiagnosisPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
 

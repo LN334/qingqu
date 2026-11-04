@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace ZhifuWater.Desktop.Data;
@@ -64,21 +64,21 @@ public interface IDesktopData
     IReadOnlyList<AlarmRuleInfo> AlarmRules { get; }
     OpResult ToggleAlarmRule(string id);
 
-    // ---------- 远程控制 ----------
+    // ---------- 设备控制 ----------
     IReadOnlyList<ActionInfo> Actions { get; }
     IReadOnlyList<CommandRecord> Commands(int limit = 30);
     OpResult ExecuteAction(string key, string reason);
     OpResult ConfirmCommand(string id);
     OpResult CancelCommand(string id);
 
-    // ---------- 工艺参数 ----------
+    // ---------- 参数设置 ----------
     IReadOnlyList<ParamInfo> Params { get; }
     IReadOnlyList<ParamRequest> ParamRequests { get; }
     OpResult SetParam(string id, double value, string reason);
     OpResult RollbackParam(string id, int version, string reason);
     OpResult ApproveParamRequest(string id, bool approve);
 
-    // ---------- 水质与化验 ----------
+    // ---------- 水质化验 ----------
     IReadOnlyList<LabMetricDef> LabMetrics { get; }
     IReadOnlyList<LabRecord> Labs { get; }
     LabStats LabStatistics(int days);

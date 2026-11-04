@@ -21,7 +21,7 @@ public sealed class ReportsPage : PageBase
 
     public override string Id => "reports";
     public override string Title => "报表中心";
-    public override string Group => "水质与诊断";
+    public override string Group => "水质与分析";
 
     public ReportsPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
 

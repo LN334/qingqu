@@ -184,7 +184,7 @@ public sealed class AdminPage : PageBase
     private static string PermName(string key) => key switch
     {
         "view" => "查看数据（view）",
-        "control" => "远程控制（control）",
+        "control" => "设备控制（control）",
         "alarm.handle" => "告警处理（alarm.handle）",
         "workorder.handle" => "工单处理（workorder.handle）",
         "param.edit" => "参数编辑与审批（param.edit）",

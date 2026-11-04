@@ -1012,8 +1012,8 @@ public sealed partial class DemoDesktopData
     {
         new() { Key = "super", Name = "平台管理员", Desc = "全部站点、全部功能", Perms = RolePerms["super"].ToList(), Sites = "all", UserCount = 1 },
         new() { Key = "region", Name = "区域管理员", Desc = "所辖站点运行与报表", Perms = RolePerms["region"].ToList(), Sites = "assigned", UserCount = 1 },
-        new() { Key = "process", Name = "工艺工程师", Desc = "工艺参数、诊断与化验复核", Perms = RolePerms["process"].ToList(), Sites = "assigned", UserCount = 1 },
-        new() { Key = "operator", Name = "运维操作员", Desc = "远程控制、告警与巡检", Perms = RolePerms["operator"].ToList(), Sites = "assigned", UserCount = 2 },
+        new() { Key = "process", Name = "工艺工程师", Desc = "参数设置、诊断与化验复核", Perms = RolePerms["process"].ToList(), Sites = "assigned", UserCount = 1 },
+        new() { Key = "operator", Name = "运维操作员", Desc = "设备控制、告警与巡检", Perms = RolePerms["operator"].ToList(), Sites = "assigned", UserCount = 2 },
         new() { Key = "maintainer", Name = "维修工程师", Desc = "工单与设备维护", Perms = RolePerms["maintainer"].ToList(), Sites = "assigned", UserCount = 1 },
         new() { Key = "viewer", Name = "监管访客", Desc = "只读查看", Perms = RolePerms["viewer"].ToList(), Sites = "assigned", UserCount = 1 },
     };

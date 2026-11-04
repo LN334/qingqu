@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -24,7 +24,7 @@ public sealed class AlarmsPage : PageBase
     private AlarmRuleInfo? _ruleSelected;
 
     public override string Id => "alarms";
-    public override string Title => "告警中心";
+    public override string Title => "告警管理";
     public override string Group => "运行";
 
     public AlarmsPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }

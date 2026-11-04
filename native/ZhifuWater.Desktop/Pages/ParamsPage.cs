@@ -20,7 +20,7 @@ public sealed class ParamsPage : PageBase
     private string _group = "all";
 
     public override string Id => "params";
-    public override string Title => "工艺参数";
+    public override string Title => "参数设置";
     public override string Group => "运行";
 
     public ParamsPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }

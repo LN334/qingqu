@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -17,7 +17,7 @@ public sealed class ControlPage : PageBase
     private CommandRecord? _selected;
 
     public override string Id => "control";
-    public override string Title => "远程控制";
+    public override string Title => "设备控制";
     public override string Group => "运行";
 
     public ControlPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }

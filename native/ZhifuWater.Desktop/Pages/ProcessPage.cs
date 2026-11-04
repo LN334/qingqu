@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -19,7 +19,7 @@ public sealed class ProcessPage : PageBase, IFocusablePage
     private string _selected = "baf";
 
     public override string Id => "process";
-    public override string Title => "工艺监控";
+    public override string Title => "工艺流程";
     public override string Group => "总览";
 
     public ProcessPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
@@ -211,9 +211,9 @@ public sealed class ProcessPage : PageBase, IFocusablePage
         _detail.Children.Add(Kit.KvGrid(pairs));
 
         var buttons = Kit.Row(6,
-            Kit.Btn("去实时监测", () => Host.ShowPage("monitor"), small: true),
+            Kit.Btn("去实时数据", () => Host.ShowPage("monitor"), small: true),
             Kit.Btn("去诊断", () => Host.ShowPage("diagnosis"), small: true),
-            Kit.Btn("远程控制", () => Host.ShowPage("control"), small: true));
+            Kit.Btn("设备控制", () => Host.ShowPage("control"), small: true));
         buttons.Margin = new Thickness(0, 10, 0, 0);
         _detail.Children.Add(buttons);
 

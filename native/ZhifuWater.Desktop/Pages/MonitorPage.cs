@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -22,7 +22,7 @@ public sealed class MonitorPage : PageBase
     private int _hoursValue = 24;
 
     public override string Id => "monitor";
-    public override string Title => "实时监测";
+    public override string Title => "实时数据";
     public override string Group => "总览";
 
     public MonitorPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
@@ -100,7 +100,7 @@ public sealed class MonitorPage : PageBase
         _liveInfo.Text = $"点位 {readings.Count} 个 · 正常 {online} 个 · 采集于 {Svc.Data.LastUpdated:HH:mm:ss}";
 
         var selectedCode = _selected;
-        // 与告警中心对齐：该点位存在未恢复告警时，状态列显示「告警」而不是「正常」
+        // 与告警管理对齐：该点位存在未恢复告警时，状态列显示「告警」而不是「正常」
         var alarmPoints = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in Svc.Data.Alarms("open"))
             if (!string.IsNullOrEmpty(a.DeviceName)) alarmPoints.Add(a.DeviceName);

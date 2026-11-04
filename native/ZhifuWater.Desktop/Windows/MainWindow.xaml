@@ -71,7 +71,7 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock x:Name="PageTitle" Grid.Column="0" FontSize="17" FontWeight="SemiBold"
-                               Foreground="{DynamicResource Ink}" VerticalAlignment="Center" Text="综合驾驶舱" />
+                               Foreground="{DynamicResource Ink}" VerticalAlignment="Center" Text="运行总览" />
 
                     <ComboBox x:Name="SiteCombo" Grid.Column="1" Width="196" Height="30" Margin="18,0,0,0"
                               VerticalAlignment="Center" ToolTip="切换站点" DisplayMemberPath="Name"
@@ -213,7 +213,7 @@
             </StackPanel>
         </Border>
 
-        <!-- 新告警弹窗：右下角逐条排队，点击进入告警中心 -->
+        <!-- 新告警弹窗：右下角逐条排队，点击进入告警管理 -->
         <Border x:Name="AlarmToastPanel" Visibility="Collapsed"
                 Background="{DynamicResource Card}" BorderBrush="{DynamicResource Line}"
                 BorderThickness="1" CornerRadius="4" Width="330" Cursor="Hand"
@@ -230,7 +230,7 @@
                     <TextBlock x:Name="AlarmToastBody" FontSize="11" Margin="0,4,0,0"
                                Foreground="{DynamicResource Muted}" TextWrapping="Wrap" MaxWidth="288" />
                     <TextBlock x:Name="AlarmToastHint" FontSize="10" Margin="0,6,0,0"
-                               Foreground="{DynamicResource Muted2}" Text="点击进入告警中心" />
+                               Foreground="{DynamicResource Muted2}" Text="点击进入告警管理" />
                 </StackPanel>
             </Grid>
         </Border>
