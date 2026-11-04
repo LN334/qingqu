@@ -209,26 +209,43 @@ public static class UpdateService
         return Convert.ToHexString(hash).ToLowerInvariant();
     }
 
-    /// <summary>启动安装并退出当前程序：安装器以静默方式升级，完成后重新拉起新版。</summary>
-    public static void ApplyAndRestart(string installerPath)
+    /// <summary>以管理员权限启动安装并退出当前程序：安装器静默升级，完成后重新拉起新版。</summary>
+    public static bool ApplyAndRestart(string installerPath)
     {
         var exe = Environment.ProcessPath ?? Path.Combine(AppContext.BaseDirectory, "Qingqu.exe");
         var script = Path.Combine(Path.GetTempPath(), "qingqu-update.ps1");
-        var ps = "$ErrorActionPreference='Stop'\r\n" +
-                 "Start-Sleep -Milliseconds 1200\r\n" +
-                 "$p = Start-Process -FilePath " + PsQuote(installerPath) + " -ArgumentList '/S' -PassThru -Wait\r\n" +
-                 "if ($p.ExitCode -ne 0) { Start-Process -FilePath " + PsQuote(installerPath) + " }\r\n" +
-                 "Start-Process -FilePath " + PsQuote(exe) + "\r\n";
+        var log = Path.Combine(Path.GetTempPath(), "qingqu-update.log");
+        var ps =
+            "$ErrorActionPreference='Continue'\r\n" +
+            "Start-Sleep -Milliseconds 1200\r\n" +
+            "$log = " + PsQuote(log) + "\r\n" +
+            "try {\r\n" +
+            "  $p = Start-Process -FilePath " + PsQuote(installerPath) + " -ArgumentList '/S' -PassThru -Wait -ErrorAction Stop\r\n" +
+            "  \"exit=$($p.ExitCode)\" | Out-File $log -Append -Encoding utf8\r\n" +
+            "} catch {\r\n" +
+            "  \"error=$($_.Exception.Message)\" | Out-File $log -Append -Encoding utf8\r\n" +
+            "}\r\n" +
+            "Start-Process -FilePath " + PsQuote(exe) + "\r\n";
         File.WriteAllText(script, ps, new UTF8Encoding(true));
 
-        Process.Start(new ProcessStartInfo
+        try
         {
-            FileName = "powershell.exe",
-            Arguments = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File " + PsQuote(script),
-            UseShellExecute = true,
-            WindowStyle = ProcessWindowStyle.Hidden,
-        });
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = "-NoProfile -WindowStyle Hidden -ExecutionPolicy Bypass -File " + PsQuote(script),
+                UseShellExecute = true,
+                Verb = "runas",
+                WindowStyle = ProcessWindowStyle.Hidden,
+            });
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            return false;
+        }
+
         System.Windows.Application.Current.Shutdown();
+        return true;
     }
 
     private static string PsQuote(string path) => "'" + path.Replace("'", "''") + "'";

@@ -141,7 +141,11 @@ public sealed class UpdateDialog : Window
         if (_installer != null)
         {
             _status.Text = "正在退出并安装，安装完成后会自动重新打开清渠…";
-            UpdateService.ApplyAndRestart(_installer);
+            if (!UpdateService.ApplyAndRestart(_installer))
+            {
+                _status.Text = "需要管理员权限才能安装更新，已取消。可稍后以管理员身份运行安装包。";
+                _status.Foreground = Pal.ToneFg("danger");
+            }
             return;
         }
 
