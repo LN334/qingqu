@@ -350,6 +350,7 @@ public partial class MainWindow : Window
             BellBadge.Visibility = unread > 0 ? Visibility.Visible : Visibility.Collapsed;
             BellBadgeText.Text = unread > 99 ? "99+" : unread.ToString();
             FooterRight.Text = "最后更新 " + _services.Data.LastUpdated.ToString("HH:mm:ss");
+            WatchAssignments();
         }
         catch
         {
@@ -440,6 +441,69 @@ public partial class MainWindow : Window
             };
             BellList.Children.Add(border);
         }
+    }
+
+    private readonly HashSet<string> _seenNotifications = new();
+    private bool _assignmentToastSeeded;
+    private DispatcherTimer? _assignmentToastTimer;
+    private NotificationInfo? _assignmentToastItem;
+
+    private void WatchAssignments()
+    {
+        try
+        {
+            var unread = _services.Data.Notifications.Where(n => !n.Read).ToList();
+            var fresh = unread.Where(n => !_seenNotifications.Contains(n.Id)).ToList();
+            foreach (var n in unread) _seenNotifications.Add(n.Id);
+
+            if (!_assignmentToastSeeded)
+            {
+                _assignmentToastSeeded = true;
+                var first = unread.FirstOrDefault(n => n.Kind == "workorder");
+                if (first != null) ShowAssignmentToast(first);
+                return;
+            }
+
+            var item = fresh.LastOrDefault(n => n.Kind == "workorder");
+            if (item != null) ShowAssignmentToast(item);
+        }
+        catch
+        {
+            // 提示失败不影响主界面
+        }
+    }
+
+    private void ShowAssignmentToast(NotificationInfo n)
+    {
+        _assignmentToastItem = n;
+        AssignmentTitle.Text = n.Title;
+        AssignmentBody.Text = n.Body;
+        AssignmentToast.Visibility = Visibility.Visible;
+        _assignmentToastTimer?.Stop();
+        _assignmentToastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(9) };
+        _assignmentToastTimer.Tick += (_, _) =>
+        {
+            _assignmentToastTimer?.Stop();
+            AssignmentToast.Visibility = Visibility.Collapsed;
+        };
+        _assignmentToastTimer.Start();
+    }
+
+    private void OnAssignmentToastClose(object sender, RoutedEventArgs e)
+    {
+        _assignmentToastTimer?.Stop();
+        AssignmentToast.Visibility = Visibility.Collapsed;
+    }
+
+    private void OnAssignmentToastView(object sender, RoutedEventArgs e)
+    {
+        var n = _assignmentToastItem;
+        _assignmentToastTimer?.Stop();
+        AssignmentToast.Visibility = Visibility.Collapsed;
+        if (n == null) return;
+        _services.Data.MarkNotificationRead(n.Id);
+        UpdateBadges();
+        ShowPage("workorders");
     }
 
     private void OnMarkReadClick(object sender, RoutedEventArgs e)
