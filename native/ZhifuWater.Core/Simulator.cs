@@ -69,7 +69,7 @@ public sealed class TimerHost : IDisposable
     }
 }
 
-/// <summary>站点工艺状态（原料罐 / BAF / PAC / PAM / 硫自养池 / 清水池 / 废水箱 / 能耗）。</summary>
+/// <summary>站点工艺状态（进水调节池 / 固液分离 / PAC / PAM / 自养脱氮池 / 清水池 / 废水箱 / 能耗）。</summary>
 public sealed class SiteState
 {
     public RawState Raw = new();
@@ -99,7 +99,7 @@ public sealed class BafState
 {
     public double Ph;
     public double Do;
-    /// <summary>硫自养池总磷（mg/L）；BAF 不用这个字段。</summary>
+    /// <summary>自养脱氮池总磷（mg/L）；固液分离不用这个字段。</summary>
     public double P;
     public bool Blower;
     public double Dp;
@@ -441,7 +441,7 @@ public sealed class Simulator
 
     public void StepSite(string siteId, SiteState s, double dt, long now)
     {
-        // —— 原料罐与提升泵 ——
+        // —— 进水调节池与提升泵 ——
         var r = s.Raw;
         bool wasRun = r.PumpRun;
         if (r.PumpRun) r.Level -= 0.012 * dt;
@@ -460,7 +460,7 @@ public sealed class Simulator
         if (!wasRun && r.PumpRun) r.Starts++;
         if (r.PumpRun) r.Starts = Math.Max(r.Starts, 1);
 
-        // —— BAF ——
+        // —— 固液分离 ——
         var b = s.Baf;
         if (b.BwPhase != 0)
         {
@@ -496,7 +496,7 @@ public sealed class Simulator
             d.Dose = JsMath.Clamp(d.Dose, 0, max);
         }
 
-        // —— 硫自养池 ——
+        // —— 自养脱氮池 ——
         var su = s.Sulfur;
         if (su.BwPhase != 0)
         {
@@ -564,7 +564,7 @@ public sealed class Simulator
         return new JsonObject
         {
             ["ok"] = true,
-            ["detail"] = $"{(unitCode == "sulfur" ? "硫自养池" : "BAF")} 反冲洗已启动：气冲 → 气水联合 → 漂洗",
+            ["detail"] = $"{(unitCode == "sulfur" ? "自养脱氮池" : "固液分离")} 反冲洗已启动：气冲 → 气水联合 → 漂洗",
         };
     }
 
@@ -589,7 +589,7 @@ public sealed class Simulator
         switch (action)
         {
             case "raw.pump.start":
-                if (s.Raw.Level < 5) return Fail("原料罐液位低于 5%，低液位保护禁止启泵");
+                if (s.Raw.Level < 5) return Fail("进水调节池液位低于 5%，低液位保护禁止启泵");
                 if (s.Raw.Fault) return Fail("提升泵故障信号存在，禁止启动");
                 return Ok();
             case "raw.pump.stop":

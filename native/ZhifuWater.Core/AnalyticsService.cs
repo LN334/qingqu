@@ -363,8 +363,8 @@ public sealed class AnalyticsService
                 ("local", "仅现场可改"), ("read", "只读")),
             ["labStatus"] = EnumList(("pending_review", "待复核"), ("reviewed", "已复核"),
                 ("draft", "草稿"), ("rejected", "退回")),
-            ["samplePoints"] = EnumList(("inlet", "进水（原料罐）"), ("baf_out", "BAF 出水"),
-                ("sulfur_out", "硫自养池出水"), ("outlet", "总出水（清水池）")),
+            ["samplePoints"] = EnumList(("inlet", "进水（进水调节池）"), ("baf_out", "固液分离出水"),
+                ("sulfur_out", "自养脱氮池出水"), ("outlet", "总出水（清水池）")),
             ["labMetrics"] = LabMetrics(),
             ["commandStatus"] = EnumList(("pending_confirm", "待确认"), ("pending_dispatch", "待下发"),
                 ("sent", "已下发"), ("executing", "执行中"), ("success", "成功"), ("failed", "失败"),
@@ -769,11 +769,11 @@ public sealed class AnalyticsService
             ["sequence"] = sequence,
             ["meta"] = new JsonObject
             {
-                ["note"] = "图形按方案第 3 章图纸顺序绘制：原料罐 → 格栅池 → 初沉池 → 配水槽1 → BAF → PAC → PAM → 配水槽2 → 硫自养池 → 清水池；反冲洗废水进入废水水箱。",
+                ["note"] = "图形按方案第 3 章图纸顺序绘制：进水调节池 → 格栅池 → 序批预氧化池 → 配水槽1 → 固液分离 → PAC → PAM → 中间水池 → 自养脱氮池 → 清水池；反冲洗废水进入废水水箱。",
                 ["interlock"] = new JsonArray
                 {
-                    new JsonObject { ["from"] = "RAW.LVL", ["text"] = "原料罐低液位与提升泵联锁，低于 5% 禁止启泵" },
-                    new JsonObject { ["from"] = "BAF.DO", ["text"] = "BAF 溶解氧与曝气风机联锁，DO < 2.5 mg/L 禁止停风机" },
+                    new JsonObject { ["from"] = "RAW.LVL", ["text"] = "进水调节池低液位与提升泵联锁，低于 5% 禁止启泵" },
+                    new JsonObject { ["from"] = "BAF.DO", ["text"] = "预氧化溶解氧与曝气风机联锁，DO < 2.5 mg/L 禁止停风机" },
                     new JsonObject { ["from"] = "WASTE.LVL", ["text"] = "废水箱高液位（≥92%）禁止启动反冲洗，避免排水受阻" },
                     new JsonObject { ["from"] = "SULFUR.P", ["text"] = "反冲洗管路压力超 0.6 MPa 提示检查阀门与管路" },
                 },

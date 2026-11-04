@@ -208,7 +208,7 @@ internal static class Program
         Check("每条事件带点位更新", lastUpdates is not null && lastUpdates.Count >= 20, $"实际 {lastUpdates?.Count}");
 
         var lvl = core.Telemetry.GetLatest("pt-site-1-raw-lvl");
-        Check("原料罐液位有最新值", lvl is not null);
+        Check("进水调节池液位有最新值", lvl is not null);
         var lvlV = J.AsDouble(J.Get(lvl, "v"));
         Check("液位数值在 0–100 之间", lvlV is > 0 and < 100, $"v={lvlV}");
         Check("最新值带时间戳", J.Num(lvl, "t") > now - 60_000);
@@ -385,7 +385,7 @@ internal static class Program
         var wo = core.Ops.CreateWorkorder(admin, new JsonObject
         {
             ["siteId"] = "site-1",
-            ["title"] = "自测：BAF 曝气风机异响检查",
+            ["title"] = "自测：预氧化曝气风机异响检查",
             ["type"] = "repair",
             ["priority"] = "high",
             ["unitCode"] = "baf",

@@ -65,30 +65,30 @@ public sealed class AutomationService
 
     private static IEnumerable<JsonObject> DefaultRules()
     {
-        yield return Rule("auto-baf-backwash", "BAF 压差高自动反冲洗", "backwash", "baf",
+        yield return Rule("auto-baf-backwash", "固液分离压差高自动反冲洗", "backwash", "baf",
             new[] { Cond("BAF.DP", ">=", 22) }, holdSec: 120, cooldownSec: 1800, maxPerDay: 6,
             action: "command", command: "baf.backwash.start",
-            reason: "BAF 滤池压差超 22 kPa 并持续 2 分钟，自动启动反冲洗");
+            reason: "固液分离压差超 22 kPa 并持续 2 分钟，自动启动反冲洗");
 
-        yield return Rule("auto-sulfur-backwash", "硫自养压差高自动反冲洗", "backwash", "sulfur",
+        yield return Rule("auto-sulfur-backwash", "自养脱氮压差高自动反冲洗", "backwash", "sulfur",
             new[] { Cond("SULFUR.DP", ">=", 20) }, holdSec: 120, cooldownSec: 2400, maxPerDay: 4,
             action: "command", command: "sulfur.backwash.start",
-            reason: "硫自养池压差超 20 kPa 并持续 2 分钟，自动启动反冲洗");
+            reason: "自养脱氮池压差超 20 kPa 并持续 2 分钟，自动启动反冲洗");
 
-        yield return Rule("auto-baf-aeration", "BAF 溶解氧低自动加曝气", "aeration", "baf",
+        yield return Rule("auto-baf-aeration", "预氧化溶解氧低自动加曝气", "aeration", "baf",
             new[] { Cond("BAF.DO", "<=", 2.2) }, holdSec: 60, cooldownSec: 900, maxPerDay: 8,
             action: "command", command: "baf.blower.start",
-            reason: "BAF 溶解氧低于 2.2 mg/L 并持续 1 分钟，自动启动曝气风机");
+            reason: "预氧化溶解氧低于 2.2 mg/L 并持续 1 分钟，自动启动曝气风机");
 
-        yield return Rule("auto-raw-stop", "原料罐低液位保护停泵", "pump", "raw",
+        yield return Rule("auto-raw-stop", "进水调节池低液位保护停泵", "pump", "raw",
             new[] { Cond("RAW.LVL", "<=", 12) }, holdSec: 30, cooldownSec: 3600, maxPerDay: 3,
             action: "command", command: "raw.pump.stop",
-            reason: "原料罐液位低于 12%，触发低液位保护，自动停提升泵");
+            reason: "进水调节池液位低于 12%，触发低液位保护，自动停提升泵");
 
         yield return Rule("auto-raw-start", "来水恢复自动启泵", "pump", "raw",
             new[] { Cond("FLOW.IN", "<=", 0.02), Cond("RAW.LVL", ">=", 20) }, holdSec: 90, cooldownSec: 1200, maxPerDay: 4,
             action: "command", command: "raw.pump.start",
-            reason: "原料罐液位回升且进水流量中断 1.5 分钟，自动启动提升泵");
+            reason: "进水调节池液位回升且进水流量中断 1.5 分钟，自动启动提升泵");
 
         yield return Rule("auto-pac-stop", "PAC 药箱低液位自动停加药", "dosing", "pac",
             new[] { Cond("PAC.LEVEL", "<=", 12) }, holdSec: 60, cooldownSec: 3600, maxPerDay: 2,
@@ -100,10 +100,10 @@ public sealed class AutomationService
             action: "workorder", command: "", reason: "",
             alarmLevels: new[] { "critical" });
 
-        yield return Rule("auto-workorder-dp", "BAF 压差持续偏高自动派单", "workorder", "baf",
+        yield return Rule("auto-workorder-dp", "固液分离压差持续偏高自动派单", "workorder", "baf",
             new[] { Cond("BAF.DP", ">=", 24) }, holdSec: 600, cooldownSec: 7200, maxPerDay: 2,
             action: "workorder", command: "",
-            reason: "BAF 压差连续 10 分钟高于 24 kPa，反冲洗未压住，需要现场检查滤料");
+            reason: "固液分离压差连续 10 分钟高于 24 kPa，反冲洗未压住，需要现场检查滤料");
     }
 
     private static JsonObject Cond(string code, string op, double threshold) => new()
@@ -585,10 +585,10 @@ public sealed class AutomationService
 
     private static string CommandName(string action) => action switch
     {
-        "baf.backwash.start" => "启动 BAF 反冲洗",
-        "baf.backwash.stop" => "停止 BAF 反冲洗",
-        "sulfur.backwash.start" => "启动硫自养反冲洗",
-        "sulfur.backwash.stop" => "停止硫自养反冲洗",
+        "baf.backwash.start" => "启动 固液分离反冲",
+        "baf.backwash.stop" => "停止 固液分离反冲",
+        "sulfur.backwash.start" => "启动自养脱氮反冲洗",
+        "sulfur.backwash.stop" => "停止自养脱氮反冲洗",
         "baf.blower.start" => "启动曝气风机",
         "baf.blower.stop" => "停止曝气风机",
         "raw.pump.start" => "启动提升泵",

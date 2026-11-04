@@ -94,28 +94,28 @@ public sealed partial class DemoDesktopData
 
         if (isPrimary)
         {
-            A("硫自养出水 pH 偏低", "major", "active", "sulfur", "pH 6.76 低于下限 6.80，反硝化效率存在下降风险",
-                6.76, "pH ≥ 6.80", "硫自养出水 pH 低于下限", "pH-501", now.AddHours(-2).AddMinutes(-10));
-            A("BAF 溶解氧不足", "major", "active", "baf", "DO 1.78 mg/L 低于控制下限 2.00 mg/L，硝化受抑制",
-                1.78, "DO ≥ 2.00 mg/L", "BAF 溶解氧不足", "DO-201", now.AddHours(-1).AddMinutes(-35));
-            A("原料罐液位偏低", "major", "acknowledged", "raw", "液位 22.6% 低于 25%，已确认并安排补水",
-                22.6, "液位 ≥ 25%", "原料罐液位偏低", "LT-101", now.AddHours(-3).AddMinutes(-5),
+            A("自养脱氮出水 pH 偏低", "major", "active", "sulfur", "pH 6.76 低于下限 6.80，反硝化效率存在下降风险",
+                6.76, "pH ≥ 6.80", "自养脱氮出水 pH 低于下限", "pH-501", now.AddHours(-2).AddMinutes(-10));
+            A("预氧化溶解氧不足", "major", "active", "baf", "DO 1.78 mg/L 低于控制下限 2.00 mg/L，硝化受抑制",
+                1.78, "DO ≥ 2.00 mg/L", "预氧化溶解氧不足", "DO-201", now.AddHours(-1).AddMinutes(-35));
+            A("进水调节池液位偏低", "major", "acknowledged", "raw", "液位 22.6% 低于 25%，已确认并安排补水",
+                22.6, "液位 ≥ 25%", "进水调节池液位偏低", "LT-101", now.AddHours(-3).AddMinutes(-5),
                 now.AddHours(-2).AddMinutes(-48), null, "已联系村委补水，预计 40 分钟内恢复");
             A("PAC 药箱余量低", "minor", "active", "pac", "余量 18.4%，低于 20% 提醒线", 18.4, "余量 ≥ 20%",
                 "PAC 药箱余量低", "P-301", now.AddHours(-4).AddMinutes(-20));
-            A("硫自养反冲洗压力偏高", "minor", "resolved", "sulfur", "反冲洗峰值压力 0.63 MPa，超过 0.60 MPa",
+            A("自养脱氮反冲洗压力偏高", "minor", "resolved", "sulfur", "反冲洗峰值压力 0.63 MPa，超过 0.60 MPa",
                 0.63, "压力 ≤ 0.60 MPa", "反冲洗压力偏高", "P-501", now.AddHours(-6).AddMinutes(-12),
                 now.AddHours(-6).AddMinutes(-5), now.AddHours(-5).AddMinutes(-40));
-            A("硫自养滤层压差偏高", "minor", "resolved", "sulfur", "压差 26.8 kPa，接近反冲洗触发值",
-                26.8, "压差 ≤ 25 kPa", "硫自养滤层压差偏高", "DP-501", now.AddHours(-8).AddMinutes(-30),
+            A("自养脱氮滤层压差偏高", "minor", "resolved", "sulfur", "压差 26.8 kPa，接近反冲洗触发值",
+                26.8, "压差 ≤ 25 kPa", "自养脱氮滤层压差偏高", "DP-501", now.AddHours(-8).AddMinutes(-30),
                 now.AddHours(-8).AddMinutes(-10), now.AddHours(-7).AddMinutes(-30));
             A("清水池液位偏高", "info", "active", "clear", "液位 91%，回用量下降", 91, "液位 ≤ 90%",
                 "清水池液位偏高", "LT-601", now.AddMinutes(-42));
             A("曝气风机故障", "critical", "closed", "baf", "风机过载保护动作，控制柜跳闸",
                 null, "运行反馈正常", "曝气风机故障", "B-201", now.AddDays(-1).AddHours(-3),
                 now.AddDays(-1).AddHours(-3).AddMinutes(8), now.AddDays(-1).AddHours(-1), "更换热继电器后恢复");
-            A("BAF 溶解氧短时低", "info", "closed", "baf", "检修期间 DO 短时降至 1.92 mg/L",
-                1.92, "DO ≥ 2.00 mg/L", "BAF 溶解氧不足", "DO-201", now.AddDays(-1).AddHours(-2),
+            A("预氧化溶解氧短时低", "info", "closed", "baf", "检修期间 DO 短时降至 1.92 mg/L",
+                1.92, "DO ≥ 2.00 mg/L", "预氧化溶解氧不足", "DO-201", now.AddDays(-1).AddHours(-2),
                 null, now.AddDays(-1).AddHours(-1).AddMinutes(40));
             A("边缘网关心跳丢失", "critical", "closed", "plant", "网关离线 4 分 12 秒，数据中断",
                 null, "心跳间隔 ≤ 90 s", "边缘网关离线", "GW-1", now.AddDays(-2).AddHours(-5),
@@ -123,8 +123,8 @@ public sealed partial class DemoDesktopData
         }
         else
         {
-            A("原料罐液位偏低", "major", "acknowledged", "raw", "液位 24.1%，已通知现场补水",
-                24.1, "液位 ≥ 25%", "原料罐液位偏低", "LT-101", now.AddHours(-2).AddMinutes(-20),
+            A("进水调节池液位偏低", "major", "acknowledged", "raw", "液位 24.1%，已通知现场补水",
+                24.1, "液位 ≥ 25%", "进水调节池液位偏低", "LT-101", now.AddHours(-2).AddMinutes(-20),
                 now.AddHours(-1).AddMinutes(-50), null, "复制试点，补水依赖人工");
             A("PAC 药箱余量低", "minor", "active", "pac", "余量 19.2%，低于 20% 提醒线",
                 19.2, "余量 ≥ 20%", "PAC 药箱余量低", "P-301", now.AddHours(-3).AddMinutes(-10));
@@ -170,13 +170,13 @@ public sealed partial class DemoDesktopData
 
         if (isPrimary)
         {
-            W(1, "硫自养 pH 探头校准与碱度核查", "repair", "high", "processing", "sulfur", "pH-501",
+            W(1, "自养脱氮 pH 探头校准与碱度核查", "repair", "high", "processing", "sulfur", "pH-501",
                 "陈浩", "告警 AL-" + now.ToString("yyyyMMdd") + "-001", now.AddHours(-2), now.AddHours(4), null,
                 "复核 pH 探头标液，取样复测进水碱度，必要时投加碳酸氢钠。");
-            W(2, "BAF 曝气风机电流偏高排查", "maintain", "normal", "pending", "baf", "B-201",
+            W(2, "预氧化曝气风机电流偏高排查", "maintain", "normal", "pending", "baf", "B-201",
                 "赵磊", "告警联动", now.AddHours(-1), now.AddHours(6), null,
                 "检查风机进气滤网、止回阀与皮带松紧，测量三相电流平衡度。");
-            W(3, "原料罐液位计零点校准", "calibrate", "normal", "accepted", "raw", "LT-101",
+            W(3, "进水调节池液位计零点校准", "calibrate", "normal", "accepted", "raw", "LT-101",
                 "陈浩", "定期校准", now.AddDays(-1), now.AddHours(20), null,
                 "排空后置零点，满量程两点校验，记录校准证书编号。");
             W(4, "PAC 加药泵密封更换", "repair", "normal", "done", "pac", "P-301",
@@ -185,13 +185,13 @@ public sealed partial class DemoDesktopData
             W(5, "现场控制柜清灰与接线紧固", "maintain", "low", "done", "plant", "PLC-1",
                 "赵磊", "月度计划", now.AddDays(-4), now.AddDays(-3), now.AddDays(-3).AddHours(1),
                 "断电清灰，紧固端子，检查接地电阻。", "接地电阻 2.1 Ω，符合要求。");
-            W(6, "初沉池浮渣清理", "maintain", "normal", "pending", "primary", "初沉池",
+            W(6, "序批预氧化池浮渣清理", "maintain", "normal", "pending", "primary", "序批预氧化池",
                 "赵磊", "巡检发现", now.AddDays(-1), now.AddHours(30), null,
                 "浮渣厚度约 3 cm，安排人工清理并检查刮渣板。");
         }
         else
         {
-            W(1, "原料罐补水与液位计核对", "repair", "high", "processing", "raw", "LT-101",
+            W(1, "进水调节池补水与液位计核对", "repair", "high", "processing", "raw", "LT-101",
                 "孙倩", "告警联动", now.AddHours(-2), now.AddHours(3), null, "人工补水至 70%，核对液位计读数。");
             W(2, "PAC 药剂补货", "maintain", "normal", "pending", "pac", "P-301",
                 "孙倩", "耗材预警", now.AddHours(-3), now.AddHours(8), null, "补 25 L PAC 原液并记录批次。");
@@ -262,7 +262,7 @@ public sealed partial class DemoDesktopData
             {
                 Id = "PR-" + DateTime.Now.AddDays(-1).ToString("yyyyMMdd") + "-01",
                 ParamId = rt.Params.First(p => p.Key == "SULFUR_HRT").Id,
-                ParamName = "硫自养停留时间", Value = 100, Unit = "min",
+                ParamName = "自养脱氮停留时间", Value = 100, Unit = "min",
                 Reason = "进水总氮升高，延长停留时间保障脱氮", Applicant = "李工",
                 At = Ms(DateTime.Now.AddDays(-1).AddHours(-2)), Status = "pending",
             });
@@ -329,7 +329,7 @@ public sealed partial class DemoDesktopData
             "发现 PAC 药箱余量偏低，已补药；其余正常。",
             defaults.Select(x => (x.Item1, x.Item2, x.Item1 == "dosage" ? "abnormal" : "ok", x.Item1 == "dosage" ? "药箱余量 18%" : "")).ToArray());
         I(3, "反冲洗专项检查", "done", "陈浩", now.Date.AddDays(-3).AddHours(11), now.Date.AddDays(-3).AddHours(10).AddMinutes(30), 0,
-            "BAF / 硫自养反冲洗时序正常，阀门动作到位。",
+            "固液分离 / 自养脱氮反冲洗时序正常，阀门动作到位。",
             defaults.Select(x => (x.Item1, x.Item2, "ok", "")).ToArray());
         I(4, "月度维护（10 月）", "pending", "陈浩", now.Date.AddDays(4).AddHours(14), null, 0, "",
             defaults.Select(x => (x.Item1, x.Item2, "ok", "")).ToArray());
@@ -342,7 +342,7 @@ public sealed partial class DemoDesktopData
         {
             new()
             {
-                Id = "DG-01", Level = "warning", Title = "硫自养出水 pH 偏低，反硝化效率承压",
+                Id = "DG-01", Level = "warning", Title = "自养脱氮出水 pH 偏低，反硝化效率承压",
                 Phenomenon = "SULFUR.PH 连续 30 分钟位于 6.8 以下（当前 6.9 附近波动），与 6.8–7.6 的控制区间下限贴合；同步观察到总氮去除率较上周下降约 4 个百分点。",
                 Causes = new()
                 {
@@ -353,17 +353,17 @@ public sealed partial class DemoDesktopData
                 Checks = new()
                 {
                     "取样复测进水氨氮与碱度，核对在线 pH 与实验室 pH 偏差",
-                    "检查硫自养池反冲洗记录，确认压差是否持续上升",
+                    "检查自养脱氮池反冲洗记录，确认压差是否持续上升",
                     "用 4.00 / 6.86 / 9.18 三点标液校准 pH-501",
                 },
                 Basis = "依据：DB33/T 治理设施运行规范（pH 控制 6.8–7.6）；本机规则 SULFUR_PH_LOW；近 24h 趋势与实验记录 LAB-20261026-O。",
                 Suggestion = "先校表再补碱：若复测确认偏低，按 50 mg/L 投加碳酸氢钠，2 小时后复测；若压差 > 25 kPa 先执行一次反冲洗。",
-                UnitName = "硫自养反硝化池",
+                UnitName = "自养脱氮池",
                 At = Ms(now.AddMinutes(-35)),
             },
             new()
             {
-                Id = "DG-02", Level = "warning", Title = "BAF 溶解氧不足，硝化速率受限",
+                Id = "DG-02", Level = "warning", Title = "预氧化溶解氧不足，硝化速率受限",
                 Phenomenon = "BAF.DO 由 3.2 mg/L 降至 1.78 mg/L，低于 2.0 mg/L 控制下限；曝气风机电流 3.4 A 处于正常区间，判断为供气量不足而非风机故障。",
                 Causes = new()
                 {
@@ -377,14 +377,14 @@ public sealed partial class DemoDesktopData
                     "逐组测试曝气均匀性，观察池面翻腾",
                     "核对进水 COD 与氨氮化验值",
                 },
-                Basis = "依据：本机规则 BAF_DO_LOW；近 24h DO 趋势；曝气风机电流记录。",
+                Basis = "依据：本机规则 固液分离_DO_LOW；近 24h DO 趋势；曝气风机电流记录。",
                 Suggestion = "先清理进气滤网并小幅上调曝气量，30 分钟后复测 DO；若仍低于 2.0 mg/L，安排曝气头检修工单。",
-                UnitName = "曝气生物滤池",
+                UnitName = "固液分离池",
                 At = Ms(now.AddHours(-1).AddMinutes(-20)),
             },
             new()
             {
-                Id = "DG-03", Level = "attention", Title = "原料罐液位偏低，存在抽空风险",
+                Id = "DG-03", Level = "attention", Title = "进水调节池液位偏低，存在抽空风险",
                 Phenomenon = "RAW.LVL 22.6%，低于 25% 低液位线；提升泵仍运行，液位下降速率约 2%/h。",
                 Causes = new()
                 {
@@ -400,7 +400,7 @@ public sealed partial class DemoDesktopData
                 },
                 Basis = "依据：本机规则 RAW_LVL_LOW；液位 10 秒采样记录。",
                 Suggestion = "立即安排补水；液位低于 20% 前停泵保护，恢复至 60% 后再启泵。",
-                UnitName = "原料罐",
+                UnitName = "进水调节池",
                 At = Ms(now.AddHours(-2).AddMinutes(-5)),
             },
             new()
@@ -430,7 +430,7 @@ public sealed partial class DemoDesktopData
         rt.Commands.Add(new CommandRecord
         {
             Id = "CMD-" + now.AddDays(-1).ToString("yyyyMMdd") + "-153012",
-            SiteId = rt.Info.Id, Action = "baf.backwash", Label = "BAF 反冲洗", Device = "P-202 / V-203",
+            SiteId = rt.Info.Id, Action = "baf.backwash", Label = "固液分离反冲", Device = "P-202 / V-203",
             UnitCode = "baf", Status = "success", Reason = "压差达到 26.8 kPa，触发反冲洗",
             By = "赵磊", At = Ms(now.AddDays(-1).AddHours(-6)),
         });
@@ -453,9 +453,9 @@ public sealed partial class DemoDesktopData
     private void BuildNotifications()
     {
         var now = DateTime.Now;
-        _notifications.Add(new NotificationInfo { Id = "N-1", Title = "新告警：硫自养出水 pH 偏低", Body = "pH 6.76 低于 6.80，请及时确认。", At = Ms(now.AddMinutes(-35)), Read = false, Kind = "alarm" });
-        _notifications.Add(new NotificationInfo { Id = "N-2", Title = "工单待接单", Body = "「BAF 曝气风机电流偏高排查」已派发给赵磊。", At = Ms(now.AddMinutes(-55)), Read = false, Kind = "workorder" });
-        _notifications.Add(new NotificationInfo { Id = "N-3", Title = "参数变更待审批", Body = "李工提交「硫自养停留时间」100 min 变更申请。", At = Ms(now.AddHours(-2)), Read = false, Kind = "param" });
+        _notifications.Add(new NotificationInfo { Id = "N-1", Title = "新告警：自养脱氮出水 pH 偏低", Body = "pH 6.76 低于 6.80，请及时确认。", At = Ms(now.AddMinutes(-35)), Read = false, Kind = "alarm" });
+        _notifications.Add(new NotificationInfo { Id = "N-2", Title = "工单待接单", Body = "「预氧化曝气风机电流偏高排查」已派发给赵磊。", At = Ms(now.AddMinutes(-55)), Read = false, Kind = "workorder" });
+        _notifications.Add(new NotificationInfo { Id = "N-3", Title = "参数变更待审批", Body = "李工提交「自养脱氮停留时间」100 min 变更申请。", At = Ms(now.AddHours(-2)), Read = false, Kind = "param" });
         _notifications.Add(new NotificationInfo { Id = "N-4", Title = "运行日报已生成", Body = now.ToString("yyyy-MM-dd") + " 运行日报已生成，可在报表中心导出。", At = Ms(now.Date.AddHours(8).AddMinutes(5)), Read = false, Kind = "report" });
         _notifications.Add(new NotificationInfo { Id = "N-5", Title = "备份完成", Body = "每日自动备份完成，保留 30 份。", At = Ms(now.Date.AddHours(2).AddMinutes(3)), Read = true, Kind = "system" });
     }
@@ -472,14 +472,14 @@ public sealed partial class DemoDesktopData
                 Result = result, Ip = "192.168.1.20",
             });
         }
-        A(1, now.AddMinutes(-8), "赵磊", "alarm.ack", "alarm", "AL-" + now.ToString("yyyyMMdd") + "-003", "确认原料罐液位偏低告警");
+        A(1, now.AddMinutes(-8), "赵磊", "alarm.ack", "alarm", "AL-" + now.ToString("yyyyMMdd") + "-003", "确认进水调节池液位偏低告警");
         A(2, now.AddMinutes(-42), "系统", "alarm.raise", "alarm", "AL-" + now.ToString("yyyyMMdd") + "-007", "规则「清水池液位偏高」触发");
-        A(3, now.AddHours(-1), "陈浩", "control.execute", "command", "CMD-" + now.AddDays(-1).ToString("yyyyMMdd") + "-153012", "BAF 反冲洗");
-        A(4, now.AddHours(-2), "李工", "param.request", "param", "site-1-sulfur_hrt", "硫自养停留时间 → 100 min");
+        A(3, now.AddHours(-1), "陈浩", "control.execute", "command", "CMD-" + now.AddDays(-1).ToString("yyyyMMdd") + "-153012", "固液分离反冲");
+        A(4, now.AddHours(-2), "李工", "param.request", "param", "site-1-sulfur_hrt", "自养脱氮停留时间 → 100 min");
         A(5, now.AddHours(-3), "王敏", "report.export", "report", "RPT-" + now.AddDays(-1).ToString("yyyyMMdd") + "-D1", "导出运行日报 CSV");
         A(6, now.AddHours(-4), "admin", "admin.user.add", "user", "U-chen", "新增维修工程师账号");
         A(7, now.AddHours(-5), "admin", "admin.config.save", "setting", "alarm.push", "开启告警推送");
-        A(8, now.AddHours(-6), "赵磊", "workorder.accept", "workorder", "WO-" + now.ToString("yyyyMMdd") + "-003", "接单：原料罐液位计零点校准");
+        A(8, now.AddHours(-6), "赵磊", "workorder.accept", "workorder", "WO-" + now.ToString("yyyyMMdd") + "-003", "接单：进水调节池液位计零点校准");
         A(9, now.AddHours(-8), "系统", "backup.create", "backup", "BK-" + now.ToString("yyyyMMdd") + "-02", "每日自动备份", "success");
         A(10, now.AddDays(-1).AddHours(-2), "admin", "admin.login", "user", "U-admin", "登录成功");
         A(11, now.AddDays(-1).AddHours(-3), "王敏", "param.apply", "param", "site-1-pac_dose", "PAC 投加量 2.0 → 1.8 L/h");
@@ -529,12 +529,12 @@ public sealed partial class DemoDesktopData
             AddNotification("新告警：" + title, $"{unitName} · {p.Def.Name} {p.Value:F2}{p.Def.Unit}", "alarm");
         }
 
-        Check("SULFUR.PH", "硫自养出水 pH 低于下限", "硫自养出水 pH 偏低", "major", v => v < 6.8, "pH ≥ 6.80", "sulfur");
-        Check("BAF.DO", "BAF 溶解氧不足", "BAF 溶解氧不足", "major", v => v < 2.0, "DO ≥ 2.00 mg/L", "baf");
-        Check("RAW.LVL", "原料罐液位偏低", "原料罐液位偏低", "major", v => v < 25, "液位 ≥ 25%", "raw");
+        Check("SULFUR.PH", "自养脱氮出水 pH 低于下限", "自养脱氮出水 pH 偏低", "major", v => v < 6.8, "pH ≥ 6.80", "sulfur");
+        Check("BAF.DO", "预氧化溶解氧不足", "预氧化溶解氧不足", "major", v => v < 2.0, "DO ≥ 2.00 mg/L", "baf");
+        Check("RAW.LVL", "进水调节池液位偏低", "进水调节池液位偏低", "major", v => v < 25, "液位 ≥ 25%", "raw");
         Check("PAC.LEVEL", "PAC 药箱余量低", "PAC 药箱余量低", "minor", v => v < 20, "余量 ≥ 20%", "pac");
         Check("PAM.LEVEL", "PAM 药箱余量低", "PAM 药箱余量低", "minor", v => v < 20, "余量 ≥ 20%", "pam");
-        Check("SULFUR.DP", "硫自养滤层压差偏高", "硫自养滤层压差偏高", "minor", v => v > 30, "压差 ≤ 30 kPa", "sulfur");
+        Check("SULFUR.DP", "自养脱氮滤层压差偏高", "自养脱氮滤层压差偏高", "minor", v => v > 30, "压差 ≤ 30 kPa", "sulfur");
     }
 
     private void AddNotification(string title, string body, string kind)
@@ -617,9 +617,9 @@ public sealed partial class DemoDesktopData
         if (_user?.Can("inspection.execute") != true) return OpResult.Fail("当前账号无化验录入权限");
         var names = new Dictionary<string, string>
         {
-            ["inlet"] = "进水（原料罐）",
-            ["baf_out"] = "BAF 出水",
-            ["sulfur_out"] = "硫自养池出水",
+            ["inlet"] = "进水（进水调节池）",
+            ["baf_out"] = "固液分离出水",
+            ["sulfur_out"] = "自养脱氮池出水",
             ["outlet"] = "总出水（清水池）",
         };
         if (!names.ContainsKey(samplePoint)) return OpResult.Fail("取样点不合法");

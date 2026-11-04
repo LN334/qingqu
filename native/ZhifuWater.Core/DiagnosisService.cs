@@ -108,15 +108,15 @@ public sealed class DiagnosisService
         var site = J.ObjsIn(Db, "sites").FirstOrDefault(s => J.Str(s, "id") == siteId);
         if (site is null) return outList;
 
-        // 1. 硫自养池 pH 偏低
+        // 1. 自养脱氮池 pH 偏低
         var sp = Read(siteId, "SULFUR.PH");
         if (sp is not null && sp.Value < 6.9)
         {
             Push(new JsonObject
             {
                 ["level"] = sp.Value < 6.6 ? "high" : "medium",
-                ["title"] = "硫自养池 pH 偏低，脱氮效率存在下降风险",
-                ["phenomenon"] = $"硫自养池 pH 当前 {J.NumText(sp.Value)}，低于运行区间下限 6.8（数据时间 {sp.Time}）。",
+                ["title"] = "自养脱氮池 pH 偏低，脱氮效率存在下降风险",
+                ["phenomenon"] = $"自养脱氮池 pH 当前 {J.NumText(sp.Value)}，低于运行区间下限 6.8（数据时间 {sp.Time}）。",
                 ["causes"] = Causes(
                     "进水碱度不足，硝化与反硝化消耗后缓冲能力下降",
                     "硫源（单质硫/硫代硫酸盐）投加偏多，产酸超过系统缓冲能力",
@@ -124,7 +124,7 @@ public sealed class DiagnosisService
                     "在线 pH 计未按期校准，示值偏低"),
                 ["checks"] = Checks(
                     Check("核对 pH 计状态", "查看最近一次校准记录，用 6.86 标准液核查；便携表与在线表差值应 ≤ 0.1 pH", "偏差 ≤ 0.1 pH"),
-                    Check("检测进水碱度", "取原料罐水样，滴定法测碱度（以 CaCO₃ 计）", "结合工艺要求核算，必要时补充碱度"),
+                    Check("检测进水碱度", "取进水调节池水样，滴定法测碱度（以 CaCO₃ 计）", "结合工艺要求核算，必要时补充碱度"),
                     Check("核算硫源投配比", "按近 24 h 进水 TN 与硫源消耗量复核投配比，单次调整不超过 10%", "与设计投配比一致"),
                     Check("复核反冲洗记录", "查看近 2 h 反冲洗阶段与时长，确认未长时间停留在冲洗态", "反冲洗按时结束")),
                 ["boundary"] = "若 pH < 6.5 且持续 30 分钟，停止进水并投加碱度调节；pH < 6.0 立即停进水、停硫源，待化验确认后再恢复。",
@@ -138,7 +138,7 @@ public sealed class DiagnosisService
             });
         }
 
-        // 2. BAF 溶解氧不足
+        // 2. 预氧化溶解氧不足
         var bd = Read(siteId, "BAF.DO");
         if (bd is not null && bd.Value < 2.2)
         {
@@ -147,8 +147,8 @@ public sealed class DiagnosisService
             Push(new JsonObject
             {
                 ["level"] = bd.Value < 1.2 ? "high" : "medium",
-                ["title"] = "BAF 溶解氧不足，硝化过程可能受抑制",
-                ["phenomenon"] = $"BAF 溶解氧当前 {J.NumText(bd.Value)} mg/L，低于 2.0 mg/L 的告警线（数据时间 {bd.Time}）。",
+                ["title"] = "预氧化溶解氧不足，硝化过程可能受抑制",
+                ["phenomenon"] = $"预氧化溶解氧当前 {J.NumText(bd.Value)} mg/L，低于 2.0 mg/L 的告警线（数据时间 {bd.Time}）。",
                 ["causes"] = Causes(
                     blowerOn
                         ? "曝气风机运行但风量不足：曝气头堵塞、支管阀门开度偏小或风机皮带打滑"
@@ -172,7 +172,7 @@ public sealed class DiagnosisService
             });
         }
 
-        // 3. 原料罐液位偏低
+        // 3. 进水调节池液位偏低
         var rl = Read(siteId, "RAW.LVL");
         if (rl is not null && rl.Value < 25)
         {
@@ -181,8 +181,8 @@ public sealed class DiagnosisService
             Push(new JsonObject
             {
                 ["level"] = rl.Value < 12 ? "high" : "medium",
-                ["title"] = "原料罐液位偏低，提升泵存在低液位保护停机风险",
-                ["phenomenon"] = $"原料罐液位 {J.NumText(rl.Value)} %，低于提醒值 25 %（数据时间 {rl.Time}）；提升泵{(pumpOn ? "运行中" : "当前停止")}。",
+                ["title"] = "进水调节池液位偏低，提升泵存在低液位保护停机风险",
+                ["phenomenon"] = $"进水调节池液位 {J.NumText(rl.Value)} %，低于提醒值 25 %（数据时间 {rl.Time}）；提升泵{(pumpOn ? "运行中" : "当前停止")}。",
                 ["causes"] = Causes(
                     "进水/补水未及时开启或补水管路流量不足",
                     "提升泵流量大于补水流量，液位持续下降",
@@ -245,8 +245,8 @@ public sealed class DiagnosisService
             Push(new JsonObject
             {
                 ["level"] = "medium",
-                ["title"] = "BAF 滤池压差偏高，建议安排反冲洗",
-                ["phenomenon"] = $"BAF 压差 {J.NumText(dp.Value)} kPa，接近 25 kPa 提醒值（数据时间 {dp.Time}）。",
+                ["title"] = "固液分离压差偏高，建议安排反冲洗",
+                ["phenomenon"] = $"固液分离压差 {J.NumText(dp.Value)} kPa，接近 25 kPa 提醒值（数据时间 {dp.Time}）。",
                 ["causes"] = Causes(
                     "滤层截留悬浮物趋于饱和",
                     "反冲洗周期设置偏长或反冲洗强度不足",
@@ -281,7 +281,7 @@ public sealed class DiagnosisService
                     "进水管路堵塞或阀门误关",
                     "泵体气蚀/空转，未建立有效流量",
                     "流量计故障或信号丢失",
-                    "原料罐液位过低导致吸空"),
+                    "进水调节池液位过低导致吸空"),
                 ["checks"] = Checks(
                     Check("检查管路与阀门", "确认进水阀、过滤器与管路无堵塞", "阀门开度正确、管路通畅"),
                     Check("检查泵体", "听泵体声音、查看出口压力，必要时排气", "无气蚀异响、出口压力正常"),

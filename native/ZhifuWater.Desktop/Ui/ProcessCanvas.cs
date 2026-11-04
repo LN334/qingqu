@@ -190,14 +190,13 @@ public sealed class ProcessCanvas : FrameworkElement
         var barRect = new Rect(rect.X, rect.Y + 1, 3, rect.Height - 2);
         dc.DrawRectangle(tone, null, barRect);
 
-        ChartDraw.Draw(this, dc, unit.Short, new Point(rect.X + 9, rect.Y + 6), 12, Pal.Ink, maxWidth: rect.Width - 56);
-        ChartDraw.Draw(this, dc, unit.Name, new Point(rect.X + 9, rect.Y + 23), 9.5, Pal.Muted2, maxWidth: rect.Width - 18);
+        ChartDraw.Draw(this, dc, unit.Name, new Point(rect.X + 9, rect.Y + 6), 12, Pal.Ink, maxWidth: rect.Width - 32);
 
         var reading = snap?.Readings.FirstOrDefault();
         var valueText = reading == null ? "待接入" : (reading.Value.HasValue
             ? reading.Value.Value.ToString("F" + reading.Point.Digits) + " " + reading.Point.Unit
             : reading.Text);
-        ChartDraw.Draw(this, dc, valueText, new Point(rect.X + 9, rect.Y + 39), 11, Pal.Ink2, maxWidth: rect.Width - 18);
+        ChartDraw.Draw(this, dc, valueText, new Point(rect.X + 9, rect.Y + 28), 11, Pal.Ink2, maxWidth: rect.Width - 18);
 
         var st = Pal.UnitStateText(state);
         ChartDraw.Draw(this, dc, st, new Point(rect.Right - 5, rect.Y + 7), 8.5, tone, TextAlignment.Right, 34);

@@ -113,9 +113,9 @@ public sealed class DashboardPage : PageBase
     private readonly List<(string Code, Button Btn, string Label, string Hex)> _trendChips = new();
     private static readonly (string Code, string Label, string Hex)[] TrendDefs =
     {
-        ("RAW.LVL", "原料罐液位", "#0E7C74"),
-        ("BAF.DO", "BAF 溶解氧", "#1C6B45"),
-        ("SULFUR.PH", "硫自养 pH", "#8A5A12"),
+        ("RAW.LVL", "进水调节池液位", "#0E7C74"),
+        ("BAF.DO", "预氧化溶解氧", "#1C6B45"),
+        ("SULFUR.PH", "自养脱氮 pH", "#8A5A12"),
         ("FLOW.IN", "进水流量", "#2A5F8A"),
     };
 

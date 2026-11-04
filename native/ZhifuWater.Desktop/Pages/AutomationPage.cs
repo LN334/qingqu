@@ -208,9 +208,9 @@ public sealed class AutomationPage : PageBase
     private static string ShortConditions(string text)
     {
         var t = System.Text.RegularExpressions.Regex.Replace(text ?? "", @"，持续\s*\d+\s*秒", "");
-        t = t.Replace("BAF 滤池压差 >= ", "压差 ≥ ").Replace("硫自养池压差 >= ", "压差 ≥ ")
-             .Replace("BAF 溶解氧 <= ", "溶解氧 ≤ ").Replace("原料罐液位 <= ", "液位 ≤ ")
-             .Replace("进水瞬时流量 <= ", "流量 ≤ ").Replace("，原料罐液位 >= ", "，液位 ≥ ")
+        t = t.Replace("固液分离压差 >= ", "压差 ≥ ").Replace("自养脱氮池压差 >= ", "压差 ≥ ")
+             .Replace("预氧化溶解氧 <= ", "溶解氧 ≤ ").Replace("进水调节池液位 <= ", "液位 ≤ ")
+             .Replace("进水瞬时流量 <= ", "流量 ≤ ").Replace("，进水调节池液位 >= ", "，液位 ≥ ")
              .Replace("PAC 药箱液位 <= ", "药箱 ≤ ").Replace("PAM 药箱液位 <= ", "药箱 ≤ ")
              .Replace("紧急告警持续未处理", "紧急告警未处理")
              .Replace(" >= ", " ≥ ").Replace(" <= ", " ≤ ");

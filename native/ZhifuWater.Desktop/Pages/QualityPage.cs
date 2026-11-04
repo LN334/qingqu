@@ -188,7 +188,7 @@ public sealed class QualityPage : PageBase
     {
         if (!Svc.Can("inspection.execute")) { Toast("当前账号无化验录入权限", false); return; }
         var dlg = new FormDialog(Host, "录入化验", "至少填写一项指标；提交后进入待复核。");
-        var point = dlg.AddCombo("取样点", new[] { "进水（原料罐）", "BAF 出水", "硫自养池出水", "总出水（清水池）" }, 3);
+        var point = dlg.AddCombo("取样点", new[] { "进水（进水调节池）", "固液分离出水", "自养脱氮池出水", "总出水（清水池）" }, 3);
         var cod = dlg.AddText("COD（mg/L）", "", "选填");
         var nh3 = dlg.AddText("氨氮（mg/L）", "", "选填");
         var tn = dlg.AddText("总氮（mg/L）", "", "选填");

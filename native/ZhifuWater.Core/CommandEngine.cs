@@ -12,15 +12,15 @@ public sealed partial class CommandEngine
 
     public static readonly Dictionary<string, ActionMeta> ACTIONS = new(StringComparer.Ordinal)
     {
-        ["raw.pump.start"] = new("启动原料罐提升泵", "raw-pump", "medium", 1600, "提升泵启动"),
-        ["raw.pump.stop"] = new("停止原料罐提升泵", "raw-pump", "medium", 1200, "提升泵停止"),
+        ["raw.pump.start"] = new("启动进水调节池提升泵", "raw-pump", "medium", 1600, "提升泵启动"),
+        ["raw.pump.stop"] = new("停止进水调节池提升泵", "raw-pump", "medium", 1200, "提升泵停止"),
         ["raw.pump.mode.set"] = new("切换提升泵运行模式", "raw-pump", "high", 1000, "运行模式切换"),
-        ["baf.blower.start"] = new("启动 BAF 曝气风机", "baf-blower", "medium", 1500, "曝气风机启动"),
-        ["baf.blower.stop"] = new("停止 BAF 曝气风机", "baf-blower", "high", 1500, "曝气风机停止"),
-        ["baf.backwash.start"] = new("启动 BAF 反冲洗", "baf-bw-pump", "high", 2500, "BAF 反冲洗启动"),
-        ["sulfur.backwash.start"] = new("启动硫自养池反冲洗", "sulfur-bw-pump", "high", 2500, "硫自养池反冲洗启动"),
-        ["baf.backwash.stop"] = new("停止 BAF 反冲洗", "baf-bw-pump", "medium", 1200, "BAF 反冲洗停止"),
-        ["sulfur.backwash.stop"] = new("停止硫自养池反冲洗", "sulfur-bw-pump", "medium", 1200, "硫自养池反冲洗停止"),
+        ["baf.blower.start"] = new("启动 预氧化曝气风机", "baf-blower", "medium", 1500, "曝气风机启动"),
+        ["baf.blower.stop"] = new("停止 预氧化曝气风机", "baf-blower", "high", 1500, "曝气风机停止"),
+        ["baf.backwash.start"] = new("启动 固液分离反冲", "baf-bw-pump", "high", 2500, "固液分离反冲启动"),
+        ["sulfur.backwash.start"] = new("启动自养脱氮池反冲洗", "sulfur-bw-pump", "high", 2500, "自养脱氮池反冲洗启动"),
+        ["baf.backwash.stop"] = new("停止 固液分离反冲", "baf-bw-pump", "medium", 1200, "固液分离反冲停止"),
+        ["sulfur.backwash.stop"] = new("停止自养脱氮池反冲洗", "sulfur-bw-pump", "medium", 1200, "自养脱氮池反冲洗停止"),
         ["pac.dose.set"] = new("调整 PAC 投加量", "pac-pump", "medium", 1200, "PAC 投加量调整"),
         ["pam.dose.set"] = new("调整 PAM 投加量", "pam-pump", "medium", 1200, "PAM 投加量调整"),
     };

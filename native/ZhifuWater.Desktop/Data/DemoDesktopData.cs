@@ -235,8 +235,8 @@ public sealed partial class DemoDesktopData : IDesktopData
             else if (snap.Readings.Count == 0) snap.State = "no-instrument";
             snap.StateText = StateText(snap.State);
             snap.Note = unit.Note;
-            if (unit.Code == "baf") { ApplyBw(snap, rt.BafBw, "BAF"); }
-            if (unit.Code == "sulfur") { ApplyBw(snap, rt.SulfurBw, "硫自养"); }
+            if (unit.Code == "baf") { ApplyBw(snap, rt.BafBw, "固液分离"); }
+            if (unit.Code == "sulfur") { ApplyBw(snap, rt.SulfurBw, "自养脱氮"); }
             result.Add(snap);
         }
         return result;
@@ -417,7 +417,7 @@ public sealed partial class DemoDesktopData : IDesktopData
 
     public string Notice() => Rt.Info.Id == "site-2"
         ? "碧山站为复制试点：选配点位未装，数据按已安装点位统计。"
-        : "鲁家村站运行正常；硫自养 pH 与 BAF 溶解氧为当前重点盯防指标。";
+        : "鲁家村站运行正常；自养脱氮 pH 与 预氧化溶解氧为当前重点盯防指标。";
 
     // ---------------- 节拍 ----------------
     public void Tick()
@@ -457,8 +457,8 @@ public sealed partial class DemoDesktopData : IDesktopData
             {
                 rt.TodayVolume += flow.Value.Value * 5.0 / 3600.0 / 1000.0 * 1000.0 / 1000.0; // L→m³
             }
-            ProgressBackwash(rt, "baf", "BAF", rt.BafBw, rnd);
-            ProgressBackwash(rt, "sulfur", "硫自养", rt.SulfurBw, rnd);
+            ProgressBackwash(rt, "baf", "固液分离", rt.BafBw, rnd);
+            ProgressBackwash(rt, "sulfur", "自养脱氮", rt.SulfurBw, rnd);
             AdvanceCommands(rt);
             EvaluateAlarms(rt);
         }

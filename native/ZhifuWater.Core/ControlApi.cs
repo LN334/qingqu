@@ -21,7 +21,7 @@ public sealed partial class CommandEngine
         switch (key)
         {
             case "raw.pump.start":
-                Add("原料罐液位 ≥ 5%（低液位保护）", "提升泵无故障信号");
+                Add("进水调节池液位 ≥ 5%（低液位保护）", "提升泵无故障信号");
                 break;
             case "raw.pump.stop":
                 Add("停泵后进水流量归零，注意下游液位");
@@ -30,7 +30,7 @@ public sealed partial class CommandEngine
                 Add("手动模式仅限现场操作并记录", "切换需二次确认");
                 break;
             case "baf.blower.stop":
-                Add("BAF 溶解氧 ≥ 2.5 mg/L（DO 联锁）");
+                Add("预氧化溶解氧 ≥ 2.5 mg/L（DO 联锁）");
                 break;
             case "baf.backwash.start":
             case "sulfur.backwash.start":

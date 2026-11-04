@@ -49,9 +49,9 @@ public sealed class OpsService
 
     public static readonly Dictionary<string, string> SAMPLE_NAMES = new(StringComparer.Ordinal)
     {
-        ["inlet"] = "进水（原料罐）",
-        ["baf_out"] = "BAF 出水",
-        ["sulfur_out"] = "硫自养池出水",
+        ["inlet"] = "进水（进水调节池）",
+        ["baf_out"] = "固液分离出水",
+        ["sulfur_out"] = "自养脱氮池出水",
         ["outlet"] = "总出水（清水池）",
     };
 
