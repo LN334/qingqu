@@ -70,7 +70,11 @@ public sealed class ReportsPage : PageBase
             Margin = new Thickness(0, 6, 0, 0),
         };
         previewBody.Children.Add(previewScroll);
-        var preview = Kit.Card("报表预览", previewBody, null, "只读", new Thickness(10, 8, 10, 8));
+        var previewLinks = Kit.Row(10,
+            Kit.Link("看运行分析", () => Host.ShowPage("analysis")),
+            Kit.Link("看告警", () => Host.ShowPage("alarms")),
+            Kit.Link("看化验", () => Host.ShowPage("quality")));
+        var preview = Kit.Card("报表预览", previewBody, previewLinks, "只读", new Thickness(10, 8, 10, 8));
         Grid.SetColumn(preview, 2);
         grid.Children.Add(preview);
 

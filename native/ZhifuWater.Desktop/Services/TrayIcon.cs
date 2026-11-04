@@ -92,6 +92,7 @@ public static class TrayIcon
             _autoStart!.Checked = IsAutoStartEnabled();
             _status!.Text = "清渠  ·  运行中  ·  v" + AppVersion();
         };
+        _menu = menu;
 
         _icon = new WF.NotifyIcon
         {

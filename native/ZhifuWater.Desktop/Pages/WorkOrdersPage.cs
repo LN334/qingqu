@@ -9,7 +9,7 @@ using ZhifuWater.Desktop.Windows;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class WorkOrdersPage : PageBase
+public sealed class WorkOrdersPage : PageBase, IFocusablePage
 {
     private UiTable _table = null!;
     private StackPanel _emptyPanel = null!;
@@ -18,6 +18,14 @@ public sealed class WorkOrdersPage : PageBase
     private WorkOrderInfo? _selected;
     private string _filter = "all";
     private string _keyword = "";
+    private string? _pendingAlarm;
+
+    /// <summary>从告警页跳过来时用 "alarm:{id}" 打开新建工单并预填。</summary>
+    public void FocusItem(string key)
+    {
+        if (key is not null && key.StartsWith("alarm:", StringComparison.Ordinal))
+            _pendingAlarm = key.Substring("alarm:".Length);
+    }
 
     public override string Id => "workorders";
     public override string Title => "工单管理";
@@ -85,7 +93,7 @@ public sealed class WorkOrdersPage : PageBase
         _emptyPanel.Children.Add(Kit.T("没有符合条件的工单", 13, Pal.Muted));
         tableHost.Children.Add(_emptyPanel);
         var tableCard = Kit.Card("工单列表", tableHost,
-            Kit.Btn("新建工单", CreateOrder, primary: true, small: true), null, new Thickness(10, 8, 10, 8));
+            Kit.Btn("新建工单", () => CreateOrder(), primary: true, small: true), null, new Thickness(10, 8, 10, 8));
 
         grid.Children.Add(tableCard);
         root.Children.Add(grid);
@@ -122,6 +130,14 @@ public sealed class WorkOrdersPage : PageBase
             Key = w.Id,
         }).ToList();
         _table.ItemsSource = rows;
+
+        if (_pendingAlarm is { } alarmId)
+        {
+            _pendingAlarm = null;
+            var alarm = Svc.Data.Alarms("open").FirstOrDefault(a => a.Id == alarmId)
+                        ?? Svc.Data.Alarms().FirstOrDefault(a => a.Id == alarmId);
+            if (alarm is not null) Dispatcher.BeginInvoke(new Action(() => CreateOrder(alarm)));
+        }
         if (_emptyPanel != null)
         {
             _emptyPanel.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -192,19 +208,19 @@ public sealed class WorkOrdersPage : PageBase
         return b;
     }
 
-    private void CreateOrder()
+    private void CreateOrder(AlarmInfo? from = null)
     {
         var types = new[] { ("repair", "维修"), ("maintain", "保养"), ("calibrate", "校准"), ("inspect", "巡检异常") };
         var prios = new[] { ("normal", "普通"), ("high", "高"), ("urgent", "紧急"), ("low", "低") };
         var units = Svc.Data.Units.ToList();
         var people = Svc.Data.Users.Where(u => u.IsActive).ToList();
         var dlg = new FormDialog(Host, "新建工单", "创建后为待接单；指定负责人则直接进入已接单。");
-        var title = dlg.AddText("标题", "", "例如：提升泵异响排查");
+        var title = dlg.AddText("标题", from?.Title ?? "", "例如：提升泵异响排查");
         var type = dlg.AddCombo("类型", types.Select(t => t.Item2).ToList());
-        var prio = dlg.AddCombo("优先级", prios.Select(p => p.Item2).ToList());
-        var unit = dlg.AddCombo("单元", units.Select(u => u.Name).ToList());
+        var prio = dlg.AddCombo("优先级", prios.Select(p => p.Item2).ToList(), from is null ? 0 : Math.Max(0, Array.FindIndex(prios, x => x.Item1 == "high")));
+        var unit = dlg.AddCombo("单元", units.Select(u => u.Name).ToList(), Math.Max(0, units.FindIndex(u => u.Name == from?.UnitName)));
         var assign = dlg.AddCombo("负责人", new[] { "暂不指派" }.Concat(people.Select(u => u.User.Name + (string.IsNullOrWhiteSpace(u.User.Title) ? "" : " · " + u.User.Title))).ToList());
-        var desc = dlg.AddText("说明（可选）");
+        var desc = dlg.AddText("说明（可选）", from is null ? "" : $"由告警「{from.Title}」转入。{(string.IsNullOrWhiteSpace(from.Detail) ? "" : from.Detail)}");
         if (!dlg.Ask("创建", validate: () =>
             {
                 if (string.IsNullOrWhiteSpace(title.Text)) return "请填写工单标题";
@@ -219,7 +235,8 @@ public sealed class WorkOrdersPage : PageBase
             prios[Math.Max(0, prio.SelectedIndex)].Item1,
             unitRow.Code,
             assignee,
-            desc.Text.Trim());
+            desc.Text.Trim(),
+            from?.Id);
         Toast(r.Message, r.Ok);
         RefreshData();
         Host.RefreshShell();

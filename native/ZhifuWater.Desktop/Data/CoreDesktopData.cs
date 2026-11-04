@@ -518,7 +518,12 @@ public sealed class CoreDesktopData : IDesktopData
             list.Add(onlineKpi);
         }
         if (byKey.TryGetValue("alarms", out var alarms))
-            list.Add(MapKpi(alarms, "活动告警", "system"));
+        {
+            var alarmKpi = MapKpi(alarms, "未关闭告警", "system");
+            alarmKpi.Label = "未关闭告警";
+            alarmKpi.Hint = "";
+            list.Add(alarmKpi);
+        }
         if (byKey.TryGetValue("workorders", out var wos))
             list.Add(MapKpi(wos, "待处理工单", "system"));
 
@@ -1224,7 +1229,7 @@ public sealed class CoreDesktopData : IDesktopData
             data.Kpis.Add(new KpiInfo { Key = "energyPerM3", Label = "吨水电耗", Value = F(J.Num(energy, "perM3"), 2), Unit = "kWh/m³", Tone = "normal", Source = "gateway" });
             data.Kpis.Add(new KpiInfo { Key = "cost", Label = "累计运行成本", Value = F(J.Num(cost, "total"), 2), Unit = "元", Tone = "normal", Source = "gateway" });
             data.Kpis.Add(new KpiInfo { Key = "costPerM3", Label = "吨水成本", Value = F(J.Num(cost, "perM3"), 2), Unit = "元/m³", Tone = "normal", Source = "gateway" });
-            data.Kpis.Add(new KpiInfo { Key = "alarms", Label = "统计期内告警", Value = J.Int(alarms, "total").ToString(CultureInfo.InvariantCulture), Unit = "条", Tone = "warn", Source = "system", Hint = "按页首选定的统计周期汇总，与「告警管理」的未关闭数不是同一口径" });
+            data.Kpis.Add(new KpiInfo { Key = "alarms", Label = "本期告警（近 " + days + " 天）", Value = J.Int(alarms, "total").ToString(CultureInfo.InvariantCulture), Unit = "条", Tone = "warn", Source = "system" });
             data.Kpis.Add(new KpiInfo { Key = "workorders", Label = "新增工单", Value = J.Int(wos, "created").ToString(CultureInfo.InvariantCulture), Unit = "单", Tone = "normal", Source = "system" });
             data.Kpis.Add(new KpiInfo { Key = "availability", Label = "点位在线率", Value = F(J.Num(avail, "dataRate"), 1), Unit = "%", Tone = "good", Source = "system" });
 
@@ -1471,7 +1476,7 @@ public sealed class CoreDesktopData : IDesktopData
         catch (CoreException ex) { return OpResult.Fail(ex.Message); }
     }
 
-    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description)
+    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description, string? alarmId = null)
     {
         try
         {
@@ -1484,6 +1489,7 @@ public sealed class CoreDesktopData : IDesktopData
                 ["unitCode"] = unitCode,
                 ["assigneeId"] = assigneeId,
                 ["description"] = description,
+                ["alarmId"] = alarmId,
             }, "desktop");
             Refresh();
             return OpResult.Done("工单已创建");

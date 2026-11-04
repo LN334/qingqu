@@ -210,12 +210,6 @@ if (updateCheck != null)
         Current.MainWindow = main;
         main.Show();
         if (StartHidden) main.Hide();
-        if (Environment.GetCommandLineArgs().Any(a => string.Equals(a, "--tray-demo", StringComparison.OrdinalIgnoreCase)))
-        {
-            var timer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(1200) };
-            timer.Tick += (_, _) => { timer.Stop(); TrayIcon.ShowMenuAt(700, 320); };
-            timer.Start();
-        }
     }
 
     /// <summary>显示登录窗；登录成功后由本方法创建主窗。</summary>
@@ -237,7 +231,7 @@ if (updateCheck != null)
 
     protected override void OnExit(ExitEventArgs e)
     {
-        TrayIcon.Dispose();
+        ZhifuWater.Desktop.Services.TrayIcon.Dispose();
         base.OnExit(e);
     }
 }

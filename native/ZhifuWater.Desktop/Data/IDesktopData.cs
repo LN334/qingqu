@@ -96,7 +96,7 @@ public interface IDesktopData
     IReadOnlyList<WorkOrderInfo> WorkOrders(string status = "all");
     OpResult AdvanceWorkOrder(string id, string action, string note);
     OpResult AssignWorkOrder(string id, string userId, string note);
-    OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description);
+    OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description, string? alarmId = null);
     IReadOnlyList<InspectionInfo> Inspections { get; }
     OpResult GenerateInspection();
     OpResult SubmitInspection(string id, string summary, IReadOnlyList<InspectionItemInput> items);

@@ -84,6 +84,7 @@ public sealed class AlarmsPage : PageBase
         listBody.Children.Add(filter);
         var infoRow = Kit.Row(8, _listInfo, Kit.Spacer(),
             Kit.Btn("看点位曲线", FocusPoint, small: true),
+                Kit.Btn("派工单", DispatchOrder, small: true),
             Kit.Btn("确认告警", AckSelected, primary: true, small: true),
             Kit.Btn("标记恢复", ResolveSelected, small: true));
         infoRow.Margin = new Thickness(0, 6, 0, 6);
@@ -224,6 +225,12 @@ public sealed class AlarmsPage : PageBase
         "info" or "提示" => "#8A979F",
         _ => "#6C7B84",
     };
+
+    private void DispatchOrder()
+    {
+        if (_selected is not { } a) { Toast("请先选中一条告警", false); return; }
+        Host.ShowPage("workorders", "alarm:" + a.Id);
+    }
 
     private void FocusPoint()
     {

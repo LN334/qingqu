@@ -877,7 +877,7 @@ public sealed partial class DemoDesktopData
         return OpResult.Done("工单已派发");
     }
 
-    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description)
+    public OpResult CreateWorkOrder(string title, string type, string priority, string unitCode, string? assigneeId, string description, string? alarmId = null)
     {
         if (_user?.Can("workorder.handle") != true) return OpResult.Fail("当前账号无工单权限");
         if (string.IsNullOrWhiteSpace(title)) return OpResult.Fail("请填写工单标题");

@@ -11,6 +11,7 @@ namespace ZhifuWater.Desktop.Pages;
 
 public sealed class AnalysisPage : PageBase
 {
+    private string? _selectedUnit;
     private UniformGrid _kpiHost = null!;
     private LineChart _daily = null!;
     private BarChart _cost = null!;
@@ -61,7 +62,8 @@ public sealed class AnalysisPage : PageBase
         _units = Table(new[] { "单元", "关键读数", "告警", "健康" },
             new double[] { 108, 0, 48, 48 });
         _units.RowHeight = 29;
-        var right = Kit.Card("单元效率与健康", _units, null, null, new Thickness(10, 8, 10, 8));
+        _units.SelectionChanged += (_, _) => { if (_units.SelectedItem is { } r) _selectedUnit = r.Key; };
+        var right = Kit.Card("单元效率与健康", _units, Kit.Link("看工艺流程", ShowUnitProcess), null, new Thickness(10, 8, 10, 8));
 
         Grid.SetColumn(left, 0);
         Grid.SetColumn(right, 2);
@@ -104,6 +106,12 @@ public sealed class AnalysisPage : PageBase
             },
             Key = u.UnitCode,
         }).ToList();
+    }
+
+    private void ShowUnitProcess()
+    {
+        if (_selectedUnit is null) { Toast("请先选中一个单元", false); return; }
+        Host.ShowPage("process", _selectedUnit);
     }
 
     private static string FirstReading(string readings)

@@ -8,7 +8,7 @@ using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class ParamsPage : PageBase
+public sealed class ParamsPage : PageBase, IFocusablePage
 {
     private UiTable _table = null!;
     private UiTable _requests = null!;
@@ -24,6 +24,11 @@ public sealed class ParamsPage : PageBase
     public override string Group => "运行";
 
     public ParamsPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
+
+    public void FocusItem(string key)
+    {
+        if (!string.IsNullOrEmpty(key)) _group = key;
+    }
 
     protected override void Build()
     {

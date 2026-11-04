@@ -181,6 +181,7 @@ public sealed class DevicesPage : PageBase, IFocusablePage
         var actions = Kit.Row(6,
             Kit.Btn("登记维护", () => Maintain(d), primary: true, small: true),
             Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true),
+            Kit.Btn("查看参数", () => Host.ShowPage("params", d.UnitName), small: true),
             Kit.Btn("看实时数据", () =>
             {
                 var code = Svc.Data.Points.Select(p => p.Code).FirstOrDefault(c => Svc.Data.DeviceIdOfPoint(c) == d.Id);
