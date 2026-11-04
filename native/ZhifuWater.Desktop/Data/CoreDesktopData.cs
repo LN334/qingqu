@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -202,6 +202,14 @@ public sealed class CoreDesktopData : IDesktopData
                     Note = J.Str(u, "note"),
                 }).ToList();
         }
+    }
+
+    /// <summary>点位对应的设备 Id（core 的 point.deviceId），用于把告警精确落到单台设备。</summary>
+    public string DeviceIdOfPoint(string pointCode)
+    {
+        if (string.IsNullOrEmpty(pointCode)) return "";
+        var meta = PointMeta();
+        return meta.TryGetValue(pointCode, out var p) ? J.Str(p, "deviceId") : "";
     }
 
     private Dictionary<string, JsonObject> PointMeta()
@@ -651,6 +659,7 @@ public sealed class CoreDesktopData : IDesktopData
                 UnitCode = J.Str(a, "unitCode"),
                 UnitName = J.Str(a, "unitName"),
                 DeviceName = J.Str(a, "pointName"),
+                PointCode = J.Str(a, "pointCode"),
                 RuleName = J.Str(a, "ruleName"),
                 At = (long)TimeUtil.Parse(a, "firstAt"),
                 AckAt = J.Get(a, "ackAt") is null ? null : (long)TimeUtil.Parse(a, "ackAt"),

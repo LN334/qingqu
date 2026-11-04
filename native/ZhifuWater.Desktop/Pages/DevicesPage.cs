@@ -101,10 +101,17 @@ public sealed class DevicesPage : PageBase, IFocusablePage
         });
         var list = query.ToList();
         // 与本单元未恢复告警对齐：单元在告警时，台账里的设备也标「告警」，避免同一台设备两页说法不同
+        // 优先按告警点位精确落到单台设备；点位没有设备绑定时才回退到整单元判断
+        var alarmDeviceIds = new HashSet<string>(StringComparer.Ordinal);
         var alarmUnits = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in Svc.Data.Alarms("open"))
-            if (!string.IsNullOrEmpty(a.UnitCode)) alarmUnits.Add(a.UnitCode);
-        string StatusOf(DeviceInfo x) => x.Online ? (alarmUnits.Contains(x.UnitCode) ? "告警" : "在线") : "离线";
+        {
+            var devId = Svc.Data.DeviceIdOfPoint(a.PointCode);
+            if (!string.IsNullOrEmpty(devId)) alarmDeviceIds.Add(devId);
+            else if (!string.IsNullOrEmpty(a.UnitCode)) alarmUnits.Add(a.UnitCode);
+        }
+        bool IsAlarm(DeviceInfo x) => alarmDeviceIds.Contains(x.Id) || alarmUnits.Contains(x.UnitCode);
+        string StatusOf(DeviceInfo x) => x.Online ? (IsAlarm(x) ? "告警" : "在线") : "离线";
         _info.Text = $"{all.Count} 台设备 · 在线 {all.Count(d => d.Online)} · 需关注 {all.Count(d => d.Health < 85 || !d.Online)}";
         var keep = _selected?.Id;
         var rows = list.Select(d => new UiRow
@@ -117,7 +124,7 @@ public sealed class DevicesPage : PageBase, IFocusablePage
             Fgs = new[]
             {
                 Pal.Muted2, Pal.Ink2, Pal.Muted, Pal.Muted2,
-                !d.Online ? Pal.Bad : alarmUnits.Contains(d.UnitCode) ? Pal.Bad : Pal.Good,
+                !d.Online ? Pal.Bad : IsAlarm(d) ? Pal.Bad : Pal.Good,
                 d.Health >= 85 ? Pal.Good : d.Health >= 60 ? Pal.Warn : Pal.Bad, Pal.Muted, Pal.Muted2,
             },
             Data = d,

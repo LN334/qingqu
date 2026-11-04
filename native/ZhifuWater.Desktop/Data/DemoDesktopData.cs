@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -530,6 +530,8 @@ public sealed partial class DemoDesktopData : IDesktopData
             q = q.Where(a => a.Title.Contains(keyword) || a.UnitName.Contains(keyword) || a.Id.Contains(keyword));
         return q.OrderByDescending(a => a.At).ToList();
     }
+
+    public string DeviceIdOfPoint(string pointCode) => "";
 
     public AlarmStats AlarmStatistics(int days)
     {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ZhifuWater.Desktop.Data;
@@ -55,6 +55,9 @@ public interface IDesktopData
 
     // ---------- 告警 ----------
     IReadOnlyList<AlarmInfo> Alarms(string status = "all", string level = "all", string keyword = "");
+
+    /// <summary>点位编码对应的设备 Id；取不到时返回空串（调用方回退到单元级判断）。</summary>
+    string DeviceIdOfPoint(string pointCode);
     AlarmStats AlarmStatistics(int days);
     OpResult AckAlarm(string id, string note);
     OpResult ResolveAlarm(string id, string note);

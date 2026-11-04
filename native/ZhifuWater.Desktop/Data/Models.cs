@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace ZhifuWater.Desktop.Data;
@@ -125,6 +125,8 @@ public sealed class AlarmInfo
     public long? ResolvedAt { get; set; }
     public string AckBy { get; set; } = "";
     public string Note { get; set; } = "";
+    /// <summary>报警所在点位编码（如 PAC.LEVEL），用于把告警精确落到单台设备。</summary>
+    public string PointCode { get; set; } = "";
     public List<TimelineEntry> Timeline { get; set; } = new();
 }
 

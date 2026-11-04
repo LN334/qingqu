@@ -342,11 +342,18 @@ public partial class MainWindow : Window
 
     private void HideToTray()
     {
-        TrayIcon.Ensure(this);
-        if (IsVisible) Hide();
-        // 关闭流程里直接 Hide 有时会被 WPF 忽略，退到消息队列末尾再收一次
-        Dispatcher.BeginInvoke(new Action(() => { if (IsVisible) Hide(); }), DispatcherPriority.Background);
-        TrayIcon.ShowBalloon("清渠仍在后台运行", "双击托盘图标可重新打开窗口；要彻底退出请用托盘菜单。");
+        // 先收窗口再建托盘：托盘初始化一旦抛异常，也不会把窗口留在屏幕上
+        Hide();
+        Dispatcher.BeginInvoke(new Action(Hide), DispatcherPriority.Background);
+        try
+        {
+            TrayIcon.Ensure(this);
+            TrayIcon.ShowBalloon("清渠仍在后台运行", "双击托盘图标可重新打开窗口；要彻底退出请用托盘菜单。");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine("托盘初始化失败：" + ex.Message);
+        }
     }
 
     private void OnRefreshClick(object sender, RoutedEventArgs e)
