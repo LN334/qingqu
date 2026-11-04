@@ -17,6 +17,7 @@ public sealed class AutomationService
     private readonly OpsService _ops;
     private readonly Notifier _notifier;
     private readonly AuditService _audit;
+    private readonly RulesEngine _alarms;
 
     /// <summary>规则条件首次满足的时间（毫秒）；条件断开即清零。</summary>
     private readonly Dictionary<string, long> _firstMet = new(StringComparer.Ordinal);
@@ -24,8 +25,9 @@ public sealed class AutomationService
     public Action<JsonObject>? Publish;
 
     public AutomationService(Store store, Telemetry telemetry, CommandEngine commands,
-        OpsService ops, Notifier notifier, AuditService audit)
+        OpsService ops, Notifier notifier, AuditService audit, RulesEngine alarms)
     {
+        _alarms = alarms;
         _store = store;
         _telemetry = telemetry;
         _commands = commands;
@@ -62,7 +64,6 @@ public sealed class AutomationService
         foreach (var rule in DefaultRules())
         {
             var id = J.Str(rule, "id");
-            if (id is not ("auto-raw-refill" or "auto-raw-refill-stop" or "auto-raw-pump-high" or "auto-raw-pump-low" or "auto-do-high")) continue;
             if (existing.Contains(id)) continue;
             rules.Add(rule);
             changed = true;
@@ -204,7 +205,7 @@ public sealed class AutomationService
             }
             catch (Exception)
             {
-                // 单条规则异常不影响其它规则；结果记入事件。
+                // 单条规则异常不影响其它规则。
                 Reset(rule);
             }
         }
@@ -247,6 +248,33 @@ public sealed class AutomationService
 
         MarkRun(rule, now, result);
         _firstMet.Remove(id);
+    }
+
+    /// <summary>
+    /// 自动控制已经处置的点位：关闭当前告警，并在 5 分钟内抑制该点位的重复告警，
+    /// 避免「已经自动补水了，界面还在报警」。
+    /// </summary>
+    private void SettleAlarms(JsonObject rule, string siteId, long now)
+    {
+        var codes = new List<string>();
+        foreach (var c in J.Objs(J.Get(rule, "conds")))
+        {
+            var code = J.Str(c, "code");
+            if (code.Length == 0) continue;
+            codes.Add(code);
+            _alarms.Suppress(siteId, code, now + 5 * 60 * 1000);
+        }
+        if (codes.Count == 0) return;
+        var name = J.Str(rule, "name");
+        foreach (var a in J.ObjsIn(_store.Data, "alarms").ToList())
+        {
+            if (J.Str(a, "siteId") != siteId) continue;
+            var status = J.Str(a, "status");
+            if (status is not ("active" or "acknowledged")) continue;
+            if (!codes.Contains(J.Str(a, "pointCode"), StringComparer.Ordinal)) continue;
+            try { _alarms.CloseAlarm(SystemUser, J.Str(a, "id"), $"自动控制已处置：{name}", "auto"); }
+            catch (Exception) { /* 已关闭或权限不符时忽略 */ }
+        }
     }
 
     private bool AllCondsHold(JsonObject rule, string siteId)
@@ -357,6 +385,7 @@ public sealed class AutomationService
                 Detail = $"规则「{J.Str(rule, "name")}」自动下发 {name}：{reason}",
             });
             Notify(siteId, "自动控制已下发命令", $"规则「{J.Str(rule, "name")}」：{reason}");
+            SettleAlarms(rule, siteId, now);
             return $"已下发：{name}";
         }
         catch (CoreException ex)

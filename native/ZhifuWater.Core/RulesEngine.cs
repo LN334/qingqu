@@ -176,9 +176,22 @@ public sealed partial class RulesEngine
         }
     }
 
+    /// <summary>自动化刚处置过的点位（毫秒时间戳），窗口内不再触发同类告警。</summary>
+    private readonly Dictionary<string, long> _suppressed = new(StringComparer.Ordinal);
+
+    public void Suppress(string siteId, string pointCode, long untilMs)
+    {
+        if (string.IsNullOrEmpty(pointCode) || string.IsNullOrEmpty(siteId)) return;
+        _suppressed[$"{siteId}|{pointCode}"] = untilMs;
+    }
+
+    private bool IsSuppressed(string siteId, string pointCode, long now) =>
+        _suppressed.TryGetValue($"{siteId}|{pointCode}", out var until) && until > now;
+
     public void EvaluateRule(JsonObject rule, JsonObject site, long now)
     {
         var siteId = J.Str(site, "id");
+        if (IsSuppressed(siteId, J.Str(rule, "pointCode"), now)) return;
         if (!PointIndex().TryGetValue($"{siteId}|{J.Str(rule, "pointCode")}", out var point)) return;
         var latest = _telemetry.GetLatest(J.Str(point, "id"));
         double? v = latest is null ? null : J.Num(latest, "v");

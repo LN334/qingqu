@@ -1,4 +1,4 @@
-<Window x:Class="ZhifuWater.Desktop.Windows.MainWindow"
+﻿<Window x:Class="ZhifuWater.Desktop.Windows.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="清渠 · 村镇水处理站智能运维平台"
@@ -211,6 +211,28 @@
                 <Button Content="查看工单" Style="{DynamicResource LinkButton}" HorizontalAlignment="Right"
                         Margin="0,6,0,0" Click="OnAssignmentToastView" />
             </StackPanel>
+        </Border>
+
+        <!-- 新告警弹窗：右下角逐条排队，点击进入告警中心 -->
+        <Border x:Name="AlarmToastPanel" Visibility="Collapsed"
+                Background="{DynamicResource Card}" BorderBrush="{DynamicResource Line}"
+                BorderThickness="1" CornerRadius="4" Width="330" Cursor="Hand"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Grid.Column="1"
+                Margin="0,0,20,86" Panel.ZIndex="95" MouseLeftButtonUp="OnAlarmToastClick">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Border x:Name="AlarmToastBar" Background="#C0392B" />
+                <StackPanel Grid.Column="1" Margin="12,9,12,10">
+                    <TextBlock x:Name="AlarmToastTitle" FontSize="12" FontWeight="SemiBold" />
+                    <TextBlock x:Name="AlarmToastBody" FontSize="11" Margin="0,4,0,0"
+                               Foreground="{DynamicResource Muted}" TextWrapping="Wrap" MaxWidth="288" />
+                    <TextBlock x:Name="AlarmToastHint" FontSize="10" Margin="0,6,0,0"
+                               Foreground="{DynamicResource Muted2}" Text="点击进入告警中心" />
+                </StackPanel>
+            </Grid>
         </Border>
 
         <!-- 轻提示 -->

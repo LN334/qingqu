@@ -781,6 +781,9 @@ public sealed class CoreDesktopData : IDesktopData
             "gt" => $"> {high} {unit}",
             "gte" => $"≥ {high} {unit}",
             "eq" => $"= {low} {unit}",
+            "high" => $"> {high} {unit}",
+            "low" => $"< {low} {unit}",
+            "state" => "状态异常",
             _ => op,
         };
     }
