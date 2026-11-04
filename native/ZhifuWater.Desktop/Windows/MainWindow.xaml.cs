@@ -97,8 +97,9 @@ public partial class MainWindow : Window
         _refreshTimer.Start();
 
         // 从托盘唤回后立刻拉一次，别等下一个刷新周期。
-        IsVisibleChanged += (_, _) => { if (IsVisible) AutoRefresh(); };
-        StateChanged += (_, _) => { if (WindowState != WindowState.Minimized) AutoRefresh(); };
+        ClockText.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        IsVisibleChanged += (_, _) => { if (IsVisible) { UpdateClock(); AutoRefresh(); } };
+        StateChanged += (_, _) => { if (WindowState != WindowState.Minimized) { UpdateClock(); AutoRefresh(); } };
 
         _toastTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3.2) };
         _toastTimer.Tick += (_, _) =>
