@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -167,9 +167,26 @@ public sealed class DevicesPage : PageBase, IFocusablePage
         };
         _detail.Children.Add(Kit.KvGrid(info));
 
+        // 关联信息：这台设备（或所在单元）当前的告警与工单，能直接跳过去处理
+        var alarm = Svc.Data.Alarms("open").FirstOrDefault(a => a.UnitCode == d.UnitCode);
+        var order = Svc.Data.WorkOrders().FirstOrDefault(w => w.UnitCode == d.UnitCode && w.Status != "closed" && w.Status != "accepted");
+        var links = new Dictionary<string, string>
+        {
+            ["当前告警"] = alarm is null ? "无" : alarm.Title + " · " + Pal.AlarmStatusText(alarm.Status),
+            ["在办工单"] = order is null ? "无" : order.Title + " · " + Pal.WorkOrderStatusText(order.Status),
+        };
+        _detail.Children.Add(Kit.Divider(5, 4));
+        _detail.Children.Add(Kit.KvGrid(links));
+
         var actions = Kit.Row(6,
             Kit.Btn("登记维护", () => Maintain(d), primary: true, small: true),
-            Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true));
+            Kit.Btn("生成保养工单", () => Host.ShowPage("workorders"), small: true),
+            Kit.Btn("看实时数据", () =>
+            {
+                var code = Svc.Data.Points.Select(p => p.Code).FirstOrDefault(c => Svc.Data.DeviceIdOfPoint(c) == d.Id);
+                if (string.IsNullOrEmpty(code)) Toast("这台设备没有绑定采集点位", false);
+                else Host.ShowPage("monitor", code);
+            }, small: true));
         actions.Margin = new Thickness(0, 10, 0, 0);
         _detail.Children.Add(actions);
     }

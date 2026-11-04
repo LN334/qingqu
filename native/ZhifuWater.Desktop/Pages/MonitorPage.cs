@@ -9,7 +9,7 @@ using ZhifuWater.Desktop.Ui;
 
 namespace ZhifuWater.Desktop.Pages;
 
-public sealed class MonitorPage : PageBase
+public sealed class MonitorPage : PageBase, IFocusablePage
 {
     private UiTable _table = null!;
     private LineChart _chart = null!;
@@ -26,6 +26,11 @@ public sealed class MonitorPage : PageBase
     public override string Group => "总览";
 
     public MonitorPage(AppServices services, ZhifuWater.Desktop.Windows.MainWindow host) : base(services, host) { }
+
+    public void FocusItem(string key)
+    {
+        if (!string.IsNullOrEmpty(key)) _selected = key;
+    }
 
     protected override void Build()
     {

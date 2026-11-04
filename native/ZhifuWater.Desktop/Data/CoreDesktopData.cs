@@ -1224,7 +1224,7 @@ public sealed class CoreDesktopData : IDesktopData
             data.Kpis.Add(new KpiInfo { Key = "energyPerM3", Label = "吨水电耗", Value = F(J.Num(energy, "perM3"), 2), Unit = "kWh/m³", Tone = "normal", Source = "gateway" });
             data.Kpis.Add(new KpiInfo { Key = "cost", Label = "累计运行成本", Value = F(J.Num(cost, "total"), 2), Unit = "元", Tone = "normal", Source = "gateway" });
             data.Kpis.Add(new KpiInfo { Key = "costPerM3", Label = "吨水成本", Value = F(J.Num(cost, "perM3"), 2), Unit = "元/m³", Tone = "normal", Source = "gateway" });
-            data.Kpis.Add(new KpiInfo { Key = "alarms", Label = "告警总数", Value = J.Int(alarms, "total").ToString(CultureInfo.InvariantCulture), Unit = "条", Tone = "warn", Source = "system" });
+            data.Kpis.Add(new KpiInfo { Key = "alarms", Label = "统计期内告警", Value = J.Int(alarms, "total").ToString(CultureInfo.InvariantCulture), Unit = "条", Tone = "warn", Source = "system", Hint = "按页首选定的统计周期汇总，与「告警管理」的未关闭数不是同一口径" });
             data.Kpis.Add(new KpiInfo { Key = "workorders", Label = "新增工单", Value = J.Int(wos, "created").ToString(CultureInfo.InvariantCulture), Unit = "单", Tone = "normal", Source = "system" });
             data.Kpis.Add(new KpiInfo { Key = "availability", Label = "点位在线率", Value = F(J.Num(avail, "dataRate"), 1), Unit = "%", Tone = "good", Source = "system" });
 
