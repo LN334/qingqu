@@ -143,6 +143,8 @@
                         <TextBlock x:Name="FooterSource" FontSize="10.5" Foreground="{DynamicResource Muted}"
                                    Margin="6,0,0,0" VerticalAlignment="Center" Text="运行正常" />
                     </StackPanel>
+                    <TextBlock x:Name="FooterHint" FontSize="10.5" Foreground="{DynamicResource Muted}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" Text="" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                         <Button x:Name="UpdateLink" Content="发现新版本" Style="{DynamicResource LinkButton}"
                                 Visibility="Collapsed" Click="OnUpdateLinkClick" Margin="0,0,12,0" />
@@ -212,9 +214,10 @@
         </Border>
 
         <!-- 轻提示 -->
+        <!-- 轻提示：浮在内容区右下、状态栏上方，不挡侧栏和版本号 -->
         <Border x:Name="ToastPanel" Visibility="Collapsed" Background="#1E2A31" CornerRadius="3"
                 Padding="14,9" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                Margin="0,0,20,34" IsHitTestVisible="False" Panel.ZIndex="90">
+                Grid.Column="1" Margin="0,0,20,40" IsHitTestVisible="False" Panel.ZIndex="90">
             <TextBlock x:Name="ToastText" Foreground="White" FontSize="12" TextWrapping="Wrap" MaxWidth="420" />
         </Border>
     </Grid>

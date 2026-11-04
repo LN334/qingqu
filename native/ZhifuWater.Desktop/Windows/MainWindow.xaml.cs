@@ -356,10 +356,26 @@ public partial class MainWindow : Window
         }
     }
 
+    private DispatcherTimer? _hintTimer;
+
+    /// <summary>状态栏中间的一次性状态提示（如「已刷新」），2.6 秒后自动清空。</summary>
+    private void ShowFooterHint(string text)
+    {
+        FooterHint.Text = text;
+        _hintTimer?.Stop();
+        _hintTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2.6) };
+        _hintTimer.Tick += (_, _) =>
+        {
+            _hintTimer?.Stop();
+            FooterHint.Text = "";
+        };
+        _hintTimer.Start();
+    }
+
     private void OnRefreshClick(object sender, RoutedEventArgs e)
     {
         AutoRefresh();
-        Toast("已刷新 · " + DateTime.Now.ToString("HH:mm:ss"));
+        ShowFooterHint("已刷新 · " + DateTime.Now.ToString("HH:mm:ss"));
     }
 
     private void UpdateClock()
